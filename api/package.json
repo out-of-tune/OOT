@@ -1,0 +1,47 @@
+{
+  "name": "oot-api",
+  "version": "1.0.0",
+  "description": "API for the oot webapp",
+  "main": "server.js",
+  "scripts": {
+    "test": "jest",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "apollo-datasource": "^0.3.1",
+    "apollo-errors": "^1.9.0",
+    "apollo-server": "^2.9.0",
+    "apollo-server-cache-memcached": "^0.6.1",
+    "apollo-server-plugin-response-cache": "^0.3.1",
+    "arangojs": "^6.11.0",
+    "bcrypt": "^3.0.6",
+    "dataloader": "^1.4.0",
+    "dotenv": "^8.1.0",
+    "js-yaml": "^3.13.1",
+    "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.15",
+    "request": "^2.88.0"
+  },
+  "devDependencies": {
+    "apollo-server-testing": "^2.9.0",
+    "babel-eslint": "^10.0.2",
+    "casual": "^1.6.2",
+    "graphql": "^14.5.3",
+    "graphql-tools": "^4.0.5",
+    "jest": "^24.9.0",
+    "jest-cli": "^24.9.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/dbPediaDownloader/"
+    ],
+    "coverageReporters": [
+      "lcov",
+      "html"
+    ]
+  }
+}

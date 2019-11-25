@@ -1,0 +1,142 @@
+// Generated from ./src/store/modules/search/antlrSource/AdvancedSearch.g4 by ANTLR 4.7.2
+// jshint ignore: start
+var antlr4 = require('antlr4');
+
+
+
+var serializedATN = ["\u0003\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964",
+    "\u0002\n\u0087\b\u0001\u0004\u0002\t\u0002\u0004\u0003\t\u0003\u0004",
+    "\u0004\t\u0004\u0004\u0005\t\u0005\u0004\u0006\t\u0006\u0004\u0007\t",
+    "\u0007\u0004\b\t\b\u0004\t\t\t\u0004\n\t\n\u0004\u000b\t\u000b\u0004",
+    "\f\t\f\u0004\r\t\r\u0004\u000e\t\u000e\u0004\u000f\t\u000f\u0004\u0010",
+    "\t\u0010\u0004\u0011\t\u0011\u0004\u0012\t\u0012\u0004\u0013\t\u0013",
+    "\u0004\u0014\t\u0014\u0004\u0015\t\u0015\u0004\u0016\t\u0016\u0004\u0017",
+    "\t\u0017\u0003\u0002\u0003\u0002\u0003\u0003\u0003\u0003\u0003\u0004",
+    "\u0003\u0004\u0003\u0005\u0003\u0005\u0003\u0006\u0003\u0006\u0003\u0007",
+    "\u0003\u0007\u0003\b\u0003\b\u0003\t\u0003\t\u0003\n\u0003\n\u0003\u000b",
+    "\u0003\u000b\u0003\f\u0005\fE\n\f\u0003\r\u0003\r\u0003\u000e\u0003",
+    "\u000e\u0003\u000f\u0003\u000f\u0003\u0010\u0003\u0010\u0003\u0010\u0003",
+    "\u0010\u0003\u0010\u0006\u0010R\n\u0010\r\u0010\u000e\u0010S\u0003\u0011",
+    "\u0003\u0011\u0003\u0011\u0003\u0011\u0003\u0011\u0007\u0011[\n\u0011",
+    "\f\u0011\u000e\u0011^\u000b\u0011\u0003\u0011\u0003\u0011\u0003\u0012",
+    "\u0006\u0012c\n\u0012\r\u0012\u000e\u0012d\u0003\u0012\u0003\u0012\u0006",
+    "\u0012i\n\u0012\r\u0012\u000e\u0012j\u0003\u0013\u0006\u0013n\n\u0013",
+    "\r\u0013\u000e\u0013o\u0003\u0014\u0003\u0014\u0003\u0015\u0003\u0015",
+    "\u0003\u0015\u0003\u0015\u0003\u0015\u0003\u0015\u0003\u0015\u0003\u0015",
+    "\u0003\u0015\u0003\u0015\u0003\u0015\u0003\u0015\u0003\u0015\u0003\u0015",
+    "\u0005\u0015\u0082\n\u0015\u0003\u0016\u0003\u0016\u0003\u0017\u0003",
+    "\u0017\u0002\u0002\u0018\u0003\u0002\u0005\u0002\u0007\u0002\t\u0002",
+    "\u000b\u0002\r\u0002\u000f\u0002\u0011\u0002\u0013\u0002\u0015\u0002",
+    "\u0017\u0002\u0019\u0002\u001b\u0002\u001d\u0002\u001f\u0003!\u0004",
+    "#\u0005%\u0006\'\u0007)\b+\t-\n\u0003\u0002\u0012\u0004\u0002CCcc\u0004",
+    "\u0002PPpp\u0004\u0002FFff\u0004\u0002NNnn\u0004\u0002KKkk\u0004\u0002",
+    "MMmm\u0004\u0002GGgg\u0003\u0002c|\u0003\u0002C\\\u0003\u0002\u00c2",
+    "\u02ba\u0004\u0002\"#%\u0080\u0003\u0002\u00a3\u0101\u0003\u00022;\u0004",
+    "\u0002//aa\u0004\u0002..00\u0004\u0002\u000b\u000b\"\"\u0002\u0088\u0002",
+    "\u001f\u0003\u0002\u0002\u0002\u0002!\u0003\u0002\u0002\u0002\u0002",
+    "#\u0003\u0002\u0002\u0002\u0002%\u0003\u0002\u0002\u0002\u0002\'\u0003",
+    "\u0002\u0002\u0002\u0002)\u0003\u0002\u0002\u0002\u0002+\u0003\u0002",
+    "\u0002\u0002\u0002-\u0003\u0002\u0002\u0002\u0003/\u0003\u0002\u0002",
+    "\u0002\u00051\u0003\u0002\u0002\u0002\u00073\u0003\u0002\u0002\u0002",
+    "\t5\u0003\u0002\u0002\u0002\u000b7\u0003\u0002\u0002\u0002\r9\u0003",
+    "\u0002\u0002\u0002\u000f;\u0003\u0002\u0002\u0002\u0011=\u0003\u0002",
+    "\u0002\u0002\u0013?\u0003\u0002\u0002\u0002\u0015A\u0003\u0002\u0002",
+    "\u0002\u0017D\u0003\u0002\u0002\u0002\u0019F\u0003\u0002\u0002\u0002",
+    "\u001bH\u0003\u0002\u0002\u0002\u001dJ\u0003\u0002\u0002\u0002\u001f",
+    "Q\u0003\u0002\u0002\u0002!U\u0003\u0002\u0002\u0002#b\u0003\u0002\u0002",
+    "\u0002%m\u0003\u0002\u0002\u0002\'q\u0003\u0002\u0002\u0002)\u0081\u0003",
+    "\u0002\u0002\u0002+\u0083\u0003\u0002\u0002\u0002-\u0085\u0003\u0002",
+    "\u0002\u0002/0\t\u0002\u0002\u00020\u0004\u0003\u0002\u0002\u000212",
+    "\t\u0003\u0002\u00022\u0006\u0003\u0002\u0002\u000234\t\u0004\u0002",
+    "\u00024\b\u0003\u0002\u0002\u000256\t\u0005\u0002\u00026\n\u0003\u0002",
+    "\u0002\u000278\t\u0006\u0002\u00028\f\u0003\u0002\u0002\u00029:\t\u0007",
+    "\u0002\u0002:\u000e\u0003\u0002\u0002\u0002;<\t\b\u0002\u0002<\u0010",
+    "\u0003\u0002\u0002\u0002=>\t\t\u0002\u0002>\u0012\u0003\u0002\u0002",
+    "\u0002?@\t\n\u0002\u0002@\u0014\u0003\u0002\u0002\u0002AB\t\u000b\u0002",
+    "\u0002B\u0016\u0003\u0002\u0002\u0002CE\t\f\u0002\u0002DC\u0003\u0002",
+    "\u0002\u0002E\u0018\u0003\u0002\u0002\u0002FG\t\r\u0002\u0002G\u001a",
+    "\u0003\u0002\u0002\u0002HI\t\u000e\u0002\u0002I\u001c\u0003\u0002\u0002",
+    "\u0002JK\u0007$\u0002\u0002K\u001e\u0003\u0002\u0002\u0002LR\u0005\u0011",
+    "\t\u0002MR\u0005\u0015\u000b\u0002NR\u0005\u0013\n\u0002OR\u0005\u001b",
+    "\u000e\u0002PR\t\u000f\u0002\u0002QL\u0003\u0002\u0002\u0002QM\u0003",
+    "\u0002\u0002\u0002QN\u0003\u0002\u0002\u0002QO\u0003\u0002\u0002\u0002",
+    "QP\u0003\u0002\u0002\u0002RS\u0003\u0002\u0002\u0002SQ\u0003\u0002\u0002",
+    "\u0002ST\u0003\u0002\u0002\u0002T \u0003\u0002\u0002\u0002U\\\u0005",
+    "\u001d\u000f\u0002V[\u0005\u0017\f\u0002W[\u0005\u0019\r\u0002X[\u0005",
+    "\u0015\u000b\u0002Y[\u0005\u001b\u000e\u0002ZV\u0003\u0002\u0002\u0002",
+    "ZW\u0003\u0002\u0002\u0002ZX\u0003\u0002\u0002\u0002ZY\u0003\u0002\u0002",
+    "\u0002[^\u0003\u0002\u0002\u0002\\Z\u0003\u0002\u0002\u0002\\]\u0003",
+    "\u0002\u0002\u0002]_\u0003\u0002\u0002\u0002^\\\u0003\u0002\u0002\u0002",
+    "_`\u0005\u001d\u000f\u0002`\"\u0003\u0002\u0002\u0002ac\u0005\u001b",
+    "\u000e\u0002ba\u0003\u0002\u0002\u0002cd\u0003\u0002\u0002\u0002db\u0003",
+    "\u0002\u0002\u0002de\u0003\u0002\u0002\u0002ef\u0003\u0002\u0002\u0002",
+    "fh\t\u0010\u0002\u0002gi\u0005\u001b\u000e\u0002hg\u0003\u0002\u0002",
+    "\u0002ij\u0003\u0002\u0002\u0002jh\u0003\u0002\u0002\u0002jk\u0003\u0002",
+    "\u0002\u0002k$\u0003\u0002\u0002\u0002ln\t\u0011\u0002\u0002ml\u0003",
+    "\u0002\u0002\u0002no\u0003\u0002\u0002\u0002om\u0003\u0002\u0002\u0002",
+    "op\u0003\u0002\u0002\u0002p&\u0003\u0002\u0002\u0002qr\u0007<\u0002",
+    "\u0002r(\u0003\u0002\u0002\u0002s\u0082\u0004>@\u0002tu\u0007@\u0002",
+    "\u0002u\u0082\u0007?\u0002\u0002vw\u0007#\u0002\u0002w\u0082\u0007?",
+    "\u0002\u0002xy\u0007>\u0002\u0002y\u0082\u0007?\u0002\u0002z{\u0005",
+    "%\u0013\u0002{|\u0005\t\u0005\u0002|}\u0005\u000b\u0006\u0002}~\u0005",
+    "\r\u0007\u0002~\u007f\u0005\u000f\b\u0002\u007f\u0080\u0005%\u0013\u0002",
+    "\u0080\u0082\u0003\u0002\u0002\u0002\u0081s\u0003\u0002\u0002\u0002",
+    "\u0081t\u0003\u0002\u0002\u0002\u0081v\u0003\u0002\u0002\u0002\u0081",
+    "x\u0003\u0002\u0002\u0002\u0081z\u0003\u0002\u0002\u0002\u0082*\u0003",
+    "\u0002\u0002\u0002\u0083\u0084\u0007*\u0002\u0002\u0084,\u0003\u0002",
+    "\u0002\u0002\u0085\u0086\u0007+\u0002\u0002\u0086.\u0003\u0002\u0002",
+    "\u0002\f\u0002DQSZ\\djo\u0081\u0002"].join("");
+
+
+var atn = new antlr4.atn.ATNDeserializer().deserialize(serializedATN);
+
+var decisionsToDFA = atn.decisionToState.map( function(ds, index) { return new antlr4.dfa.DFA(ds, index); });
+
+function AdvancedSearchLexer(input) {
+	antlr4.Lexer.call(this, input);
+    this._interp = new antlr4.atn.LexerATNSimulator(this, atn, decisionsToDFA, new antlr4.PredictionContextCache());
+    return this;
+}
+
+AdvancedSearchLexer.prototype = Object.create(antlr4.Lexer.prototype);
+AdvancedSearchLexer.prototype.constructor = AdvancedSearchLexer;
+
+Object.defineProperty(AdvancedSearchLexer.prototype, "atn", {
+        get : function() {
+                return atn;
+        }
+});
+
+AdvancedSearchLexer.EOF = antlr4.Token.EOF;
+AdvancedSearchLexer.WORD = 1;
+AdvancedSearchLexer.TEXT = 2;
+AdvancedSearchLexer.DECIMAL = 3;
+AdvancedSearchLexer.WHITESPACE = 4;
+AdvancedSearchLexer.COLON = 5;
+AdvancedSearchLexer.OPERATOR = 6;
+AdvancedSearchLexer.OPENPARAN = 7;
+AdvancedSearchLexer.CLOSEPARAN = 8;
+
+AdvancedSearchLexer.prototype.channelNames = [ "DEFAULT_TOKEN_CHANNEL", "HIDDEN" ];
+
+AdvancedSearchLexer.prototype.modeNames = [ "DEFAULT_MODE" ];
+
+AdvancedSearchLexer.prototype.literalNames = [  ];
+
+AdvancedSearchLexer.prototype.symbolicNames = [ null, "WORD", "TEXT", "DECIMAL", 
+                                                "WHITESPACE", "COLON", "OPERATOR", 
+                                                "OPENPARAN", "CLOSEPARAN" ];
+
+AdvancedSearchLexer.prototype.ruleNames = [ "A", "N", "D", "L", "I", "K", 
+                                            "E", "LOWERCASE", "UPPERCASE", 
+                                            "UMLAUTS", "STANDARDC", "SPECIALC", 
+                                            "NUMBER", "QUOTE", "WORD", "TEXT", 
+                                            "DECIMAL", "WHITESPACE", "COLON", 
+                                            "OPERATOR", "OPENPARAN", "CLOSEPARAN" ];
+
+AdvancedSearchLexer.prototype.grammarFileName = "AdvancedSearch.g4";
+
+
+
+exports.AdvancedSearchLexer = AdvancedSearchLexer;
+

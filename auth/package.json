@@ -1,0 +1,27 @@
+{
+  "name": "@out-of-tune/auth-service",
+  "version": "1.2.3",
+  "description": "auth-service",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://millii19@bitbucket.org/millii19/server.git"
+  },
+  "author": "Aemilian Mayrhofer",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/millii19/server#readme",
+  "dependencies": {
+    "@out-of-tune/auth-tools": "^1.1.4",
+    "arangojs": "^6.11.1",
+    "cors": "^2.8.5",
+    "dataloader": "^1.4.0",
+    "dotenv": "^8.1.0",
+    "express": "^4.17.1",
+    "simple-oauth2": "^2.2.1"
+  }
+}

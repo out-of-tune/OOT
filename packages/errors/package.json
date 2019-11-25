@@ -1,0 +1,14 @@
+{
+  "name": "@out-of-tune/errors",
+  "version": "1.0.4",
+  "description": "collection of errors for out-of-tune",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "Aemilian Mayrhofer",
+  "license": "ISC",
+  "publishConfig": {
+    "access": "public"
+  }
+}
