@@ -35,5 +35,6 @@ COPY --from=build-stage /app/dist /usr/share/nginx/html
 COPY nginx.conf.template /etc/nginx/nginx.conf.template
 COPY mime.types  /etc/nginx/mime.types
 COPY run_nginx.sh ./
+RUN chmod 777 run_nginx.sh
 EXPOSE $PORT
 CMD ["/run_nginx.sh"]
