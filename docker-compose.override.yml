@@ -1,0 +1,25 @@
+version: '3'
+services:
+  apollo:
+    ports:
+      - "${APOLLO_PORT}:${APOLLO_PORT}"
+  client:
+    ports:
+      - "${CLIENT_PORT}:${CLIENT_PORT}"
+      
+  arangodb:
+    ports:
+      - "${ARANGODB_PORT}:8529"
+  auth:
+    ports:
+      - "${AUTH_PORT}:4000"
+  proxy:
+    ports:
+      - "${PROXY_HTTP_PORT}:80"
+      - "${PROXY_HTTPS_PORT}:443"
+  memcached:
+    ports:
+      - "11211:11211"
+  share:
+    ports:
+      - "${SHARE_PORT}:${SHARE_PORT}"
