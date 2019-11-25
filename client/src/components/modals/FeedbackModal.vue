@@ -5,9 +5,7 @@
             <!-- Modal content -->
             <div class="card">
                 <v-icon dark @click="changeFeedbackModalState" class="close">close</v-icon>
-                <v-form class="form" action="" v-model="valid">
-                    <label for="message">Mail:</label>
-                    <v-text-field dark id="mail" v-model="mail" :rules="emailRules" color="#da6a1dff"></v-text-field>
+                <v-form class="form" action="">
                     <label for="message">Feedback:</label>
                     <v-textarea dark id="message" v-model="feedback" color="#da6a1dff"></v-textarea>
                     <v-btn dark color="#da6a1dff" @click="sendBetaFeedback">SEND</v-btn>
@@ -23,12 +21,6 @@ import PaginatedList from "@/components/helpers/PaginatedList"
 import { mapState, mapActions } from 'vuex'
 export default {
     data: ()=>({
-        valid: false,
-        mail: "",
-        emailRules: [
-            v => !!v || 'E-mail is required',
-            v => /.+@.+/.test(v) || 'E-mail must be valid',
-        ],
         feedback: ""
     }),
     computed: {
@@ -43,16 +35,11 @@ export default {
             'setError'
         ]),
         sendBetaFeedback(){
-            if(this.valid){
-                if(this.feedback.length>0){
-                    this.sendFeedback({mail:this.mail, feedback:this.feedback, group:"beta-tester"})
-                }
-                else {
-                    this.setError(new Error("Feedback is required!"))
-                }
+            if(this.feedback.length>0){
+                this.sendFeedback({ feedback:this.feedback, group:"beta-tester" })
             }
             else {
-                this.setError(new Error("Please enter a valid E-mail address!"))
+                this.setError(new Error("Feedback is required!"))
             }
         }
     }

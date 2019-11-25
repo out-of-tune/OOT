@@ -22,7 +22,6 @@ const sendFeedback = async ({ dispatch, rootState }, { mail="anonym", feedback, 
         rootState
     )
 
-    console.log(result)
     if(result){
         dispatch('setSuccess', "Thanks for your feedback!")
     }
