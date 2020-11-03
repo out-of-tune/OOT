@@ -36,7 +36,7 @@ First you must install:
 
 Clone the out-of-tune repository from github.
 ```
-git clone <github address>
+git clone https://github.com/out-of-tune/OOT.git
 ```
 
 You now have to configure your .env file. The best way to do this is just copy the sample.env file (in the root folder <b>AND</b> in the client folder of the repository) and rename it. 
