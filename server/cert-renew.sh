@@ -5,5 +5,5 @@ then
 fi
 
 echo "Renewing Certificate"
-certbot renew --force-renewal
+certbot renew -q
 nginx -s reload
