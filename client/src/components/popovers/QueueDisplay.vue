@@ -14,11 +14,14 @@
     :list="queue" 
     @change="onMove"
     v-if="queue.length>0">
-        <li class="song" v-for="(track, index) in queue" v-bind:key="track.key" @click="playSong(index)">
+        <li class="song" v-for="(track, index) in queue" v-bind:key="track.key" >
           <button @click="removeFromQueue(index)"><v-icon small color="white">remove</v-icon></button>
-          <div :class="{bold: index === queueIndex}">{{track.name}}</div>
+          <div :class="{bold: index === queueIndex}" @click="playSong(index)">{{track.name}}</div>
           <button v-if="loginState" @click="addSongToCurrentPlaylist(track.uri)">
             <v-icon color="white">playlist_add</v-icon>
+          </button>
+          <button v-if="loginState" @click="addSongToSpotifyQueue(track.uri)">
+            <v-icon color="green">add</v-icon>
           </button>
         </li>
     </draggable>
@@ -38,6 +41,7 @@ export default {
       ...mapActions([
           'playAtIndexInQueue',
           'addSongToPlaylist',
+          'addSongToQueue',
           'removeFromQueue',
           'setQueueVisibility',
           'setQueue',
@@ -79,6 +83,13 @@ export default {
         event({
           eventCategory: 'playlistInteraction',
           eventAction: 'addSongToPlaylist'
+        })
+      },
+      addSongToSpotifyQueue(uri){
+        this.addSongToQueue(uri)
+        event({
+          eventCategory: 'queueInteraction',
+          eventAction: 'addSongToQueue'
         })
       }
   },
