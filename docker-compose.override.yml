@@ -1,9 +1,18 @@
 version: '3'
 services:
   apollo:
+    entrypoint: ["npm", "run", "serve"]
+    volumes:
+      - "./api:/usr/src/app"
     ports:
       - "${APOLLO_PORT}:${APOLLO_PORT}"
   client:
+    build:
+      context: ./client
+      target: build-stage
+    volumes:
+      - "./client:/app"
+    entrypoint: ["npm", "run", "serve"]
     ports:
       - "${CLIENT_PORT}:${CLIENT_PORT}"
       
@@ -11,6 +20,9 @@ services:
     ports:
       - "${ARANGODB_PORT}:8529"
   auth:
+    entrypoint: ["npm", "run", "serve"]
+    volumes:
+      - "./auth:/usr/src/app"
     ports:
       - "${AUTH_PORT}:4000"
   proxy:
@@ -21,5 +33,8 @@ services:
     ports:
       - "11211:11211"
   share:
+    entrypoint: ["npm", "run", "serve"]
+    volumes:
+      - "./services/share:/usr/src/app"
     ports:
       - "${SHARE_PORT}:${SHARE_PORT}"
