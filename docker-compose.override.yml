@@ -1,7 +1,7 @@
 version: '3'
 services:
   apollo:
-    entrypoint: ["npm", "run", "serve"]
+    entrypoint: ["/bin/sh", "-c", "npm install && npm run serve"]
     volumes:
       - "./api:/usr/src/app"
     ports:
@@ -12,7 +12,7 @@ services:
       target: build-stage
     volumes:
       - "./client:/app"
-    entrypoint: ["npm", "run", "serve"]
+    entrypoint: ["/bin/sh", "-c", "npm install && npm run serve"]
     ports:
       - "${CLIENT_PORT}:${CLIENT_PORT}"
       
@@ -20,7 +20,7 @@ services:
     ports:
       - "${ARANGODB_PORT}:8529"
   auth:
-    entrypoint: ["npm", "run", "serve"]
+    entrypoint: ["/bin/sh", "-c", "npm install && npm run serve"]
     volumes:
       - "./auth:/usr/src/app"
     ports:
@@ -33,7 +33,7 @@ services:
     ports:
       - "11211:11211"
   share:
-    entrypoint: ["npm", "run", "serve"]
+    entrypoint: ["/bin/sh", "-c", "npm install && npm run serve"]
     volumes:
       - "./services/share:/usr/src/app"
     ports:
