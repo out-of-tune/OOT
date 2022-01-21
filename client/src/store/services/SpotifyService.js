@@ -81,8 +81,8 @@ class SpotifyService{
         return this.getFromAPI('me', token)
     }
 
-    async getAlbumsFromArtist(token, sid, offset=0) {
-        const result = await this.getFromAPI(`artists/${sid}/albums`, token, {offset})
+    async getAlbumsFromArtist(token, sid, offset=0, includeGroups = "single,album") {
+        const result = await this.getFromAPI(`artists/${sid}/albums`, token, {offset, include_groups: includeGroups })
         if(result.next){
             const nextResult = await this.getAlbumsFromArtist(token, sid, offset=offset+result.limit)
             const r = {items: [...result.items, ...nextResult.items]}
