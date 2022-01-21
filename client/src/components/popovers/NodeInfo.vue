@@ -28,7 +28,7 @@
                 <h3>Top songs</h3>
                 <ul>
                     <li v-for='track in node.data.tracks' v-bind:key="track.id" :class="{noPreview: !track.preview_url}">
-                        <v-icon id="playArrow"  @click="setSong(track, track.album.images)" small color="white">play_arrow</v-icon> 
+                        <v-icon id="playArrow"  @click="setSong(track, node.data.images)" small color="white">play_arrow</v-icon> 
                         <div id="songName" @click="setSong(track, track.album.images)">
                             <span class="innerText" v-if="track.name.length>25">
                                 {{track.name}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{track.name}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -37,7 +37,12 @@
                                 {{track.name}}
                             </span>
                         </div>
-                        <button id="addToQueueButton" @click="addSongToQueue({...track, images: node.data.images})"><v-icon small color="white">add</v-icon></button>
+                        <button title="add to queue" id="addToQueueButton" @click="addSongToQueue({...track, images: node.data.images})">
+                          <v-icon small color="orange">add</v-icon>
+                        </button>
+                        <button title="add to Spotify queue" id="addToSpotifyQueueButton" @click="addSongToSpotifyQueue(track.uri)">
+                          <v-icon small color="green">add</v-icon>
+                        </button>
                     </li>
                 </ul>
             </div>
@@ -135,6 +140,7 @@ export default {
             'setCurrentSong',
             'playSong',
             'addToQueue',
+            'addSongToSpotifyQueue',
             'setNodeInfoVisibility',
             'fitGraphToNodes'
         ]),
@@ -223,10 +229,9 @@ export default {
     }
     li {
         display: grid;
-        grid-template-columns: 30px 1fr 30px;
+        grid-template-columns: 20px 1fr 20px 20px;
         grid-template-areas: "play songInfo addToQueue";
         margin-bottom: 0.5rem;
-
     }
 
     .nodeName {

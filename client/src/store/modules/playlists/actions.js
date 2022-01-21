@@ -44,7 +44,7 @@ const addSongsToPlaylist = async ({ dispatch, rootState, state }, songUris) => {
   }
 }
 
-const addSongToQueue = async ({ dispatch, rootState }, songUri) => {
+const addSongToSpotifyQueue = async ({ dispatch, rootState }, songUri) => {
   const token = rootState.authentication.accessToken
   if (token) {
     await SpotifyService.addSongToQueue(token, songUri)
@@ -86,7 +86,7 @@ export const actions = {
   getCurrentUsersPlaylists,
   setCurrentPlaylist,
   addSongToPlaylist,
-  addSongToQueue,
+  addSongToSpotifyQueue,
   addSongsToPlaylist,
   loadPlaylist,
   clearPlaylists
