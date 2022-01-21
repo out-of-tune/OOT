@@ -21,7 +21,7 @@
             <v-icon color="white">playlist_add</v-icon>
           </button>
           <button title="add to Spotify queue" v-if="loginState" @click="addSongToSpotifyQueue(track.uri)">
-            <v-icon class="green">add</v-icon>
+            <v-icon color="green">add</v-icon>
           </button>
         </li>
     </draggable>
