@@ -121,8 +121,8 @@
         }
       },
       coverUrl() {
-        if (this.currentSong.images.length > 0)
-        return this.currentSong.images[0].url
+        if (this.currentSong.album.images.length > 0)
+        return this.currentSong.album.images[0].url
         else return logo
       }
     },

@@ -225,31 +225,45 @@ const removeSelectedNodes = ({ commit, state, dispatch }) => {
     dispatch("applyAllConfigurations")
 }
 
-const addSelectedSongsToQueue = async ({commit, rootState, state, dispatch}) => {
-    const selectedSongNodes = state.selectedNodes.filter((node) => node.data.label === "song")
-    const selectedSongNodeSids = selectedSongNodes.map((node)=>{
-        return node.data.sid
-    })
-    function fetchData(sid, token){
-        return SpotifyService.getFullSongData(token, sid)
+const addSelectedSongsToQueue = async ({rootState, state, dispatch}, sids) => {
+    const selectedSongNodeSids = sids 
+      ? sids 
+      : state.selectedNodes.filter(node => node.data.label === "song").map(node => node.data.sid)
+
+    function fetchData(ids, token){
+        return SpotifyService.getFullSongData(token, ids)
     }
     const chunks = fp.chunk(50)(selectedSongNodeSids)
     const promises = chunks.map(chunk=>{
         return handleTokenError(fetchData, [chunk], dispatch, rootState)
     })
     const result = (await Promise.all(promises)).flatMap((chunk)=>chunk.tracks)
-    const updatedNodes = result.map((result,index)=>{
-        return {id:selectedSongNodes[index].id, data:{...selectedSongNodes[index].data, ...result, images: result.album.images}}
+    result.forEach(song => {
+        dispatch("addToQueue", song)
     })
-    commit("ADD_TO_GRAPH",{
-        nodes: updatedNodes,
-        links: []
+    dispatch("setSuccess", "Added "+ selectedSongNodeSids.length +" songs to queue")
+}
+
+function getRandom(list){
+  const i = Math.floor(Math.random() * list.length);
+  return list[i]
+}
+
+const addSongsFromSelectedAlbumsToQueue = async ({rootState, state, dispatch}) => {
+    const selectedAlbumNodes = state.selectedNodes.filter(node => node.data.label === "album")
+    const selectedAlbumNodeSids = selectedAlbumNodes.map((node) => node.data.sid)
+
+    function fetchData(sid, token){
+        return SpotifyService.getSongsFromAlbum(token, sid)
+    }
+    const promises = selectedAlbumNodeSids.map(sid=>{
+        return handleTokenError(fetchData, [sid], dispatch, rootState)
     })
-    dispatch('applyAllConfigurations')
-    updatedNodes.forEach((node)=> {
-        dispatch("addToQueue", {...node.data, images: node.data.images})
+    const result = await Promise.all(promises)
+    const songSids = result.map(album => {
+        return getRandom(album.items).id
     })
-    dispatch("setSuccess", "Added "+ selectedSongNodes.length +" songs to queue")
+    dispatch('addSelectedSongsToQueue', songSids)
 }
 
 const pinNodes = ({commit, dispatch}, nodes) => {
@@ -313,6 +327,7 @@ export const actions = {
     deselect,
     selectAll,
     addSelectedSongsToQueue,
+    addSongsFromSelectedAlbumsToQueue,
     pinNodes,
     unpinNodes,
     invertSelection,

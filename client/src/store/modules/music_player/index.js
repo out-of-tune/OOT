@@ -5,7 +5,9 @@ export const music_player = {
     state: {
         currentSong: {
             name: "",
-            images: [],
+            album: {
+              images: [],
+            },
             preview_url: ""
         },
         queue: [],

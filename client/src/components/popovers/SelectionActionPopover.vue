@@ -22,6 +22,8 @@
               <v-btn dark small outline class="btn" @click="unpin(selectedNodes)">Unpin</v-btn>
               <v-btn dark small outline class="btn" @click="invert">Invert</v-btn>
               <v-btn dark small outline class="btn" @click="sortNodes">sort</v-btn>
+              <v-btn dark small outline class="btn" @click="() => addSelectedSongsToQueue()">Add songs to queue</v-btn>
+              <v-btn dark small outline class="btn" @click="addSongsFromSelectedAlbumsToQueue">Add songs from albums to queue</v-btn>
               <v-btn dark small outline class="btn" @click="addToQueue">Add to queue</v-btn>
               <v-btn dark small outline class="btn" @click="openPlaylistChooser">Add to playlist</v-btn>
             </div>
@@ -49,6 +51,7 @@ export default {
         "collapseSelectedNodes",
         "removeSelectedNodes",
         "addSelectedSongsToQueue",
+        "addSongsFromSelectedAlbumsToQueue",
         "pinNodes",
         "unpinNodes",
         "invertSelection",
@@ -113,10 +116,7 @@ export default {
       },
       addToQueue(){
         this.addSelectedSongsToQueue()
-        event({
-          eventCategory: 'graph',
-          eventAction: 'addSelectedSongsToQueue'
-        })
+        this.addSongsFromSelectedAlbumsToQueue()
       },
       showItems(){
         this.changeSelectionModalState()
