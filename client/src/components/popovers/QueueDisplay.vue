@@ -1,11 +1,11 @@
 <template>
   <div class="card">
     <div class="close">
+      <v-icon class="icon" id="delete-icon" @click="clearQueue" size="1.5rem" color="white">delete</v-icon>
       <span id="label">queue</span>
       <div id="queueIcons">
-        <v-icon id="delete-icon" v-if="loginState" @click="play" size="1.5rem" color="white">playlist_play</v-icon>
-        <v-icon id="delete-icon" @click="clearQueue" size="1.5rem" color="white">delete</v-icon>
-        <v-icon id="close-icon" @click="closeWindow" size="1.5rem" color="white">close</v-icon>
+        <v-icon class="icon" id="play-icon" v-if="loginState" @click="play" size="1.5rem" color="white">playlist_play</v-icon>
+        <v-icon class="icon" id="close-icon" @click="closeWindow" size="1.5rem" color="white">close</v-icon>
       </div>
       <div id="spacer"></div>
     </div>
@@ -14,11 +14,14 @@
     :list="queue" 
     @change="onMove"
     v-if="queue.length>0">
-        <li class="song" v-for="(track, index) in queue" v-bind:key="track.key" @click="playSong(index)">
+        <li class="song" v-for="(track, index) in queue" v-bind:key="track.key" >
           <button @click="removeFromQueue(index)"><v-icon small color="white">remove</v-icon></button>
-          <div :class="{bold: index === queueIndex}">{{track.name}}</div>
-          <button v-if="loginState" @click="addSongToCurrentPlaylist(track.uri)">
+          <div :class="{bold: index === queueIndex}" @click="playSong(index)">{{track.name}}</div>
+          <button title="add to playlist" v-if="loginState" @click="addSongToCurrentPlaylist(track.uri)">
             <v-icon color="white">playlist_add</v-icon>
+          </button>
+          <button title="add to Spotify queue" v-if="loginState" @click="addSongToSpotifyQueue(track.uri)">
+            <v-icon color="green">add</v-icon>
           </button>
         </li>
     </draggable>
@@ -38,6 +41,7 @@ export default {
       ...mapActions([
           'playAtIndexInQueue',
           'addSongToPlaylist',
+          'addSongToSpotifyQueue',
           'removeFromQueue',
           'setQueueVisibility',
           'setQueue',
@@ -80,6 +84,9 @@ export default {
           eventCategory: 'playlistInteraction',
           eventAction: 'addSongToPlaylist'
         })
+      },
+      addSongToSpotifyQueue(uri){
+        this.addSongToQueue(uri)
       }
   },
   computed: {
@@ -102,7 +109,7 @@ export default {
 <style scoped>
 li {
   display: grid;
-  grid-template-columns: 30px 1fr 30px;
+  grid-template-columns: 30px 1fr 30px 30px;
   margin-bottom: 0.5rem;
 }
 .song {
@@ -137,17 +144,21 @@ li {
 #label {
   text-transform: uppercase;
   font-weight: bold;
-  
+  text-align: center; 
 }
 .close {
   padding-top: 1rem;
   position: sticky;
   top:0;
   background-color: #252525;
+  text-align: center;
 }
 #queueIcons {
   float:right;
   justify-self: center;
+}
+#delete-icon {
+  float: left;
 }
 </style>
 
