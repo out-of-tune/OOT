@@ -30,7 +30,7 @@ class SpotifyService {
     })
   }
 
-  sendToAPI(url, token, params) {
+  postToApi(url, token, params) {
     const headers = {
       "Content-Type": "application/json",
       "Authorization": "Bearer " + token
@@ -59,6 +59,15 @@ class SpotifyService {
     })
   }
 
+  async requestAll(requestFunction, offset = 0) {
+    const result = await requestFunction(offset)
+    if (result.next) {
+      const nextResult = await this.requestAll(requestFunction, offset + result.limit)
+      const r = { items: [...result.items, ...nextResult.items] }
+      return r
+    } else return result
+  }
+
   getSongSamplesFromArtist(token, artistId) {
     const url = `artists/${artistId}/top-tracks`
     const result = this.getFromAPI(url, token, { country: "AT" })
@@ -70,7 +79,7 @@ class SpotifyService {
       limit,
       offset
     }
-    );
+    )
   }
 
   getPlaylist(token, uri) {
@@ -81,22 +90,12 @@ class SpotifyService {
     return this.getFromAPI('me', token)
   }
 
-  async getAlbumsFromArtist(token, sid, offset = 0) {
-    const result = await this.getFromAPI(`artists/${sid}/albums`, token, { offset })
-    if (result.next) {
-      const nextResult = await this.getAlbumsFromArtist(token, sid, offset = offset + result.limit)
-      const r = { items: [...result.items, ...nextResult.items] }
-      return r
-    } else return result
+  async getAlbumsFromArtist(token, sid) {
+    return this.requestAll(offset => this.getFromAPI(`artists/${sid}/albums`, token, { offset }))
   }
 
-  async getSongsFromAlbum(token, sid, offset = 0) {
-    const result = await this.getFromAPI(`albums/${sid}/tracks`, token, { offset })
-    if (result.next) {
-      const nextResult = await this.getSongsFromAlbum(token, sid, offset = offset + result.limit)
-      const r = { items: [...result.items, ...nextResult.items] }
-      return r
-    } else return result
+  async getSongsFromAlbum(token, sid) {
+    return this.requestAll(offset => this.getFromAPI(`albums/${sid}/tracks`, token, { offset }))
   }
 
   getFullSongData(token, sids) {
@@ -105,15 +104,17 @@ class SpotifyService {
   }
 
   addSongToPlaylist(token, playlistId, songUri) {
-    return this.sendToAPI(`playlists/${playlistId}/tracks`, token, { uris: [songUri] })
+    return this.postToApi(`playlists/${playlistId}/tracks`, token, { uris: [songUri] })
   }
+
   addSongToQueue(token, songUri) {
-    return this.sendToAPI(`me/player/queue?uri=${songUri}`, token, { uri: songUri })
+    return this.postToApi(`me/player/queue?uri=${songUri}`, token, { uri: songUri })
   }
+
   async addSongsToPlaylist(token, playlistId, songUris) {
     const chunkedSongUris = _.chunk(100)(songUris)
     return await Promise.all(chunkedSongUris.map((chunk) => {
-      return this.sendToAPI(`playlists/${playlistId}/tracks`, token, { uris: chunk })
+      return this.postToApi(`playlists/${playlistId}/tracks`, token, { uris: chunk })
     }))
   }
 
@@ -121,19 +122,16 @@ class SpotifyService {
     const sidsString = sids.join(',')
     return this.getFromAPI(`artists/`, token, { ids: sidsString })
   }
+
   searchByString(token, searchString, types, limit) {
     const stringifiedTypes = types.join(",")
-    console.log(stringifiedTypes)
     return this.getFromAPI(`search`, token, { q: searchString, type: stringifiedTypes, limit: limit })
   }
-  async getSongsFromPlaylist(token, sid, offset = 0) {
-    const result = await this.getFromAPI(`playlists/${sid}/tracks`, token, { offset })
-    if (result.next) {
-      const nextResult = await this.getSongsFromPlaylist(token, sid, offset = offset + result.limit)
-      const r = { items: [...result.items, ...nextResult.items] }
-      return r
-    } else return result
+
+  async getSongsFromPlaylist(token, sid) {
+    return this.requestAll(offset => this.getFromAPI(`playlists/${sid}/tracks`, token, { offset }))
   }
+
   play(token, uris) {
     this.putToApi('me/player/play', token, { uris })
   }
