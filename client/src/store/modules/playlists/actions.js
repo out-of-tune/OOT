@@ -47,8 +47,14 @@ const addSongsToPlaylist = async ({ dispatch, rootState, state }, songUris) => {
 const addSongToSpotifyQueue = async ({ dispatch, rootState }, songUri) => {
   const token = rootState.authentication.accessToken
   if (token) {
-    await SpotifyService.addSongToQueue(token, songUri)
-    dispatch('setMessage', "Added song to Spotify Queue")
+    try {
+      await SpotifyService.addSongToQueue(token, songUri)
+    }
+    catch(e){
+      dispatch('setError', e.response.data.error)
+      return
+    }
+    dispatch('setSuccess', "Added song to Spotify Queue")
   }
   else {
     dispatch('setError', new Error("no token provided"))
