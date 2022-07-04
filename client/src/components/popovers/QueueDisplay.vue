@@ -20,7 +20,7 @@
           <button title="add to playlist" v-if="loginState" @click="addSongToCurrentPlaylist(track.uri)">
             <v-icon color="white">playlist_add</v-icon>
           </button>
-          <button title="add to Spotify queue" v-if="loginState" @click="addSongToSpotifyQueue(track.uri)">
+          <button title="add to Spotify queue" v-if="loginState" @click="addSongToQueue(track.uri)">
             <v-icon color="green">add</v-icon>
           </button>
         </li>
@@ -85,8 +85,8 @@ export default {
           eventAction: 'addSongToPlaylist'
         })
       },
-      addSongToSpotifyQueue(uri){
-        this.addSongToQueue(uri)
+      addSongToQueue(uri){
+        this.addSongToSpotifyQueue(uri)
       }
   },
   computed: {
