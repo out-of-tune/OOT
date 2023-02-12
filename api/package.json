@@ -33,7 +33,7 @@
     "graphql-tools": "^4.0.5",
     "jest": "^24.9.0",
     "jest-cli": "^24.9.0",
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.20"
   },
   "jest": {
     "testEnvironment": "node",
