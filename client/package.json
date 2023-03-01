@@ -61,7 +61,7 @@
     "eslint-plugin-vue": "^5.2.3",
     "jest": "^24.8.0",
     "json-loader": "^0.5.7",
-    "mocha": "^6.2.0",
+    "mocha": "^6.2.3",
     "vue-jest": "^3.0.4",
     "yaml-frontmatter-loader": "^0.1.0"
   },
