@@ -1,6 +1,7 @@
 require("babel-polyfill");
 
 module.exports = {
+    publicPath: "/app/",
     css: {
       extract: false
     },
