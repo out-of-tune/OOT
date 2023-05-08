@@ -1,0 +1,14 @@
+source ../../../.env
+
+containerID=2f2645f53d79
+path=/var/lib/arangodb3/export_2023-05-07
+
+
+docker exec $containerID arangoimport --file ${path}/Artist.json --collection Artist --create-collection true --type json --server.password $ARANGODB_PASSWORD --server.database $ARANGODB_DATABASE --batch-size 500000000
+docker exec $containerID arangoimport --file ${path}/Genre.json --collection Genre --create-collection true --type json --server.password $ARANGODB_PASSWORD --server.database $ARANGODB_DATABASE --batch-size 500000000
+docker exec $containerID arangoimport --file ${path}/Source.json --collection Source --create-collection true --type json --server.password $ARANGODB_PASSWORD --server.database $ARANGODB_DATABASE --batch-size 500000000
+docker exec $containerID arangoimport --file ${path}/artist_genre.json --collection artist_genre --create-collection true --type json --server.password $ARANGODB_PASSWORD --server.database $ARANGODB_DATABASE --batch-size 500000000 --create-collection-type edge
+docker exec $containerID arangoimport --file ${path}/artist_source.json --collection artist_source --create-collection true --type json --server.password $ARANGODB_PASSWORD --server.database $ARANGODB_DATABASE --batch-size 500000000 --create-collection-type edge
+docker exec $containerID arangoimport --file ${path}/fusion_genre.json --collection fusion_genre --create-collection true --type json --server.password $ARANGODB_PASSWORD --server.database $ARANGODB_DATABASE --batch-size 500000000 --create-collection-type edge
+docker exec $containerID arangoimport --file ${path}/stylistic_origin.json --collection stylistic_origin --create-collection true --type json --server.password $ARANGODB_PASSWORD --server.database $ARANGODB_DATABASE --batch-size 500000000 --create-collection-type edge
+docker exec $containerID arangoimport --file ${path}/subgenre_supergenre.json --collection subgenre_supergenre --create-collection true --type json --server.password $ARANGODB_PASSWORD --server.database $ARANGODB_DATABASE --batch-size 500000000 --create-collection-type edge
