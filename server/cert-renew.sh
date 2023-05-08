@@ -1,5 +1,5 @@
 #!/bin/bash
-if [ "$NODE_ENV" != "production" ]
+if [ "$PROXY_USE_CERT" != "1" ]
 then
     exit 0
 fi
