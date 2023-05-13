@@ -34,7 +34,6 @@
 <script>
 import { mapActions, mapState } from 'vuex'
 import { getNodePosition} from "@/assets/js/graphHelper"
-import { event } from 'vue-analytics'
 
 export default {
     data: ()=>{
@@ -56,74 +55,34 @@ export default {
       ]),
       collapse(){
         this.collapseSelectedNodes()
-        event({
-          eventCategory: 'graph',
-          eventAction: 'collapseSelectedNodes'
-        })
       },
       expand(){
         this.expandSelectedNodes()
-        event({
-          eventCategory: 'graph',
-          eventAction: 'expandSelectedNodes'
-        })
       },
       remove(){
         this.removeSelectedNodes()
-        event({
-          eventCategory: 'graph',
-          eventAction: 'removeSelectedNodes'
-        })
       },
       openPlaylistChooser(){
         this.changePlaylistChooserState(true)
-        event({
-          eventCategory: 'graph',
-          eventAction: 'openSelectionPlaylistChooser'
-        })
       },
       pin(selectedNodes){
         this.pinNodes(selectedNodes)
-        event({
-          eventCategory: 'graph',
-          eventAction: 'pinSelectedNodes'
-        })
       },
       unpin(selectedNodes){
         this.unpinNodes(selectedNodes)
-        event({
-          eventCategory: 'graph',
-          eventAction: 'unpinSelectedNodes'
-        })
       },
       invert(){
         this.invertSelection()
-        event({
-          eventCategory: 'graph',
-          eventAction: 'invertSelection'
-        })
       },
       sortNodes(){
         const pos = getNodePosition(this.$store.state, this.selectedNodes[0])
         this.applyNodeCoordinateSystemLine({xOffset: pos.x, yOffset: pos.y})
-        event({
-          eventCategory: 'graph',
-          eventAction: 'sortSelectedNodes'
-        })
       },
       addToQueue(){
         this.addSelectedSongsToQueue()
-        event({
-          eventCategory: 'graph',
-          eventAction: 'addSelectedSongsToQueue'
-        })
       },
       showItems(){
         this.changeSelectionModalState()
-        event({
-          eventCategory: 'UI',
-          eventAction: 'showSelectedItems'
-        })
       }
     },
     computed: {

@@ -49,7 +49,6 @@ import MouseActionRadio from "@/components/helpers/MouseActionRadio.vue";
 import LoadSavePopover from '@/components/popovers/LoadSavePopover'
 import SelectionPopover from '@/components/popovers/SelectionActionPopover'
 import { mapActions, mapState } from "vuex";
-import { event } from "vue-analytics"
 
 export default {
   components: {
@@ -73,24 +72,12 @@ export default {
       this.changePlaylistLoaderState(true)
     },
     trackSettings(){
-      event({
-          eventCategory: 'UI',
-          eventAction: 'goToSettings'
-        })
     },
     undoAction(){
       this.undo()
-      event({
-        eventCategory: 'graph',
-        eventAction: 'undo'
-      })
     },
     redoAction(){
       this.redo()
-      event({
-        eventCategory: 'graph',
-        eventAction: 'redo'
-      })
     },
     openFeedbackModal(){
       this.changeFeedbackModalState()

@@ -91,7 +91,6 @@
   import { mapState, mapActions } from 'vuex'
   import logo from "@/assets/logo.png"
   import { searchGraph } from '@/assets/js/graphHelper.js'
-  import { event } from "vue-analytics"
 
   export default {
     data: () => ({
@@ -141,10 +140,6 @@
         else {
           this.$refs.player.play()
         }
-        event({
-          eventCategory: 'musicplayer',
-          eventAction: this.isPlaying ? "pause" : "play"
-        })
       },
       setStartEnd: function() {
         this.start = this.$refs.player.seekable.start(0)
@@ -163,17 +158,9 @@
       },
       NextSong: function() {
         this.playNextInQueue()
-        event({
-          eventCategory: 'musicplayer',
-          eventAction: "nextSong"
-        })
       },
       PrevSong: function() {
         this.playPreviousInQueue()
-        event({
-          eventCategory: 'musicplayer',
-          eventAction: "previousSong"
-        })
       },
       getArtists: function() {
         return this.currentSong.artists? this.currentSong.artists.map((artist)=>artist.name).join(", "): ""
