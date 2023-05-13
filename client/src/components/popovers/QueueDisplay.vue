@@ -28,7 +28,6 @@
 <script>
 import draggable from "vuedraggable"
 import { mapActions, mapState } from 'vuex'
-import { event } from 'vue-analytics'
 
 export default {
   components: {
@@ -54,32 +53,16 @@ export default {
       },
       clearQueue: function(){
         this.setQueue({queue: [], queueIndex: 0})
-        event({
-          eventCategory: 'musicplayer',
-          eventAction: 'clearQueue'
-        })
       },
       play: function(){
         const uris = this.queue.map(track=>track.uri)
         this.playOnSpotify(uris)
-        event({
-          eventCategory: 'musicplayer',
-          eventAction: 'playQueueOnSpotify'
-        })
       },
       playSong(index){
         this.playAtIndexInQueue(index)
-        event({
-          eventCategory: 'musicplayer',
-          eventAction: 'playSongFromQueue'
-        })
       },
       addSongToCurrentPlaylist(uri){
         this.addSongToPlaylist(uri)
-        event({
-          eventCategory: 'playlistInteraction',
-          eventAction: 'addSongToPlaylist'
-        })
       }
   },
   computed: {

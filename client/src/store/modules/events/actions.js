@@ -1,6 +1,5 @@
 import Viva from "vivagraphjs"
 import { getNodePosition, getPinnedState } from "@/assets/js/graphHelper"
-import { event } from "vue-analytics"
 import { startMultiSelect } from "@/assets/js/selectHelper"
 
 const SHIFT = 16

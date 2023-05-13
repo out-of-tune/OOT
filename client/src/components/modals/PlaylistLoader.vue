@@ -42,7 +42,6 @@
 <script>
 import PaginatedList from "@/components/helpers/PaginatedList"
 import { mapState, mapActions } from 'vuex'
-import { event } from 'vue-analytics'
 export default {
     data: ()=>({
         uriString: ""
@@ -70,24 +69,12 @@ export default {
         loadPlaylistFromUri(uriString){
             const splitString=uriString.split(":")
             this.loadPlaylist(splitString[splitString.length-1])
-            event({
-                eventCategory: 'playlistInteraction',
-                eventAction: 'loadPlaylistFromUri'
-            })
         },
         loadPlaylistFromUser(playlistId){
             this.loadPlaylist(playlistId)
-            event({
-                eventCategory: 'playlistInteraction',
-                eventAction: 'loadPlaylistFromUser'
-            })
         },
         loginUser(){
             this.login()
-            event({
-                eventCategory: 'user',
-                eventAction: 'login'
-            })
         }
     },
     mounted: function(){

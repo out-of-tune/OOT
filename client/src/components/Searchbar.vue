@@ -54,7 +54,6 @@
 <script>
 import { mapActions,mapState, mapGetters } from 'vuex'
 import { generateSearchObject } from "@/assets/js/searchObjectHelper"
-import { event } from "vue-analytics"
 export default {
     methods: {
         ...mapActions([

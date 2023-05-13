@@ -27,7 +27,6 @@
 </template>
 <script>
     import { mapActions, mapState } from 'vuex'
-    import { event } from 'vue-analytics'
     export default {
         methods: {
             ...mapActions([
@@ -44,10 +43,6 @@
                 this.setInfo("Configuration Reset")
                 this.initConfiguration()
                 this.applyAllConfigurations()
-                event({
-                    eventCategory: 'saveLoad',
-                    eventAction: 'resetConfiguration'
-                })
             },
             previewFiles: function(event) {
                 var files = event.target.files || event.dataTransfer.files;
@@ -84,37 +79,17 @@
                     this.removeConfigurationFromIndexedDb(this.loadName)
                     this.loadName=""
                 }
-                event({
-                    eventCategory: 'saveLoad',
-                    eventAction: 'removeConfigurationFromIndexedDb'
-                })
             },
             loadFromIndexedDb(loadName){
                 this.loadConfigurationFromIndexedDb(loadName)
-                event({
-                    eventCategory: 'saveLoad',
-                    eventAction: 'loadConfigurationFromIndexedDb'
-                })
             },
             trackDownload(){
-               event({
-                    eventCategory: 'saveLoad',
-                    eventAction: 'downloadConfiguration'
-                }) 
             },
             storeConfig(saveName){
                 this.storeConfiguration(saveName)
-                event({
-                    eventCategory: 'saveLoad',
-                    eventAction: 'saveConfigurationToIndexedDb'
-                }) 
             },
             uploadFile(){
                 this.$refs.loadInput.click()
-                event({
-                    eventCategory: 'saveLoad',
-                    eventAction: 'uploadConfiguration'
-                }) 
             }
         },
         computed: {

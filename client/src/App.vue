@@ -1,6 +1,5 @@
 <template>
   <v-app id="inspire">
-    <Analytics></Analytics>
     <snackbar/>
     <div class="topbar">
       <div>
@@ -41,7 +40,6 @@ import Searchbar from "./components/Searchbar.vue"
 const selectionModal = () => import("@/components/modals/SelectionModal")
 import MusicPlayer from "./components/MusicPlayer"
 const feedbackModal = () => import('./components/modals/FeedbackModal')
-import Analytics from "./components/Analytics"
 const shareModal = () => import("./components/modals/ShareModal")
 import "cookieconsent/build/cookieconsent.min.css"
 
@@ -72,7 +70,6 @@ export default {
     selectionModal,
     MusicPlayer,
     feedbackModal,
-    Analytics,
     shareModal,
     IntroTour
   },

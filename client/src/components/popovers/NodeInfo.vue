@@ -104,7 +104,6 @@
 <script>
 import { mapState, mapActions } from 'vuex'
 import logo from "@/assets/logo.png"
-import { event } from "vue-analytics"
 
 export default {
     data: () =>({
