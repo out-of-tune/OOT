@@ -25,13 +25,11 @@ class ArangoAPI extends DataSource {
 
             const db = system.useDatabase(arango_database)
             
-            context.artist = new ArtistAPI(db)
-            context.genre = new GenreAPI(db)
-            context.user = new UserAPI(db)
-            context.source = new SourceAPI(db)
-            context.source.create_initial()
-            context.app = new AppAPI(db)
-            context.app.create_initial(process.env.CLIENT_KEY, process.env.CLIENT_SECRET)
+            context.artist = await ArtistAPI.createAPI(db)
+            context.genre = await GenreAPI.createAPI(db)
+            context.user = await UserAPI.createAPI(db)
+            context.source = await SourceAPI.createAPI(db)
+            context.app = await AppAPI.createAPI(db, process.env.CLIENT_KEY, process.env.CLIENT_SECRET)
             console.log('ArangoDB connected: ', await system.version())
             
         } catch(err) {

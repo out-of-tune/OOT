@@ -6,9 +6,8 @@ const BaseAPI = require('./base')
 class ArtistAPI extends BaseAPI {
     constructor(db) {
         super(db)
-        this._collection('Artist')
-        this._collection('artist_source', true)
-        this._collection('artist_genre', true)
+        this.collection = 'Artist'
+        this.edges = ['artist_source', 'artist_genre']
         this._info_loader = new DataLoader(ids => this._info(ids, this.db))
         this._genres_loader = new DataLoader(ids => this._genres(ids, this.db))
     }

@@ -5,8 +5,8 @@ const BaseAPI = require('./base')
 class GenreAPI extends BaseAPI{
     constructor(db) {
         super(db)
-        this._collection('Genre')
-        this._collection('subgenre_supergenre', true)
+        this.collection = 'Genre'
+        this.edges = ['subgenre_supergenre']
         this._subgenre_loader = new DataLoader(ids => this._subgenres(ids, this.db))
         this._supergenre_loader = new DataLoader(ids => this._supergenres(ids, this.db))
         this._artists_loader = new DataLoader(ids => this._artists(ids, this.db))

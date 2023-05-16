@@ -4,12 +4,15 @@ const BaseAPI = require('./base')
 class SourceAPI extends BaseAPI {
     constructor(db) {
         super(db)
+        this.collection = "Source"
     }
-    async create_initial() {
-        await this._collection('Source')
-        const spotify = await this.fetch('Spotify')
+
+    static async createAPI(db) {
+        const api = await super.createAPI(db)
+        const spotify = await api.fetch('Spotify')
         if (spotify && spotify.length === 0)
-            this.create('Spotify', '0')
+            await api.create('Spotify', '0')
+        return api
     }
 
     async create(name, _key) {

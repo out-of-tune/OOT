@@ -6,6 +6,18 @@ class BaseAPI {
     constructor(db) {
         this.db = db
         this._id_loader = new DataLoader(ids => this.get_ids(ids, this.db))
+        this.collection = null 
+        this.edges = []
+    }
+
+    static async createAPI(db) {
+        const api = new this(db)
+        if (api.collection == null) throw new Error(`no collection specified for ${this.name} class`)
+        await Promise.all([
+            api._collection(api.collection),
+            ...api.edges.map(name => api._collection(name, true))
+        ])
+        return api
     }
 
     async get_ids(ids, db=this.db) {

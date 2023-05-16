@@ -3,7 +3,6 @@ const BaseAPI = require('./base')
 class AppAPI extends BaseAPI {
     constructor(db) {
         super(db)
-        this._collection('App')
         this.collection = 'App'
     }
 
@@ -24,18 +23,20 @@ class AppAPI extends BaseAPI {
         return await this.set_fields(this.collection, id, fields)
     }
 
-    async create_initial(key, secret) {
-        const cc = await this.fetch(key)
+    static async createAPI(db, key, secret) {
+        const api = await super.createAPI(db)
+        const cc = await api.fetch(key)
         if (cc.length == 1) {
             const client = cc[0]
             if (client.secret !== secret) {
                 console.log('change secret')
-                this.update(client.id, { secret })
+                await api.update(client.id, { secret })
             }
         }
         if (cc.length == 0) {
-            this.create(key, secret, 'OOT')
+            await api.create(key, secret, 'OOT')
         }
+        return api
     }
 
 

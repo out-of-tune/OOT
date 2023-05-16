@@ -3,7 +3,6 @@ const BaseAPI = require('./base')
 class FeedbackAPI extends BaseAPI {
     constructor(db) {
         super(db)
-        this._collection('Feedback')
         this.collection = 'Feedback'
     }
 
