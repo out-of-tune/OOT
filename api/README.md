@@ -1,6 +1,6 @@
 # API
 The API is responsible for delivering data to the webclients.
-If you want to start the API seperatly (without docker) you can follow the steps in [Setup](#setup) and [Start](#start)
+If you want to start the API separately (without docker) you can follow the steps in [Setup](#setup) and [Start](#start)
 
 ## Setup
 To install all dependencies run the following command in the 'api' directory:
@@ -39,11 +39,11 @@ The following endpoints are available for requesting:
 | createfeedback    | feedback, email, type, group                | Boolean (represents success)        | argument feedback is required, the others aren’t|
 
 ## Authentication
-There are two forms of authentication: user authentication and client authentication. These can both be used at the same time. Client authentication should be used at all times, but isn’t required in development mode.
+There are two forms of authentication: user authentication and client authentication. These can both be used at the same time. Client authentication should be used at all times, but is not required in development mode.
 
 ### User Authentication
 
-Shouldn’t be used yet, nothing is saved in the DB about the user as of yet.
+Should not be used yet, nothing is saved in the DB about the user as of yet.
 
 To log in a user, send a login mutation to the API with the users email address. This will only work if the user already exists in the database.
 
@@ -56,7 +56,7 @@ user: {
     name
 }
 ```
-Both signup and login mutations have the same responseobject:
+Both sign-up and login mutations have the same response object:
 ``` 
 {
     success,
