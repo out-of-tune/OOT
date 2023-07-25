@@ -4,39 +4,39 @@
     <div class="spacer"></div>
 
     <div class="action">
-      <button class="container tooltip" @click="undoAction"><v-icon class="icon" color="white">undo</v-icon>
+      <button class="container tooltip" @click="undoAction"><v-icon class="icon" color="white" icon="mdi-undo"/>
         <span class="tooltiptext">UNDO</span>
       </button>
-      <button class="container tooltip" @click="redoAction"><v-icon class="icon" color="white">redo</v-icon>
+      <button class="container tooltip" @click="redoAction"><v-icon class="icon" color="white" icon="mdi-redo"/>
         <span class="tooltiptext">REDO</span>
       </button>
     </div>
     <div class="spacer"></div>
     <SelectionPopover></SelectionPopover>
     <div>
-      <button class="container tooltip action" @click="switchPlaylistLoader"><v-icon class="icon" color="white">playlist_add</v-icon>
-        <span class="tooltiptext">PLAYLISTS</span>
+      <button class="container tooltip action" @click="switchPlaylistLoader"><v-icon class="icon" color="white" icon="mdi-playlist-plus"/>
+          <span class="tooltiptext">PLAYLISTS</span>
       </button>
     </div>
 
     <LoadSavePopover></LoadSavePopover>
 
     <router-link :to="{ name: 'Settings'}" target="_blank" @click="trackSettings">
-      <button class="container action tooltip" v-on="on"><v-icon class="icon" color="white">settings</v-icon>
+      <button class="container action tooltip" v-on="on"><v-icon class="icon" color="white" icon="mdi-cog-outline"/>
       <span class="tooltiptext">SETTINGS</span></button>
     </router-link>
 
     <router-link :to="{ name: 'Help'}" target="_blank">
-      <button class="container action tooltip" v-on="on"><v-icon class="icon" color="white">help</v-icon>
+      <button class="container action tooltip" v-on="on"><v-icon class="icon" color="white" icon="mdi-help"/>
       <span class="tooltiptext">HELP</span></button>
     </router-link>
     <div>
-      <button class="container tooltip action" @click="openFeedbackModal"><v-icon class="icon" color="white">feedback</v-icon>
+      <button class="container tooltip action" @click="openFeedbackModal"><v-icon class="icon" color="white" icon="mdi-message-alert"/>
         <span class="tooltiptext">FEEDBACK</span>
       </button>
     </div>
     <div>
-      <button class="container tooltip action" @click="openShareModal"><v-icon class="icon" color="white">share</v-icon>
+      <button class="container tooltip action" @click="openShareModal"><v-icon class="icon" color="white" icon="mdi-share"/>
         <span class="tooltiptext">SHARE</span>
       </button>
     </div>

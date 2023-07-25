@@ -2,7 +2,7 @@
     <div class="text-xs-center popover">
       <v-menu dark v-model="menu" :close-on-content-click="false" :nudge-width="100">
         <template v-slot:activator="{ on }">
-          <button class="container action tooltip" v-on="on"><v-icon class="icon" color="white">select_all</v-icon>
+          <button class="container action tooltip" v-on="on"><v-icon class="icon" color="white" icon="mdi-select-all"/>
           <span class="tooltiptext">SELECTION</span></button>
         </template>
 
