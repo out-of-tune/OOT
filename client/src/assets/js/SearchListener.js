@@ -1,4 +1,4 @@
-import AdvancedSearchListener from "../antlrSource/AdvancedSearchListener"
+import AdvancedSearchListener from "./antlrSource/AdvancedSearchListener.js"
 
 export default class SearchListener extends AdvancedSearchListener {
   constructor() {
