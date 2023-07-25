@@ -18,8 +18,6 @@
     
 </template>
 <script>
-import PaginatedList from "@/components/helpers/PaginatedList"
-
 import { mapState, mapActions } from 'vuex'
 export default {
     data: ()=>({

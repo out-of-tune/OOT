@@ -139,11 +139,6 @@ export default {
         ]),
         setSong: function(track, images){
             this.playSong({...track, images})
-            event({
-                eventCategory: 'musicplayer',
-                eventAction: 'playSongFromNodeInfo',
-                eventLabel: this.node.data.label
-            })
         },
         checkOverflow: function(reference) {
             return (reference ? reference.scrollWidth : null) > (reference ? reference.offsetWidth : null)
@@ -152,18 +147,9 @@ export default {
             this.setNodeInfoVisibility(false)
         },
         trackSpotifyVisit(){
-            event({
-                eventCategory: 'externalLinks',
-                eventAction: 'visitSpotify',
-                eventLabel: this.node.data.label
-            })
         },
         addSongToQueue(song){
             this.addToQueue(song)
-            event({
-                eventCategory: 'musicplayer',
-                eventAction: 'addToQueue'
-            })
         }
     }
 }

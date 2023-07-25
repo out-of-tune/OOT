@@ -57,7 +57,7 @@ const logout = ({ dispatch, commit }) => {
 
 const authenticateClient = async ({ commit, dispatch, rootState }) => {
     console.log(process.env)
-    const key = Buffer.from(`${process.env.CLIENT_KEY}:${process.env.CLIENT_SECRET}`).toString('base64')
+    const key = new ArrayBuffer(`${process.env.CLIENT_KEY}:${process.env.CLIENT_SECRET}`).toString('base64')
 
     try {
         const response = await AuthenticationService.login('/app/login', { 'App-Login': key })

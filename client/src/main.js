@@ -6,13 +6,23 @@ import 'material-design-icons-iconfont/dist/material-design-icons.css'
 import store from './store'
 import axios from "axios";
 import VueTour from 'vue-tour'
-import vuetify from './plugins/vuetify'
+
+// Vuetify
+import 'vuetify/styles'
+import { createVuetify } from 'vuetify'
+import * as components from 'vuetify/components'
+import * as directives from 'vuetify/directives'
+
+const vuetify = createVuetify({
+  components,
+  directives,
+})
 
 require('vue-tour/dist/vue-tour.css')
 
-const app = createApp(App).mount('#app')
-app.use(VueTour)
-app.prototype.$http = axios
+const app = createApp(App)
+// app.use(VueTour)
+// app.prototype.$http = axios
 app.config.productionTip = false
 app.use(store)
 app.use(router)

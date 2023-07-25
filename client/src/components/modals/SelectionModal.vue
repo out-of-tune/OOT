@@ -6,16 +6,6 @@
             <div class="modal-content">
                 <v-icon dark @click="changeSelectionModalState" class="close">close</v-icon>
                 <div class="playlist-box">
-                    <!--
-                    <div>
-                        <h2>Selection Actions</h2>
-                        <button class="btn" @click="expandSelectedNodes">Expand</button>
-                        <button class="btn" @click="collapseSelectedNodes">Collapse</button>
-                        <button class="btn" @click="removeSelectedNodes">Remove</button>
-                        <button class="btn" @click="addSelectedSongsToQueue">Add to queue</button>
-                        <button class="btn" @click="pinSelectedNodes">Pin nodes</button>
-                        <button class="btn" @click="unpinSelectedNodes">Unpin nodes</button>
-                    </div> -->
                     <div>
                         <h2>Selected Nodes</h2>
                         <div @click="showDetailedCounts= !showDetailedCounts" id="fullCount" class="nodeCount">Selected nodes: {{selectedNodes.length}}</div>
@@ -34,7 +24,6 @@
                             :itemClick="showNodeInformation"
                             
                             >
-                            <!-- :itemStyle="{border: '1px solid white', padding: '3px', borderRadius:'3px'}" -->
                         </PaginatedList>
                     </div>
                 </div>

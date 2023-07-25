@@ -1,56 +1,50 @@
-import Router from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 
 const Login = () => import('@/views/Login')
-const Graph  = () => import("@/components/Graph.vue")
-const Settings  = () => import("@/views/Settings.vue")
-const Guide  = () => import("@/views/Guide.vue")
-const CookiePolicy  = () => import("@/views/CookiePolicy.vue")
+const Graph = () => import("@/components/Graph.vue")
+const Settings = () => import("@/views/Settings.vue")
+const Guide = () => import("@/views/Guide.vue")
+const CookiePolicy = () => import("@/views/CookiePolicy.vue")
 
-const router = new Router({
-    routes: [
-        {
-            path: '/login',
-            name: 'Login',
-            component: Login
-        },
+const routes = [
+  {
+    path: '/login',
+    name: 'Login',
+    component: Login
+  },
 
-        {
-            path: '/',
-            name: 'Home',
-            redirect: {
-                name: 'Graph'
-            },
-        },
-        {
-            path: '/graph',
-            name: 'Graph',
-            component: Graph
-        },
-        {
-            path: '/settings',
-            name: 'Settings',
-            component: Settings
-        },
-        {
-            path: '/help',
-            name: 'Help',
-            component: Guide
-        },
-        {
-            path: '/cookiepolicy',
-            name: 'Cookie Policy',
-            component: CookiePolicy
-        }
-    ],
-    scrollBehavior (to, from, savedPosition) {
-        if (to.hash) {
-          return {
-            selector: to.hash,
-            offset: { x: 0, y: 64 }
-          }
-        }
-      }
-      
+  {
+    path: '/',
+    name: 'Home',
+    redirect: {
+      name: 'Graph'
+    },
+  },
+  {
+    path: '/graph',
+    name: 'Graph',
+    component: Graph
+  },
+  {
+    path: '/settings',
+    name: 'Settings',
+    component: Settings
+  },
+  {
+    path: '/help',
+    name: 'Help',
+    component: Guide
+  },
+  {
+    path: '/cookiepolicy',
+    name: 'Cookie Policy',
+    component: CookiePolicy
+  }
+]
+
+const router = createRouter({
+  history: createWebHashHistory(),
+  routes
 })
 
 export default router
