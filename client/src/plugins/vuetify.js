@@ -1,17 +1,13 @@
-import Vue from 'vue'
-import Vuetify from 'vuetify/lib'
-import 'vuetify/src/stylus/app.styl'
+// Vuetify
+import 'vuetify/styles'
+import { createVuetify } from 'vuetify'
+import * as components from 'vuetify/components'
+import * as directives from 'vuetify/directives'
 
-Vue.use(Vuetify, {
-  theme: {
-    primary: "#302c29",
-    secondary: "#da6a1d",
-    accent: "#795548",
-    error: "#f44336",
-    warning: "#E65100",
-    info: "#607D8B",
-    success: "#4CAF50"
-  },
-  customProperties: true,
-  iconfont: 'md',
+const vuetify = createVuetify({
+  components,
+  directives,
 })
+
+export default vuetify
+

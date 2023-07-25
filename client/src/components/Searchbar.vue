@@ -312,12 +312,12 @@ export default {
     .searchIcon:hover {
         color: #da6a1d;
     }
-    >>> .v-input__control{
+    :deep() .v-input__control{
         min-height: 30px !important;
         max-height: 40px;
         align-self: center;
     }
-    >>> .v-input__control .v-input__slot{
+    :deep() .v-input__control .v-input__slot{
         margin: 0;
     }
     .searchfield {

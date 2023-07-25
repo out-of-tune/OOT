@@ -1,4 +1,3 @@
-import Vue from 'vue'
 import Router from 'vue-router'
 
 const Login = () => import('@/views/Login')
@@ -6,15 +5,6 @@ const Graph  = () => import("@/components/Graph.vue")
 const Settings  = () => import("@/views/Settings.vue")
 const Guide  = () => import("@/views/Guide.vue")
 const CookiePolicy  = () => import("@/views/CookiePolicy.vue")
-
-// import Login from '@/views/Login'
-// import Graph from "@/components/Graph.vue";
-// import Settings from "@/views/Settings.vue"
-// import Guide from "@/views/Guide.vue"
-// import CookiePolicy from "@/views/CookiePolicy.vue"
-
-
-Vue.use(Router)
 
 const router = new Router({
     routes: [
