@@ -253,7 +253,7 @@
                         frameborder="0"></iframe>
                 </p>
                 <h2 id="loadplaylist">Loading and visualizing playlists</h2>
-                <p>You can visualize playlist by clicking on the PLAYLISTS button on the toolbar. If you are logged in you can choose a playlist and load it. This will generate a 
+                <p>You can visualize playlist by clicking on the PLAYLISTS button on the toolbar. If you are logged in you can choose a playlist and load it. This will generate a graph.</p>
                 <h2 id="deleteGraph">How can I delete a stored graph or configuration?</h2>
                 <p>In the save/load options you can pick a graph/configuration with the dropdown and click on the delete button on the right hand side. </p>
                 <h2 id="resetconfiguration">How do I reset my configuration?</h2>
@@ -375,18 +375,18 @@
             <div class="actions">
                 <h1 class="header">General Actions</h1>
                 <div class="data">
-                    <template  v-for="(option, index) in actions.generalActions" v-if="!option.hidden">
-                        <div :key="index">{{option.keyCombination.join(" + ")}}</div>
-                        <div :key="index+'desc'">{{option.description}}</div>
+                    <template  v-for="(option, index) in actions.generalActions" :key="index" v-if="!option.hidden">
+                        <div>{{option.keyCombination.join(" + ")}}</div>
+                        <div>{{option.description}}</div>
                     </template>
                 </div>
             </div>
             <div class="actions">
                 <h1 class="header">Selection Actions</h1>
                 <div class="data">
-                    <template  v-for="(option, index) in actions.selectionActions" v-if="!option.hidden">
-                        <div :key="index">{{option.keyCombination.join(" + ")}}</div>
-                        <div :key="index+'desc'">{{option.description}}</div>
+                    <template  v-for="(option, index) in actions.selectionActions" :key="index" v-if="!option.hidden">
+                        <div>{{option.keyCombination.join(" + ")}}</div>
+                        <div>{{option.description}}</div>
                     </template>
                 </div>
             </div>

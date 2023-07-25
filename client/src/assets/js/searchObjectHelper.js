@@ -1,8 +1,4 @@
-const antlr4 = require('antlr4/index');
-const AdvancedSearchLexer = require('./antlrSource/AdvancedSearchLexer');
-const AdvancedSearchParser = require('./antlrSource/AdvancedSearchParser');
-const SearchListener = require('./SearchListener').SearchListener
-const ErrorListener = require('./ErrorListener').ErrorListener
+import {InputStream, CommonTokenStream} from "antlr4"
 
 const getNodeLabels = schema => schema.nodeTypes.map(type=>type.label)
 const getNodeTypeByName = (schema, nodeLabel) => schema.nodeTypes.find(nodeType => nodeType.label === nodeLabel)
@@ -24,9 +20,9 @@ function validateAttributes(attributes, nodeType, schema){
 }
 
 export const generateSearchObject = input => {
-    var chars = new antlr4.InputStream(input);
+    var chars = new InputStream(input);
     var lexer = new AdvancedSearchLexer.AdvancedSearchLexer(chars);
-    var tokens  = new antlr4.CommonTokenStream(lexer);
+    var tokens  = new CommonTokenStream(lexer);
     var parser = new AdvancedSearchParser.AdvancedSearchParser(tokens);
     parser.buildParseTrees = true;   
     var listener = new ErrorListener();

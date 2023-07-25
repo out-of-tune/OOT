@@ -1,4 +1,3 @@
-import Vue from 'vue'
 import Vuex from 'vuex'
 import VuexPersistence from 'vuex-persist'
 import createMutationsSharer from "vuex-shared-mutations";
@@ -29,8 +28,6 @@ import history from './modules/history'
 import cookie_consent from './modules/cookie_consent'
 import feedback from './modules/feedback'
 import share from './modules/share'
-
-Vue.use(Vuex)
 
 const configurationMutations = [
     'SAVE_EXPAND_CONFIGURATION',

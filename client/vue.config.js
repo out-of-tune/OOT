@@ -1,17 +1,19 @@
-require("babel-polyfill");
-
 module.exports = {
-    publicPath: "/app/",
-    css: {
-      extract: false
-    },
-    configureWebpack: {
-      devtool: 'source-map',
-      entry: ["babel-polyfill", "./src/main.js"],
-      optimization: {
-        splitChunks: {
-            chunks: 'all'
-        }
+  publicPath: "/app/",
+  configureWebpack: {
+    resolve: {
+      fallback: {
+        "fs": false,
+        "tls": false,
+        "net": false,
+        "path": false,
+        "zlib": false,
+        "http": false,
+        "https": false,
+        "stream": false,
+        "crypto": false,
+        "url": false
       }
     }
   }
+}
