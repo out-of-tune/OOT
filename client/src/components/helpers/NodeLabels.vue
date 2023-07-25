@@ -1,12 +1,13 @@
 <script>
+import { h } from 'vue'
 export default {
   props: ["items"],
-  render(createElement) {
+  render() {
     if (this.items.length) {
-      return createElement(
+      return h(
         "div",
         this.items.map(function(nodeLabel) {
-          return createElement("span",{
+          return h("span",{
                 style: {
                     left: nodeLabel.coordinates.x+'px', 
                     top: nodeLabel.coordinates.y+'px',
@@ -25,7 +26,7 @@ export default {
         })
       );
     } else {
-      return createElement("div", "");
+      return h("div", "");
     }
   }
 };
