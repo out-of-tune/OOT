@@ -20,7 +20,8 @@
     <selectionModal></selectionModal>
     <feedbackModal></feedbackModal>
     <shareModal></shareModal>
-    <IntroTour v-if="['Graph'].indexOf($route.name) > -1"></IntroTour>
+    <!-- TODO: fix intro tour -->
+    <!-- <IntroTour v-if="['Graph'].indexOf($route.name) > -1"></IntroTour> -->
     <MusicPlayer class="musicPlayer" v-if="['Graph'].indexOf($route.name) > -1"></MusicPlayer>
 
     <Toolbar v-if="['Graph'].indexOf($route.name) > -1"></Toolbar>

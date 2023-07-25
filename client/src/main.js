@@ -4,8 +4,8 @@ import App from './App.vue'
 import 'roboto-fontface/css/roboto/roboto-fontface.css'
 import 'material-design-icons-iconfont/dist/material-design-icons.css'
 import store from './store'
-import axios from "axios";
-import VueTour from 'vue-tour'
+import Vue3Tour from 'vue3-tour'
+import 'vue3-tour/dist/vue3-tour.css'
 
 // Vuetify
 import 'vuetify/styles'
@@ -18,14 +18,11 @@ const vuetify = createVuetify({
   directives,
 })
 
-require('vue-tour/dist/vue-tour.css')
-
 const app = createApp(App)
-// app.use(VueTour)
-// app.prototype.$http = axios
 app.config.productionTip = false
 app.use(store)
 app.use(router)
+app.use(Vue3Tour)
 
 app.use(vuetify, {
   theme: {
