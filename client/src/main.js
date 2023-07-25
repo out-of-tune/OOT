@@ -1,8 +1,7 @@
-import { createApp, ref } from 'vue'
+import { createApp } from 'vue'
 import router from './router'
 import App from './App.vue'
-import 'roboto-fontface/css/roboto/roboto-fontface.css'
-import 'material-design-icons-iconfont/dist/material-design-icons.css'
+import '@mdi/font/css/materialdesignicons.css'
 import store from './store'
 import Vue3Tour from 'vue3-tour'
 import 'vue3-tour/dist/vue3-tour.css'
@@ -35,7 +34,6 @@ app.use(vuetify, {
     success: "#4CAF50"
   },
   customProperties: true,
-  iconfont: 'md',
 })
 
 app.mount('#app')

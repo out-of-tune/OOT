@@ -2,7 +2,7 @@
     <div class="text-xs-center popover">
       <v-menu dark v-model="loadSaveMenu" :close-on-content-click="false" :nudge-width="100">
         <template v-slot:activator="{ on }">
-          <button class="container tooltip" v-on="on"><v-icon class="icon" color="white">save</v-icon>
+          <button class="container tooltip" v-on="on"><v-icon class="icon" color="white" icon="mdi-content-save"/>
           <span class="tooltiptext">SAVE/LOAD</span>
           </button>
         </template>

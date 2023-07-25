@@ -247,7 +247,7 @@ h2 {
 .settingsSwitch {
   margin: 0;
 }
->>> .v-messages {
+:deep() .v-messages {
   min-height: 0 !important;
   height: 0 !important;
 }
