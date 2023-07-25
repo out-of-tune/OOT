@@ -23,20 +23,6 @@
 <script>
 import { mapActions, mapState } from "vuex";
 
-const modifiers = {
-  computeStyle: {
-    enabled: true,
-    fn(data) {
-      data.styles = Object.assign({}, data.styles, {
-        left: "50%",
-        top: "50%",
-        transform: "translate(-50%, -50%)"
-      });
-
-      return data;
-    }
-  }
-};
 export default {
   name: "introTour",
   data: () => {
@@ -48,7 +34,6 @@ export default {
             "Out-of-tune utilizes a so-called graph. This graph consists of dots and lines (nodes and edges). The nodes represent different artists, genres, albums and songs.",
           params: {
             placement: "none",
-            modifiers
           }
         },
         {
@@ -57,7 +42,6 @@ export default {
             "The graph is interactive. You are able to click on every node, select multiple of them, move them,...",
           params: {
             placement: "none",
-            modifiers
           }
         },
         {
@@ -143,7 +127,6 @@ export default {
             "If the graph is moving too fast, you can press SPACEBAR to pause all motion.",
           params: {
             placement: "none",
-            modifiers
           }
         },
         {
@@ -166,7 +149,6 @@ export default {
           content: "Thank you for using out-ouf-tune <3",
           params: {
             placement: "none",
-            modifiers
           }
         }
       ],
