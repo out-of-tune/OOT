@@ -86,8 +86,8 @@ export default {
         },
         useSelected: function(){
             if(this.$refs.autocomplete && this.selectedItem!=-1){
-                this.addOnClick(this.$refs.autocomplete.childNodes[this.selectedItem].innerText)
-            }else{
+                this.addOnClick(this.$refs.autocomplete.children[this.selectedItem].innerText)
+            } else {
                 this.$emit('addRule')
             }
         },
@@ -129,13 +129,15 @@ export default {
         },
         moveToNext: function(){
             if(this.$refs.autocomplete){
-                if(this.selectedItem+1<this.$refs.autocomplete.childNodes.length){
+                if(this.selectedItem+1<this.$refs.autocomplete.children.length){
                     if(this.selectedItem!=-1){
-                        this.$refs.autocomplete.childNodes[this.selectedItem].className=""
+                        this.$refs.autocomplete.children[this.selectedItem].className=""
                     }
                     this.selectedItem++
-                    this.$refs.autocomplete.childNodes[this.selectedItem].className="selected"
-                    this.$refs.autocomplete.childNodes[this.selectedItem].scrollIntoView(false)
+                    this.$refs.autocomplete.children[this.selectedItem].className="selected"
+                  console.log(this.$refs.autocomplete.children[this.selectedItem])
+                  console.log(this.$refs.autocomplete)
+                    this.$refs.autocomplete.children[this.selectedItem].scrollIntoView(false)
 
                 } 
             }
@@ -143,11 +145,11 @@ export default {
         moveToPrevious: function(){
             if(this.$refs.autocomplete){
                 if(this.selectedItem!=-1){
-                    this.$refs.autocomplete.childNodes[this.selectedItem].className=""
+                    this.$refs.autocomplete.children[this.selectedItem].className=""
                     this.selectedItem--
                     if(this.selectedItem!=-1){
-                        this.$refs.autocomplete.childNodes[this.selectedItem].className="selected"
-                        this.$refs.autocomplete.childNodes[this.selectedItem].scrollIntoView(false)
+                        this.$refs.autocomplete.children[this.selectedItem].className="selected"
+                        this.$refs.autocomplete.children[this.selectedItem].scrollIntoView(false)
                     }
                 } 
             }
@@ -155,7 +157,7 @@ export default {
         addCharacterInput: function(searchString){
             this.selectedItem= -1
             if(this.$refs.autocomplete){
-                this.$refs.autocomplete.childNodes.forEach((listItem)=>{
+                this.$refs.autocomplete.children.forEach((listItem)=>{
                     listItem.className=""
                 })
             }
