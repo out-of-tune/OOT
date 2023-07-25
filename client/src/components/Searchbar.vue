@@ -70,16 +70,8 @@ export default {
         startAdvancedSearch: function(){
             this.startAdvancedGraphSearch({addToSelection: false})
             this.inputIsFocused = false
-            event({
-                eventCategory: 'search',
-                eventAction: 'advancedSearch'
-            })
         },
         startSimpleSearch(searchObject){
-           event({
-                eventCategory: 'search',
-                eventAction: 'simpleSearch'
-            })
             this.startSimpleGraphSearch(searchObject)
         },
         changeVisibility: function(){

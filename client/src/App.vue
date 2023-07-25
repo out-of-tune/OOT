@@ -1,16 +1,16 @@
 <template>
   <v-app id="inspire">
-    <snackbar/>
+    <snackbar />
     <div class="topbar">
       <div>
         <a href="/">
           <span class="hidden-sm-and-down title">out-of-tune</span>
         </a>
       </div>
-      <Searchbar v-if="['Graph', 'Settings'].indexOf($route.name)>-1"></Searchbar>
-      <div class="login" v-if="['Graph', 'Settings'].indexOf($route.name)>-1">
+      <Searchbar v-if="['Graph', 'Settings'].indexOf($route.name) > -1"></Searchbar>
+      <div class="login" v-if="['Graph', 'Settings'].indexOf($route.name) > -1">
         <v-btn small v-if="!loggedIn" id="login" outline color="#ffffff" v-on:click="loginUser">login</v-btn>
-        <div v-if="loggedIn" class="username"><b>{{$store.state.user.me.display_name}}</b></div>
+        <div v-if="loggedIn" class="username"><b>{{ $store.state.user.me.display_name }}</b></div>
         <v-btn small v-if="loggedIn" id="logout" outline color="#ffffff" v-on:click="logoutUser">logout</v-btn>
       </div>
     </div>
@@ -20,45 +20,30 @@
     <selectionModal></selectionModal>
     <feedbackModal></feedbackModal>
     <shareModal></shareModal>
-    <IntroTour v-if="['Graph'].indexOf($route.name)>-1"></IntroTour>
-    <MusicPlayer class="musicPlayer" v-if="['Graph'].indexOf($route.name)>-1"></MusicPlayer>
+    <IntroTour v-if="['Graph'].indexOf($route.name) > -1"></IntroTour>
+    <MusicPlayer class="musicPlayer" v-if="['Graph'].indexOf($route.name) > -1"></MusicPlayer>
 
-    <Toolbar v-if="['Graph'].indexOf($route.name)>-1"></Toolbar>
+    <Toolbar v-if="['Graph'].indexOf($route.name) > -1"></Toolbar>
   </v-app>
 </template>
 
 <script>
+import { defineAsyncComponent } from 'vue'
 import { mapActions, mapState } from "vuex";
 import Toolbar from "./components/Toolbar.vue";
 import IntroTour from "@/components/helpers/IntroTour"
 
-const PlaylistLoader = () => import("@/components/modals/PlaylistLoader")
-const PlaylistChooser = () => import("@/components/modals/PlaylistChooser")
+const PlaylistLoader = defineAsyncComponent(() => import("@/components/modals/PlaylistLoader"))
+const PlaylistChooser = defineAsyncComponent(() => import("@/components/modals/PlaylistChooser"))
 
-const snackbar = () => import("./components/Snackbar")
+const snackbar = defineAsyncComponent(() => import("./components/Snackbar"))
 import Searchbar from "./components/Searchbar.vue"
-const selectionModal = () => import("@/components/modals/SelectionModal")
+const selectionModal = defineAsyncComponent(() => import("@/components/modals/SelectionModal"))
 import MusicPlayer from "./components/MusicPlayer"
-const feedbackModal = () => import('./components/modals/FeedbackModal')
-const shareModal = () => import("./components/modals/ShareModal")
-import "cookieconsent/build/cookieconsent.min.css"
+const feedbackModal = defineAsyncComponent(() => import('./components/modals/FeedbackModal'))
+const shareModal = defineAsyncComponent(() => import("./components/modals/ShareModal"))
 
-//helper function
-function deepEqual(obj1, obj2) {
-  function isPrimitive(obj) {
-    return obj !== Object(obj);
-  }
-  if (obj1 === obj2)
-    return true;
-  if (isPrimitive(obj1) && isPrimitive(obj2))
-    return obj1 === obj2;
-  if (Object.keys(obj1).length !== Object.keys(obj2).length) return false;
-  for (let key in obj1) {
-    if (!(key in obj2)) return false;
-    if (!deepEqual(obj1[key], obj2[key])) return false;
-  }
-  return true;
-}
+import { deepEqual } from "@/utils/deepEqual.js"
 
 export default {
   components: {
@@ -78,30 +63,21 @@ export default {
   }),
   methods: {
     ...mapActions([
-      "initConfiguration", 
-      "requireAccessToken", 
-      "refreshToken", 
-      "setLoginState", 
-      "getCurrentUser", 
-      "login", 
-      "logout", 
-      "initCookieConsent",
+      "initConfiguration",
+      "requireAccessToken",
+      "refreshToken",
+      "setLoginState",
+      "getCurrentUser",
+      "login",
+      "logout",
       "requireAccessToken",
       "authenticateClient"
     ]),
-    loginUser(){
+    loginUser() {
       this.login()
-      event({
-        eventCategory: "user",
-        eventAction: "login"
-      })
     },
-    logoutUser(){
+    logoutUser() {
       this.logout()
-      event({
-        eventCategory: "user",
-        eventAction: "logout"
-      })
     }
   },
   computed: {
@@ -109,8 +85,7 @@ export default {
       loggedIn: state => state.authentication.loginState
     })
   },
-  created: async function() {
-    this.initCookieConsent()
+  created: async function () {
     //init config when no config is in localStorage
     if (
       deepEqual(this.$store.state.configurations, {
@@ -143,6 +118,7 @@ export default {
   background-color: #212121;
   border-right: 2px solid #da6a1d !important;
 }
+
 .musicPlayer {
   position: absolute;
   z-index: 2;
@@ -150,10 +126,12 @@ export default {
   left: 0px;
   color: white;
 }
+
 a {
   color: inherit;
   text-decoration: inherit;
 }
+
 .topbar {
   background-color: #252525;
   color: white;
@@ -168,6 +146,7 @@ a {
   z-index: 2;
   width: 100vw;
 }
+
 .login {
   justify-self: right;
   display: flex;

@@ -65,41 +65,21 @@
                 this.downloadGraph()
                 const name = this.generateFileName()
                 this.startDownloadOfUrl(this.$refs.downloadButton, this.$store.state.graph_io.url, name)
-                event({
-                    eventCategory: 'saveLoad',
-                    eventAction: 'downloadGraph'
-                })
             },
             deleteGraph: function(){
                 if(this.loadName.length>0){
                     this.removeGraphFromIndexedDb(this.loadName)
                     this.loadName=""
-                    event({
-                        eventCategory: 'saveLoad',
-                        eventAction: 'removeGraphFromIndexedDb'
-                    })
                 }
             },
             loadFromIndexedDb(loadName){
                 this.loadGraphFromIndexedDb(loadName)
-                event({
-                    eventCategory: 'saveLoad',
-                    eventAction: 'loadGraphFromIndexedDb'
-                })
             },
             saveGraphToIndexedDb(saveName){
                 this.storeGraph(saveName)
-                event({
-                    eventCategory: 'saveLoad',
-                    eventAction: 'saveGraphToIndexedDb'
-                })
             },
             uploadFile(){
                 this.$refs.loadInput.click()
-                event({
-                    eventCategory: 'saveLoad',
-                    eventAction: 'uploadGraph'
-                }) 
             }
         },
         computed: {

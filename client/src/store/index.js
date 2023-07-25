@@ -25,7 +25,6 @@ import search from './modules/search'
 import graph_camera from './modules/graph_camera'
 import selection from './modules/selection'
 import history from './modules/history'
-import cookie_consent from './modules/cookie_consent'
 import feedback from './modules/feedback'
 import share from './modules/share'
 
@@ -83,12 +82,6 @@ const vuexLocalConfigurations = new VuexPersistence({
     filter: (mutation) => configurationMutations.includes(mutation.type)
 })
 
-const vuexCookieUserState = new VuexPersistence({
-    key: "oot_user",
-    modules: ['authentication'],
-    filter: (mutation) => userMutations.includes(mutation.type)
-})
-
 const vuexStoredGraphs = new VuexPersistence({
     key: "graph_io",
     modules: ['graph_io'],
@@ -112,7 +105,6 @@ export default new Vuex.Store({
     plugins: [
         vuexLocalPlaylists.plugin, 
         vuexLocalConfigurations.plugin, 
-        vuexCookieUserState.plugin,
         vuexStoredGraphs.plugin,
         vuexStoredConfigurations.plugin,
         vuexStoredEvents.plugin,
@@ -227,7 +219,6 @@ export default new Vuex.Store({
         graph_camera,
         selection,
         history,
-        cookie_consent,
         feedback,
         share
     }

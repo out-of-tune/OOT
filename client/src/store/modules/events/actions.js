@@ -47,29 +47,14 @@ const mouseClickFunctionality = async ({ commit, dispatch, rootState }, node) =>
             if (node.data.label === "song") {
                 dispatch('songAction', node)
             }
-            event({
-                eventCategory: "graph",
-                eventAction: "expand",
-                eventLabel: node.data.label
-            })
             break
         case 'collapse':
             dispatch('collapseAction', node)
-            event({
-                eventCategory: "graph",
-                eventAction: "collapse",
-                eventLabel: node.data.label
-            })
             break
         case 'explore':
             if (node.data.label === "song") {
                 dispatch('songAction', node)
             }
-            event({
-                eventCategory: "graph",
-                eventAction: "explore",
-                eventLabel: node.data.label
-            })
             break
     }
 }
