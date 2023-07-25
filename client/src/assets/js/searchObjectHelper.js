@@ -1,6 +1,9 @@
 import { InputStream, CommonTokenStream } from "antlr4"
 import AdvancedSearchLexer from "./antlrSource/AdvancedSearchLexer.js"
 import AdvancedSearchParser from "./antlrSource/AdvancedSearchParser.js"
+import ErrorListener from "./ErrorListener.js"
+import SearchListener from "./SearchListener.js"
+import antlr4 from "antlr4"
 
 const getNodeLabels = schema => schema.nodeTypes.map(type => type.label)
 const getNodeTypeByName = (schema, nodeLabel) => schema.nodeTypes.find(nodeType => nodeType.label === nodeLabel)
