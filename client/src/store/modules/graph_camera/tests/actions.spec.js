@@ -1,10 +1,11 @@
-
+/**
+ * @jest-environment jsdom
+ */
 import {getAllNodes, getNodePosition} from "@/assets/js/graphHelper.js"
 import {
     actions
 } from '../actions'
 global.expect = require('expect')
-import {JSDOM} from "jsdom"
 jest.mock("@/assets/js/graphHelper.js")
 
 const {
@@ -239,13 +240,6 @@ describe("fitGraphToNodes",()=>{
     })
     it("centers graph",()=>{
         getNodePosition.mockReturnValueOnce({x:200, y: 200}).mockReturnValue({x:100, y: 100})
-        
-
-        const dom = new JSDOM()
-        global.document = dom.window.document
-        global.window = dom.window
-        global.body = dom.window.document.body
-
         Object.defineProperty(global.window.HTMLBodyElement.prototype, 'clientWidth', {value: 1000, configurable:true});
         Object.defineProperty(global.window.HTMLBodyElement.prototype, 'clientHeight', {value: 1000, configurable:true});
 
@@ -256,11 +250,6 @@ describe("fitGraphToNodes",()=>{
     it("zooms to scale 2 when only one node is given",()=>{
         getNodePosition.mockReturnValue({x:100, y: 100})
               
-        const dom = new JSDOM()
-        global.document = dom.window.document
-        global.window = dom.window
-        global.body = dom.window.document.body
-
         Object.defineProperty(global.window.HTMLBodyElement.prototype, 'clientWidth', {value: 500, configurable:true});
         Object.defineProperty(global.window.HTMLBodyElement.prototype, 'clientHeight', {value: 500, configurable:true});
         
@@ -273,11 +262,6 @@ describe("fitGraphToNodes",()=>{
         getNodePosition.mockReturnValueOnce({x:100, y: 100})
         getNodePosition.mockReturnValueOnce({x:700, y: 700})   
             
-        const dom = new JSDOM()
-        global.document = dom.window.document
-        global.window = dom.window
-        global.body = dom.window.document.body
- 
         Object.defineProperty(global.window.HTMLBodyElement.prototype, 'clientWidth', {value: 500, configurable:true});
         Object.defineProperty(global.window.HTMLBodyElement.prototype, 'clientHeight', {value: 500, configurable:true});
         
@@ -293,11 +277,6 @@ describe("fitGraphToNodes",()=>{
     it("zooms to desired scale, but no more than 2",()=>{
         getNodePosition.mockReturnValueOnce({x:100, y: 100})
         getNodePosition.mockReturnValueOnce({x:150, y: 150})   
-        const dom = new JSDOM()
-        global.document = dom.window.document
-        global.window = dom.window
-        global.body = dom.window.document.body
- 
         Object.defineProperty(global.window.HTMLBodyElement.prototype, 'clientWidth', {value: 500, configurable:true});
         Object.defineProperty(global.window.HTMLBodyElement.prototype, 'clientHeight', {value: 500, configurable:true});
         

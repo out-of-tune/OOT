@@ -1,6 +1,9 @@
+/**
+ * @jest-environment jsdom
+ */
+
 import SpotifyTokenService from '@/store/services/SpotifyTokenService'
 import AuthenticationService from '@/store/services/AuthenticationService'
-import BaseService from '@/store/services/BaseService'
 jest.mock("@/store/services/SpotifyTokenService")
 jest.mock("@/store/services/AuthenticationService")
 jest.mock("@/store/services/BaseService")
@@ -17,7 +20,6 @@ const {
     refreshTokenAfterTimeout,
     requireAccessToken,
     logout,
-    authenticateClient
 } = actions
 
 describe("refreshTokenAfterTimeout", ()=>{
@@ -169,20 +171,5 @@ describe("login", () =>{
         AuthenticationService.get_oauth2_login_page.mockReturnValue("out-of-tune.org")
         await login()
         expect(global.window.location.href).toBe("out-of-tune.org")
-    })
-})
-
-describe("authenticateClient", ()=>{
-    let commit
-    let dispatch
-    let rootState
-    beforeEach(()=>{
-        commit = jest.fn()
-        dispatch = jest.fn()
-        rootState = {
-
-        }
-        process.env.VUE_APP_KEY = "key"
-        process.env.VUE_APP_SECRET = "secret"
     })
 })

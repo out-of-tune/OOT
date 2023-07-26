@@ -1,9 +1,12 @@
+/**
+ * @jest-environment jsdom
+ */
+
 import {
   mutations
 } from '../store/mutations'
 expect = require('expect')
 
-// destructure assign `mutations`
 const {
   SET_HOVERED_NODE,
   SET_GRAPHCONTAINER,
