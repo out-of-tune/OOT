@@ -1,5 +1,5 @@
 <template>
-  <v-app id="inspire">
+  <v-app>
     <snackbar />
     <div class="topbar">
       <div>
@@ -9,7 +9,7 @@
       </div>
       <Searchbar v-if="['Graph', 'Settings'].indexOf($route.name) > -1"></Searchbar>
       <div class="login" v-if="['Graph', 'Settings'].indexOf($route.name) > -1">
-        <v-btn small v-if="!loggedIn" id="login" outline color="#ffffff" v-on:click="loginUser">login</v-btn>
+        <v-btn small v-if="!loggedIn" id="login" v-on:click="loginUser">login</v-btn>
         <div v-if="loggedIn" class="username"><b>{{ $store.state.user.me.display_name }}</b></div>
         <v-btn small v-if="loggedIn" id="logout" outline color="#ffffff" v-on:click="logoutUser">logout</v-btn>
       </div>
