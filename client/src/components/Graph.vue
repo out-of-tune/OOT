@@ -10,13 +10,12 @@
     <NodeInfo v-if="nodeInfoDisplay" class="nodeInfo"></NodeInfo>
     <QueueDisplay v-if="queueDisplay" class="queueDisplay"></QueueDisplay>
     <div class="iconContainer">
-      <v-icon v-if="!isRendered" size="24px" id="pauseIcon" color="white">pause</v-icon>
+      <v-icon v-if="!isRendered" size="24px" id="pauseIcon" color="white" icon="mdi-pause"/>
       <v-icon v-if="pendingRequestCount > 0" size="24px" id="loadingIndicator"
-        :color="pendingRequestCount > 100 ? 'red' : pendingRequestCount > 10 ? 'yellow' : 'green'">hourglass_empty</v-icon>
+        :color="pendingRequestCount > 100 ? 'red' : pendingRequestCount > 10 ? 'yellow' : 'green'" icon="mdi-timer-sand-empty"/>
       <b style="color: red" v-if="pendingRequestCount > 100">{{ pendingRequestCount }}</b>
       <b style="color: white" v-if="groupMoveActive">M</b>
-      <v-icon style="color: white" v-if="highlight">highlight</v-icon>
-
+      <v-icon style="color: white" v-if="highlight" icon="mdi-flashlight"/>
     </div>
   </div>
 </template>

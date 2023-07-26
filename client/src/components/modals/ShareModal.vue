@@ -2,7 +2,7 @@
     <div>
         <div v-if="open" id="shareModal" class="modal">
             <div class="card">
-                <v-icon dark @click="changeShareModalState" class="close">close</v-icon>
+                <v-icon dark @click="changeShareModalState" class="close" icon="mdi-close"/>
                 <div class="content">
                     <v-btn class="right" small @click="generateShareLink('graph')">share graph</v-btn>
                     <v-btn class="left" small @click="generateShareLink('settings')">share configuration</v-btn>

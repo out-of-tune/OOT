@@ -3,7 +3,7 @@
     <v-menu v-model="menu" :close-on-content-click="false" :nudge-width="100">
       <template v-slot:activator="{ on }">
         <button class="container" v-on="on">
-          <v-icon class="icon" color="white">brush</v-icon>
+          <v-icon class="icon" color="white" icon="mdi-brush"/>
         </button>
       </template>
 

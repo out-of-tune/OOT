@@ -11,7 +11,7 @@
                         name="searchField"
                         v-model="searchString" 
                         @input="addCharacterInput(searchString)">
-                        <v-icon class="searchIcon" slot="append" @click="startAdvancedSearch()">search</v-icon>
+                        <v-icon class="searchIcon" slot="append" @click="startAdvancedSearch()" icon="mdi-magnify"/>
                     </v-text-field>
                     <ul ref="autocomplete" id="autocomplete" v-if="getMatchingData().length>0 && inputIsFocused">
                         <li v-for="(data) in getMatchingData()"  @mousedown="addOnClick(data)" v-bind:key="data">
@@ -44,7 +44,8 @@
                         class="searchIcon" 
                         slot="append" 
                         @click="startSimpleSearch({ nodeType: selectedNode, searchString: simpleSearchString})"
-                    >search</v-icon>
+                        icon="mdi-magnify"
+                    />
                 </v-text-field>
             </div>
             <a id="changeSearchMode" @click="changeSearchMode">Search Graph</a>

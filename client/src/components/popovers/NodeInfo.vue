@@ -2,7 +2,7 @@
     <div class="card">
         <div class="close">
             <span id="nodeLabel" v-if="node">{{node.data.label}}</span>
-            <v-icon id="close-icon" @click="closeWindow" size="1.5rem" color="white">close</v-icon>
+            <v-icon id="close-icon" @click="closeWindow" size="1.5rem" color="white" icon="mdi-close"/>
         </div>
         <div class="content">
             <div v-if="!node.data.label">
@@ -28,7 +28,7 @@
                 <h3>Top songs</h3>
                 <ul>
                     <li v-for='track in node.data.tracks' v-bind:key="track.id" :class="{noPreview: !track.preview_url}">
-                        <v-icon id="playArrow"  @click="setSong(track, track.album.images)" small color="white">play_arrow</v-icon> 
+                        <v-icon id="playArrow"  @click="setSong(track, track.album.images)" small color="white" icon="mdi-play"/>
                         <div id="songName" @click="setSong(track, track.album.images)">
                             <span class="innerText" v-if="track.name.length>25">
                                 {{track.name}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{track.name}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -37,7 +37,7 @@
                                 {{track.name}}
                             </span>
                         </div>
-                        <button id="addToQueueButton" @click="addSongToQueue({...track, images: node.data.images})"><v-icon small color="white">add</v-icon></button>
+                        <button id="addToQueueButton" @click="addSongToQueue({...track, images: node.data.images})"><v-icon small color="white" icon="mdi-plus"/></button>
                     </li>
                 </ul>
             </div>
@@ -69,7 +69,7 @@
                 <div>{{ node.data.total_tracks }}</div>
                 <ul>
                     <li v-for='track in node.data.tracks' v-bind:key="track.id" :class="{noPreview: !track.preview_url}">
-                        <v-icon id="playArrow"  @click="setSong(track, node.data.images)" small color="white">play_arrow</v-icon> 
+                        <v-icon id="playArrow"  @click="setSong(track, node.data.images)" small color="white" icon="mdi-play"/>
                         <div id="songName" @click="setSong(track, node.data.images)">
                             <span class="innerText" v-if="track.name.length>25">
                                 {{track.name}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{track.name}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -78,7 +78,7 @@
                                 {{track.name}}
                             </span>
                             </div>
-                        <button id="addToQueueButton" @click="addSongToQueue({...track, images: node.data.images})"><v-icon small color="white">add</v-icon></button>
+                        <button id="addToQueueButton" @click="addSongToQueue({...track, images: node.data.images})"><v-icon small color="white" icon="mdi-plus"/></button>
                     </li>
                 </ul>
             </div>

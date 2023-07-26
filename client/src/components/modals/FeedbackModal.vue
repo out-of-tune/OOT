@@ -4,7 +4,7 @@
         <div v-if="open" id="feedbackModal" class="modal">
             <!-- Modal content -->
             <div class="card">
-                <v-icon dark @click="changeFeedbackModalState" class="close">close</v-icon>
+                <v-icon @click="changeFeedbackModalState" class="close" icon="mdi-close"/>
                 <v-form class="form" action="" v-model="valid">
                     <label for="message">Mail:</label>
                     <v-text-field dark id="mail" v-model="mail" :rules="emailRules" color="#da6a1dff"></v-text-field>
