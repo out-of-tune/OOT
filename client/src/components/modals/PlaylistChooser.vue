@@ -2,7 +2,7 @@
     <div>
         <div v-if="open" id="playlistChooser" class="modal">
             <div class="card" >
-                <v-icon dark @click="changePlaylistChooserState(false)" class="close">close</v-icon>
+                <v-icon @click="changePlaylistChooserState(false)" icon="mdi-close"/>
                 <div class="playlist-box" v-if="loggedIn">
                     <div>
                         <h2>PLAYLISTS</h2>

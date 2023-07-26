@@ -4,7 +4,7 @@
         <div v-if="open" id="myModal" class="modal">
             <!-- Modal content -->
             <div class="modal-content">
-                <v-icon dark @click="changeSelectionModalState" class="close">close</v-icon>
+                <v-icon dark @click="changeSelectionModalState" class="close" icon="mdi-close"/>
                 <div class="playlist-box">
                     <div>
                         <h2>Selected Nodes</h2>

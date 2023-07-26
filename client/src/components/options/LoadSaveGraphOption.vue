@@ -9,7 +9,7 @@
                 ></v-autocomplete>
             </div>
             <input id="loadInput" ref="loadInput" style="display: none" type="file" @change="previewFiles">
-            <v-icon id="delete" @click="deleteGraph()" class="icon" color="black">delete_outline</v-icon>
+            <v-icon id="delete" @click="deleteGraph()" class="icon" color="black" icon="mdi-delete-outline"/>
             <v-btn id="load" class="actionButton" outline small @click="loadFromIndexedDb(loadName)">Load</v-btn>
         </div>
         <div>

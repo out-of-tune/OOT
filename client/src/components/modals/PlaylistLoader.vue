@@ -4,7 +4,7 @@
         <div v-if="open" id="myModal" class="modal">
             <!-- Modal content -->
             <div class="card">
-                <v-icon dark @click="changePlaylistLoaderState(false)" class="close">close</v-icon>
+                <v-icon dark @click="changePlaylistLoaderState(false)" class="close" icon="mdi-close"/>
                 <div class="playlist-box" v-if="loggedIn">
                     <div>
                         <h2>Your playlists</h2>

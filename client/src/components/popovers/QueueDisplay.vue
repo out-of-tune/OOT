@@ -15,7 +15,7 @@
     @change="onMove"
     v-if="queue.length>0">
         <li class="song" v-for="(track, index) in queue" v-bind:key="track.key" @click="playSong(index)">
-          <button @click="removeFromQueue(index)"><v-icon small color="white">remove</v-icon></button>
+          <button @click="removeFromQueue(index)"><v-icon small color="white" icon="mdi-remove"/></button>
           <div :class="{bold: index === queueIndex}">{{track.name}}</div>
           <button v-if="loginState" @click="addSongToCurrentPlaylist(track.uri)">
             <v-icon color="white" icon="mdi-playlist-plus"/>
