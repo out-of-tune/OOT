@@ -3,9 +3,9 @@
     <div class="close">
       <span id="label">queue</span>
       <div id="queueIcons">
-        <v-icon id="delete-icon" v-if="loginState" @click="play" size="1.5rem" color="white">playlist_play</v-icon>
-        <v-icon id="delete-icon" @click="clearQueue" size="1.5rem" color="white">delete</v-icon>
-        <v-icon id="close-icon" @click="closeWindow" size="1.5rem" color="white">close</v-icon>
+        <v-icon id="delete-icon" v-if="loginState" @click="play" size="1.5rem" color="white" icon="mdi-playlist-play"/>
+        <v-icon id="delete-icon" @click="clearQueue" size="1.5rem" color="white" icon="mdi-delete"/>
+        <v-icon id="close-icon" @click="closeWindow" size="1.5rem" color="white" icon="mdi-close"/>
       </div>
       <div id="spacer"></div>
     </div>
@@ -18,7 +18,7 @@
           <button @click="removeFromQueue(index)"><v-icon small color="white">remove</v-icon></button>
           <div :class="{bold: index === queueIndex}">{{track.name}}</div>
           <button v-if="loginState" @click="addSongToCurrentPlaylist(track.uri)">
-            <v-icon color="white">playlist_add</v-icon>
+            <v-icon color="white" icon="mdi-playlist-plus"/>
           </button>
         </li>
     </draggable>

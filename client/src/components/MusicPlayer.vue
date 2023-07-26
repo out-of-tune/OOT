@@ -32,16 +32,16 @@
     </div>
     <div class="controls">
       <v-btn id="rewindButton" small min-width="1px" color="#f14e14" v-on:click="PrevSong">
-        <v-icon>skip_previous</v-icon>
+        <v-icon icon="mdi-skip-previous"/>
       </v-btn>
 
       <v-btn id="playButton" small color="#da6a1d" v-on:click="StartStop">
-        <v-icon v-if="!isPlaying">play_arrow</v-icon>
-        <v-icon v-if="isPlaying">pause</v-icon>
+        <v-icon v-if="!isPlaying" icon="mdi-play"/>
+        <v-icon v-if="isPlaying" icon="mdi-pause"/>
       </v-btn>
 
       <v-btn id="forwardButton" small color="#f14e14" v-on:click="NextSong">
-        <v-icon>skip_next</v-icon>
+        <v-icon icon="mdi-skip-next"/>
       </v-btn>
     </div>
     <div id="timeSlider" class="sliderBox">
@@ -60,10 +60,10 @@
     <div id="queue">
         <div id="buttons">
           <v-btn id="queueButton" small :class="{activated: queueDisplay}" @click="setQueueVisibility(!queueDisplay)">
-            <v-icon>queue_music</v-icon>
+            <v-icon icon="mdi-playlist-music"/>
           </v-btn>
           <v-btn id="infoButton" small :class="{activated: nodeInfoDisplay}" @click="setNodeInfoVisibility(!nodeInfoDisplay)">
-            <v-icon>info</v-icon>
+            <v-icon icon="mdi-information"/>
           </v-btn>
         </div>
     </div>
@@ -72,13 +72,10 @@
       <div class="sliderBox">
         <v-slider
           v-model="volumePercent"
-          append-icon="volume_up"
-          prepend-icon="volume_down"
-          color= "white"
+          append-icon="mdi-volume-plus"
+          prepend-icon="mdi-volume-minus"
           min=0
           max=100
-          :hide-details="true"
-          dark
           @change="setVolume"
         ></v-slider>
       </div>
@@ -206,10 +203,6 @@
     display: grid;
     grid-template: "songInfo controls queue volume" 1fr
     "songInfo timeSlider queue volume"/ 2fr 4fr 1fr 1fr;
-  }
-  .sliderBox {
-    color: #00848d;
-    display: block;
   }
   .v-input__icon {
     color: white !important;
