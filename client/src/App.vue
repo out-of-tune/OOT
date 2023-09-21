@@ -7,11 +7,25 @@
           <span class="hidden-sm-and-down title">out-of-tune</span>
         </a>
       </div>
-      <Searchbar v-if="['Graph', 'Settings'].indexOf($route.name) > -1"></Searchbar>
+      <Searchbar
+        v-if="['Graph', 'Settings'].indexOf($route.name) > -1"
+      ></Searchbar>
       <div class="login" v-if="['Graph', 'Settings'].indexOf($route.name) > -1">
-        <v-btn small v-if="!loggedIn" id="login" v-on:click="loginUser">login</v-btn>
-        <div v-if="loggedIn" class="username"><b>{{ $store.state.user.me.display_name }}</b></div>
-        <v-btn small v-if="loggedIn" id="logout" outline color="#ffffff" v-on:click="logoutUser">logout</v-btn>
+        <v-btn small v-if="!loggedIn" id="login" v-on:click="loginUser"
+          >login</v-btn
+        >
+        <div v-if="loggedIn" class="username">
+          <b>{{ $store.state.user.me.display_name }}</b>
+        </div>
+        <v-btn
+          small
+          v-if="loggedIn"
+          id="logout"
+          outline
+          color="#ffffff"
+          v-on:click="logoutUser"
+          >logout</v-btn
+        >
       </div>
     </div>
     <router-view></router-view>
@@ -22,29 +36,42 @@
     <shareModal></shareModal>
     <!-- TODO: fix intro tour -->
     <!-- <IntroTour v-if="['Graph'].indexOf($route.name) > -1"></IntroTour> -->
-    <MusicPlayer class="musicPlayer" v-if="['Graph'].indexOf($route.name) > -1"></MusicPlayer>
+    <MusicPlayer
+      class="musicPlayer"
+      v-if="['Graph'].indexOf($route.name) > -1"
+    ></MusicPlayer>
 
     <Toolbar v-if="['Graph'].indexOf($route.name) > -1"></Toolbar>
   </v-app>
 </template>
 
 <script>
-import { defineAsyncComponent } from 'vue'
+import { defineAsyncComponent } from "vue";
 import { mapActions, mapState } from "vuex";
 import Toolbar from "./components/Toolbar.vue";
-import IntroTour from "@/components/helpers/IntroTour"
+import IntroTour from "@/components/helpers/IntroTour";
 
-const PlaylistLoader = defineAsyncComponent(() => import("@/components/modals/PlaylistLoader"))
-const PlaylistChooser = defineAsyncComponent(() => import("@/components/modals/PlaylistChooser"))
+const PlaylistLoader = defineAsyncComponent(() =>
+  import("@/components/modals/PlaylistLoader")
+);
+const PlaylistChooser = defineAsyncComponent(() =>
+  import("@/components/modals/PlaylistChooser")
+);
 
-const snackbar = defineAsyncComponent(() => import("./components/Snackbar"))
-import Searchbar from "./components/Searchbar.vue"
-const selectionModal = defineAsyncComponent(() => import("@/components/modals/SelectionModal"))
-import MusicPlayer from "./components/MusicPlayer"
-const feedbackModal = defineAsyncComponent(() => import('./components/modals/FeedbackModal'))
-const shareModal = defineAsyncComponent(() => import("./components/modals/ShareModal"))
+const snackbar = defineAsyncComponent(() => import("./components/Snackbar"));
+import Searchbar from "./components/Searchbar.vue";
+const selectionModal = defineAsyncComponent(() =>
+  import("@/components/modals/SelectionModal")
+);
+import MusicPlayer from "./components/MusicPlayer";
+const feedbackModal = defineAsyncComponent(() =>
+  import("./components/modals/FeedbackModal")
+);
+const shareModal = defineAsyncComponent(() =>
+  import("./components/modals/ShareModal")
+);
 
-import { deepEqual } from "@/utils/deepEqual.js"
+import { deepEqual } from "@/utils/deepEqual.js";
 
 export default {
   components: {
@@ -57,10 +84,10 @@ export default {
     MusicPlayer,
     feedbackModal,
     shareModal,
-    IntroTour
+    IntroTour,
   },
   data: () => ({
-    drawer: null
+    drawer: null,
   }),
   methods: {
     ...mapActions([
@@ -72,19 +99,19 @@ export default {
       "login",
       "logout",
       "requireAccessToken",
-      "authenticateClient"
+      "authenticateClient",
     ]),
     loginUser() {
-      this.login()
+      this.login();
     },
     logoutUser() {
-      this.logout()
-    }
+      this.logout();
+    },
   },
   computed: {
     ...mapState({
-      loggedIn: state => state.authentication.loginState
-    })
+      loggedIn: (state) => state.authentication.loginState,
+    }),
   },
   created: async function () {
     //init config when no config is in localStorage
@@ -92,29 +119,28 @@ export default {
       deepEqual(this.$store.state.configurations, {
         actionConfiguration: {
           expand: [],
-          collapse: []
+          collapse: [],
         },
         appearanceConfiguration: {
           nodeConfiguration: {
             color: [],
             size: [],
-            tooltip: []
+            tooltip: [],
           },
           edgeConfiguration: {
             color: [],
-            size: []
-          }
-        }
+            size: [],
+          },
+        },
       })
     ) {
       this.initConfiguration();
     }
-
-  }
+  },
 };
 </script>
 
-<style scoped>
+<style>
 #navDrawer {
   background-color: #212121;
   border-right: 2px solid #da6a1d !important;
@@ -152,5 +178,44 @@ a {
   justify-self: right;
   display: flex;
   align-items: center;
+}
+
+.btn {
+  background: #313131;
+  border: 1px solid #2d9cdb;
+  box-sizing: border-box;
+  box-shadow: 1px 1px 4px rgba(45, 156, 219, 0.25);
+  border-radius: 5px;
+  padding: 3px;
+  margin-right: 1rem;
+  width: 100px;
+  margin-bottom: 1rem;
+  cursor: pointer;
+}
+
+.btn:active {
+  background: #2d9cdb;
+}
+.btn:hover {
+  background: linear-gradient(180deg, #2d9cdb 0%, #56ccf2 100%);
+  color: white;
+}
+
+.btn-orange {
+  background: #313131;
+  border: 1px solid #f2994a;
+  box-sizing: border-box;
+  box-shadow: 1px 1px 4px rgba(242, 152, 74, 0.25);
+  border-radius: 5px;
+  padding: 3px;
+  margin-right: 1rem;
+  width: 100px;
+  margin-bottom: 1rem;
+  cursor: pointer;
+}
+
+.btn-orange:hover {
+  background: linear-gradient(180deg, #f2994a 0%, rgb(240, 131, 35) 100%);
+  color: white;
 }
 </style>
