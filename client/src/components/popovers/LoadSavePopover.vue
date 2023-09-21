@@ -1,45 +1,68 @@
 <template>
-    <div class="text-xs-center popover">
-      <v-menu dark v-model="loadSaveMenu" :close-on-content-click="false" :nudge-width="100">
-        <template v-slot:activator="{ on }">
-          <button class="container tooltip" v-on="on"><v-icon class="icon" color="white" icon="mdi-content-save"/>
-          <span class="tooltiptext">SAVE/LOAD</span>
-          </button>
-        </template>
-
-        <v-card class="menu">
+  <Popper placement="top">
+    <button class="container tooltip">
+      <v-icon class="icon" color="white" icon="mdi-content-save" />
+      <span class="tooltiptext">SAVE/LOAD</span>
+    </button>
+    <template #content>
+      <div>
+        <div class="menu">
           <h2 id="menu-header">SAVE / LOAD</h2>
 
-          <v-divider></v-divider>
           <div class="nav-buttons">
-            <v-btn id="configurationTab" class="tabButton" :class="{active: configuration}" small color="#da6a1d" @click="configuration=true">Configuration</v-btn>
-            <v-btn small class="tabButton" id="graphTab" :class="{active: !configuration}" color="#0d676d" @click="configuration=false">Graph</v-btn>
+            <button
+              id="configurationTab"
+              class="tabButton"
+              :class="{ active: configuration }"
+              color="#da6a1d"
+              @click="configuration = true"
+            >
+              Configuration
+            </button>
+            <button
+              class="tabButton"
+              id="graphTab"
+              :class="{ active: !configuration }"
+              color="#0d676d"
+              @click="configuration = false"
+            >
+              Graph
+            </button>
           </div>
-          <v-card-actions v-if="configuration" id="loadSaveConfiguration" class="loadSaveActions">
+          <div
+            v-if="configuration"
+            id="loadSaveConfiguration"
+            class="loadSaveActions"
+          >
             <LoadSaveConfigurationOption></LoadSaveConfigurationOption>
-          </v-card-actions>
-          <v-card-actions v-else id="loadSaveGraph" class="loadSaveActions">
+          </div>
+          <div v-else id="loadSaveGraph" class="loadSaveActions">
             <LoadSaveGraphOption></LoadSaveGraphOption>
-          </v-card-actions>
-        </v-card>
-      </v-menu>
-    </div>
+          </div>
+        </div>
+      </div>
+    </template>
+  </Popper>
 </template>
 <script>
-import LoadSaveConfigurationOption from '@/components/options/LoadSaveConfigurationOption'
-import LoadSaveGraphOption from '@/components/options/LoadSaveGraphOption'
+import LoadSaveConfigurationOption from "@/components/options/LoadSaveConfigurationOption";
+import LoadSaveGraphOption from "@/components/options/LoadSaveGraphOption";
+
+import Popper from "vue3-popper";
 
 export default {
-    data: ()=>{
-      return{
-        loadSaveMenu: false,
-        configuration: true
-    }},
-    components: {
-        LoadSaveConfigurationOption,
-        LoadSaveGraphOption
-    },
-}
+  data: () => {
+    return {
+      loadSaveMenu: false,
+      configuration: true,
+    };
+  },
+  components: {
+    LoadSaveConfigurationOption,
+    LoadSaveGraphOption,
+    Popper,
+  },
+};
 </script>
 <style scoped>
 .tooltip {
@@ -57,7 +80,7 @@ export default {
   text-align: center;
   padding: 0.5rem;
   background-color: #0d676d;
- 
+
   /* Position the tooltip text - see examples below! */
   position: absolute;
   z-index: 1;
@@ -67,6 +90,10 @@ export default {
 
 .menu {
   padding: 1rem;
+  background-color: #434343;
+  width: 500px;
+  height: 300px;
+  overflow-y: scroll;
 }
 
 .container:hover {
@@ -85,41 +112,41 @@ export default {
 }
 
 .btn {
-    background: #FFFFFF;
-    border: 1px solid #2D9CDB;
-    box-sizing: border-box;
-    box-shadow: 1px 1px 4px rgba(45, 156, 219, 0.25);
-    border-radius: 5px;
-    padding: 3px;
-    margin-right: 1rem;
-    width: 100px;
-    margin-bottom: 1rem;
+  background: #ffffff;
+  border: 1px solid #2d9cdb;
+  box-sizing: border-box;
+  box-shadow: 1px 1px 4px rgba(45, 156, 219, 0.25);
+  border-radius: 5px;
+  padding: 3px;
+  margin-right: 1rem;
+  width: 100px;
+  margin-bottom: 1rem;
 }
 
 .btn-orange {
-    background: #424242;
-    border: 1px solid #F2994A;
-    box-sizing: border-box;
-    box-shadow: 1px 1px 4px rgba(242, 152, 74, 0.25);
-    border-radius: 5px;
-    padding: 3px;
-    margin-right: 1rem;
-    width: 100px;
-    margin-bottom: 1rem;
+  background: #424242;
+  border: 1px solid #f2994a;
+  box-sizing: border-box;
+  box-shadow: 1px 1px 4px rgba(242, 152, 74, 0.25);
+  border-radius: 5px;
+  padding: 3px;
+  margin-right: 1rem;
+  width: 100px;
+  margin-bottom: 1rem;
 }
 
 .btn-orange:hover {
-    background: linear-gradient(180deg, #F2994A 0%, rgb(240, 131, 35) 100%);    
-    color: white;
+  background: linear-gradient(180deg, #f2994a 0%, rgb(240, 131, 35) 100%);
+  color: white;
 }
 
 .btn:active {
-    background: #2D9CDB;
+  background: #2d9cdb;
 }
 
 .btn:hover {
-    background: linear-gradient(180deg, #2D9CDB 0%, #56CCF2 100%);    
-    color: white;
+  background: linear-gradient(180deg, #2d9cdb 0%, #56ccf2 100%);
+  color: white;
 }
 .loadSaveActions {
   display: grid;
@@ -130,16 +157,16 @@ export default {
 #loadSaveConfiguration {
   border: 2px solid #da6a1d;
 } */
-#spacer{
+#spacer {
   margin: 1rem;
 }
-.tabButton{
+.tabButton {
   color: white;
   border: 2px solid #ffffff;
-  margin-left:0;
-  margin-right:0;
+  margin-left: 0;
+  margin-right: 0;
 }
-#graphTab{
+#graphTab {
   margin-left: 2px;
 }
 .active {
@@ -148,5 +175,4 @@ export default {
   color: white !important;
   box-shadow: none !important;
 }
-
 </style>
