@@ -151,12 +151,6 @@ export default {
 .loadSaveActions {
   display: grid;
 }
-/* #loadSaveGraph {
-  border: 2px solid #0d676d;
-}
-#loadSaveConfiguration {
-  border: 2px solid #da6a1d;
-} */
 #spacer {
   margin: 1rem;
 }

@@ -12,15 +12,11 @@
 
             <div>
               <div class="actions">
-                <btn dark small outline class="btn" @click="collapse"
-                  >Collapse</btn
-                >
-                <btn dark small outline class="btn" @click="expand">Expand</btn>
+                <btn class="btn" @click="collapse">Collapse</btn>
+                <btn class="btn" @click="expand">Expand</btn>
 
-                <btn dark small outline class="btn" @click="remove">Remove</btn>
-                <btn dark small outline class="btn" @click="pin(selectedNodes)"
-                  >Pin</btn
-                >
+                <btn class="btn" @click="remove">Remove</btn>
+                <btn dark class="btn" @click="pin(selectedNodes)">Pin</btn>
                 <btn
                   dark
                   small
