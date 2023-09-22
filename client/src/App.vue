@@ -11,21 +11,20 @@
         v-if="['Graph', 'Settings'].indexOf($route.name) > -1"
       ></Searchbar>
       <div class="login" v-if="['Graph', 'Settings'].indexOf($route.name) > -1">
-        <v-btn small v-if="!loggedIn" id="login" v-on:click="loginUser"
-          >login</v-btn
-        >
+        <button v-if="!loggedIn" id="login" v-on:click="loginUser">
+          login
+        </button>
         <div v-if="loggedIn" class="username">
           <b>{{ $store.state.user.me.display_name }}</b>
         </div>
-        <v-btn
-          small
+        <button
           v-if="loggedIn"
           id="logout"
-          outline
           color="#ffffff"
           v-on:click="logoutUser"
-          >logout</v-btn
         >
+          logout
+        </button>
       </div>
     </div>
     <router-view></router-view>

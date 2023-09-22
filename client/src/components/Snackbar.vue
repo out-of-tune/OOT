@@ -1,45 +1,47 @@
 <template>
   <v-snackbar v-model="show" :color="color" :timeout="10000">
-    {{message}}
-    <v-btn flat @click="retryExpand" v-if="message==='expand failed'">Retry</v-btn>
-    <v-btn flat color="orange" @click="show = false">Close</v-btn>
+    {{ message }}
+    <button flat @click="retryExpand" v-if="message === 'expand failed'">
+      Retry
+    </button>
+    <button flat color="orange" @click="show = false">Close</button>
   </v-snackbar>
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from "vuex";
 
 export default {
-  data () {
+  data() {
     return {
       show: false,
-      message: ''
-    }
+      message: "",
+    };
   },
   methods: {
-    ...mapActions([
-      'setMessage',
-      'expandAction'
-    ]),
-    retryExpand: function(){
-      this.expandAction(this.$store.state.expand.failedNodes)
-    }
+    ...mapActions(["setMessage", "expandAction"]),
+    retryExpand: function () {
+      this.expandAction(this.$store.state.expand.failedNodes);
+    },
   },
   computed: {
     ...mapState({
-      color: state => state.snackbar.color
-    })
+      color: (state) => state.snackbar.color,
+    }),
   },
   created: function () {
-    this.$store.watch(state => state.snackbar.message, () => {
-      const msg = this.$store.state.snackbar.message
-      if (msg !== '') {
-        this.show = true
-        this.message = this.$store.state.snackbar.message
-        
-        this.setMessage('')
+    this.$store.watch(
+      (state) => state.snackbar.message,
+      () => {
+        const msg = this.$store.state.snackbar.message;
+        if (msg !== "") {
+          this.show = true;
+          this.message = this.$store.state.snackbar.message;
+
+          this.setMessage("");
+        }
       }
-    })
-}
-}
+    );
+  },
+};
 </script>

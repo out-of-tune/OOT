@@ -3,83 +3,105 @@
     <div class="close">
       <span id="label">queue</span>
       <div id="queueIcons">
-        <v-icon id="delete-icon" v-if="loginState" @click="play" size="1.5rem" color="white" icon="mdi-playlist-play"/>
-        <v-icon id="delete-icon" @click="clearQueue" size="1.5rem" color="white" icon="mdi-delete"/>
-        <v-icon id="close-icon" @click="closeWindow" size="1.5rem" color="white" icon="mdi-close"/>
+        <v-icon
+          id="delete-icon"
+          v-if="loginState"
+          @click="play"
+          size="1.5rem"
+          color="white"
+          icon="mdi-playlist-play"
+        />
+        <v-icon
+          id="delete-icon"
+          @click="clearQueue"
+          size="1.5rem"
+          color="white"
+          icon="mdi-delete"
+        />
+        <v-icon
+          id="close-icon"
+          @click="closeWindow"
+          size="1.5rem"
+          color="white"
+          icon="mdi-close"
+        />
       </div>
       <div id="spacer"></div>
     </div>
 
-    <draggable 
-    :list="queue" 
-    @change="onMove"
-    v-if="queue.length>0">
-        <li class="song" v-for="(track, index) in queue" v-bind:key="track.key" @click="playSong(index)">
-          <button @click="removeFromQueue(index)"><v-icon small color="white" icon="mdi-remove"/></button>
-          <div :class="{bold: index === queueIndex}">{{track.name}}</div>
-          <button v-if="loginState" @click="addSongToCurrentPlaylist(track.uri)">
-            <v-icon color="white" icon="mdi-playlist-plus"/>
-          </button>
-        </li>
+    <draggable :list="queue" @change="onMove" v-if="queue.length > 0">
+      <li
+        class="song"
+        v-for="(track, index) in queue"
+        v-bind:key="track.key"
+        @click="playSong(index)"
+      >
+        <button @click="removeFromQueue(index)">
+          <v-icon color="white" icon="mdi-remove" />
+        </button>
+        <div :class="{ bold: index === queueIndex }">{{ track.name }}</div>
+        <button v-if="loginState" @click="addSongToCurrentPlaylist(track.uri)">
+          <v-icon color="white" icon="mdi-playlist-plus" />
+        </button>
+      </li>
     </draggable>
     <h2 v-else>Nothing in queue!</h2>
   </div>
 </template>
 <script>
-import draggable from "vuedraggable"
-import { mapActions, mapState } from 'vuex'
+import draggable from "vuedraggable";
+import { mapActions, mapState } from "vuex";
 
 export default {
   components: {
-    draggable
+    draggable,
   },
   methods: {
-      ...mapActions([
-          'playAtIndexInQueue',
-          'addSongToPlaylist',
-          'removeFromQueue',
-          'setQueueVisibility',
-          'setQueue',
-          'playOnSpotify'
-      ]),
-      closeWindow: function(){
-          this.setQueueVisibility(false)
-      },
-      onMove: function({moved}){
-        if(moved.oldIndex==this.queueIndex){
-          
-          this.setQueue({queue: this.queue, queueIndex: moved.newIndex})
-        }
-      },
-      clearQueue: function(){
-        this.setQueue({queue: [], queueIndex: 0})
-      },
-      play: function(){
-        const uris = this.queue.map(track=>track.uri)
-        this.playOnSpotify(uris)
-      },
-      playSong(index){
-        this.playAtIndexInQueue(index)
-      },
-      addSongToCurrentPlaylist(uri){
-        this.addSongToPlaylist(uri)
+    ...mapActions([
+      "playAtIndexInQueue",
+      "addSongToPlaylist",
+      "removeFromQueue",
+      "setQueueVisibility",
+      "setQueue",
+      "playOnSpotify",
+    ]),
+    closeWindow: function () {
+      this.setQueueVisibility(false);
+    },
+    onMove: function ({ moved }) {
+      if (moved.oldIndex == this.queueIndex) {
+        this.setQueue({ queue: this.queue, queueIndex: moved.newIndex });
       }
+    },
+    clearQueue: function () {
+      this.setQueue({ queue: [], queueIndex: 0 });
+    },
+    play: function () {
+      const uris = this.queue.map((track) => track.uri);
+      this.playOnSpotify(uris);
+    },
+    playSong(index) {
+      this.playAtIndexInQueue(index);
+    },
+    addSongToCurrentPlaylist(uri) {
+      this.addSongToPlaylist(uri);
+    },
   },
   computed: {
     ...mapState({
-        queueIndex: state => state.music_player.queueIndex,
-        loginState: state => state.authentication.loginState
+      queueIndex: (state) => state.music_player.queueIndex,
+      loginState: (state) => state.authentication.loginState,
     }),
     queue: {
-        get() {
-            return this.$store.state.music_player.queue
-        },
-        set(value) {
-          this.setQueue({queue: this.queue, queueIndex: this.queueIndex})
-        }
-    }
+      get() {
+        return this.$store.state.music_player.queue;
+      },
+      set(value) {
+        this.setQueue({ queue: this.queue, queueIndex: this.queueIndex });
+      },
+    },
   },
-}
+};
 </script>
 
 <style scoped>
@@ -91,7 +113,7 @@ li {
 .song {
   cursor: pointer;
 }
-.bold{
+.bold {
   font-weight: bold;
 }
 #spacer {
@@ -120,17 +142,15 @@ li {
 #label {
   text-transform: uppercase;
   font-weight: bold;
-  
 }
 .close {
   padding-top: 1rem;
   position: sticky;
-  top:0;
+  top: 0;
   background-color: #252525;
 }
 #queueIcons {
-  float:right;
+  float: right;
   justify-self: center;
 }
 </style>
-

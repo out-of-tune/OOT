@@ -1,77 +1,90 @@
 <template>
   <div id="settings">
     <div class="nav-buttons">
-      <v-btn
+      <button
         small
         dark
         color="#da6a1d"
         class="btn"
         id="open"
-        @click="openPage='nodeConfiguration'"
-      >Node Configuration</v-btn>
-      <v-btn
+        @click="openPage = 'nodeConfiguration'"
+      >
+        Node Configuration
+      </button>
+      <button
         small
         dark
         color="#0d676d"
         class="btn"
         id="configOpen"
-        @click="openPage='edgeConfiguration'"
-      >Edge Configuration</v-btn>
-      <v-btn
+        @click="openPage = 'edgeConfiguration'"
+      >
+        Edge Configuration
+      </button>
+      <button
         small
-        dark
         color="#1dcdda"
         class="btn"
         id="open"
-        @click="openPage='generalConfiguration'"
-      >General settings</v-btn>
+        @click="openPage = 'generalConfiguration'"
+      >
+        General settings
+      </button>
     </div>
-    <div id="nodeSettings" v-if="openPage==='nodeConfiguration'">
+    <div id="nodeSettings" v-if="openPage === 'nodeConfiguration'">
       <span id="blank"></span>
       <h2
         v-for="nodeLabel in getNodeLabelNames()"
         v-bind:key="nodeLabel"
         class="nodeLabel"
-      >{{nodeLabel}}</h2>
+      >
+        {{ nodeLabel }}
+      </h2>
       <h2 id="expand">expand/collapse</h2>
       <GraphModificationOption
         class="setting1"
         v-for="nodeLabel in getNodeLabelNames()"
-        v-bind:key="nodeLabel+1"
+        v-bind:key="nodeLabel + 1"
         :nodeLabel="nodeLabel"
       ></GraphModificationOption>
       <h2 id="color">color</h2>
       <AppearanceMappingColorOption
         class="setting2"
         v-for="nodeType in nodeTypes"
-        v-bind:key="nodeType.label+2"
+        v-bind:key="nodeType.label + 2"
         :nodeType="nodeType"
       ></AppearanceMappingColorOption>
       <h2 id="size">size</h2>
       <AppearanceMappingSizeOption
         class="setting3"
         v-for="nodeType in nodeTypes"
-        v-bind:key="nodeType.label+3"
+        v-bind:key="nodeType.label + 3"
         :nodeType="nodeType"
       ></AppearanceMappingSizeOption>
       <h2 id="tooltipOption">tooltip</h2>
       <AppearanceMappingTooltipOption
         class="setting4"
         v-for="(nodeType, index) in nodeTypes"
-        v-bind:key="nodeType.label+4"
+        v-bind:key="nodeType.label + 4"
         :nodeType="nodeType"
         :index="index"
       ></AppearanceMappingTooltipOption>
     </div>
-    <div id="edgeSettings" v-if="openPage==='edgeConfiguration'">
+    <div id="edgeSettings" v-if="openPage === 'edgeConfiguration'">
       <h2>Color</h2>
       <AppearanceMappingEdgeColor></AppearanceMappingEdgeColor>
     </div>
-    <div id="generalSettings" v-if="openPage==='generalConfiguration'">
+    <div id="generalSettings" v-if="openPage === 'generalConfiguration'">
       <div class="settingsCard">
         <div class="settingsCardTitle">Show tutorial</div>
-        <v-switch color="#da6a1d" class="settingsSwitch" v-model="showTour" dark></v-switch>
-        <div class="settingsCardText">Shows the startup tour in the out-of-tune main window.</div>
+        <v-switch
+          color="#da6a1d"
+          class="settingsSwitch"
+          v-model="showTour"
+        ></v-switch>
+        <div class="settingsCardText">
+          Shows the startup tour in the out-of-tune main window.
+        </div>
       </div>
       <!-- <div class="settingsCard">
         <div class="settingsCardTitle">Performance Mode</div>
@@ -96,20 +109,20 @@ export default {
     AppearanceMappingColorOption,
     AppearanceMappingSizeOption,
     AppearanceMappingTooltipOption,
-    AppearanceMappingEdgeColor
+    AppearanceMappingEdgeColor,
   },
   data: () => {
     return {
-      openPage: "nodeConfiguration"
+      openPage: "nodeConfiguration",
     };
   },
   methods: {
     ...mapGetters(["getNodeLabelNames"]),
-    ...mapActions(["setShowTour"])
+    ...mapActions(["setShowTour"]),
   },
   computed: {
     ...mapState({
-      nodeTypes: state => state.schema.nodeTypes
+      nodeTypes: (state) => state.schema.nodeTypes,
     }),
     showTour: {
       get() {
@@ -117,9 +130,9 @@ export default {
       },
       set(value) {
         this.setShowTour(value);
-      }
-    }
-  }
+      },
+    },
+  },
 };
 </script>
 <style scoped>
