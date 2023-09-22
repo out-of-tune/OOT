@@ -6,6 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
+    "format": "npx prettier . --write",
     "test": "jest -c jest.config.js",
     "unit": "jest -c jest.config.unit.js",
     "integration": "jest -c jest.config.integration.js"
