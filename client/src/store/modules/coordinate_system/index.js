@@ -1,7 +1,7 @@
-import actions from "./actions"
+import actions from "./actions";
 
 export const coordinate_system = {
-    actions
-}
+  actions,
+};
 
-export default coordinate_system
+export default coordinate_system;

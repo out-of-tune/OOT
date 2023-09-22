@@ -17,66 +17,71 @@
 </template>
 
 <script>
-import draggable from "vuedraggable"
-import { mapState, mapActions } from "vuex"
+import draggable from "vuedraggable";
+import { mapState, mapActions } from "vuex";
 export default {
   components: {
-    draggable
+    draggable,
   },
-  props: [
-    'nodeType'
-  ],
+  props: ["nodeType"],
   computed: {
     ...mapState({
-      sizeRules: state => state.configurations.appearanceConfiguration.nodeConfiguration.size
+      sizeRules: (state) =>
+        state.configurations.appearanceConfiguration.nodeConfiguration.size,
     }),
     ruleset: {
       get: function () {
-        const nodeLabel = this.nodeType.label
+        const nodeLabel = this.nodeType.label;
 
         const rulesets = this.sizeRules.filter(function (node) {
-          return node.nodeLabel === nodeLabel
-        })
+          return node.nodeLabel === nodeLabel;
+        });
         if (rulesets.length > 0) {
-          return rulesets[0].rules.filter((rule, index) => index != 0)
+          return rulesets[0].rules.filter((rule, index) => index != 0);
         }
-        return []
-      }
-    }
+        return [];
+      },
+    },
   },
   methods: {
-    ...mapActions([
-      'updateRuleset'
-    ]),
+    ...mapActions(["updateRuleset"]),
     getRuleString: function (rule) {
       switch (rule.sizeType) {
         case "compare":
-          return rule.searchString
+          return rule.searchString;
         case "map":
           return `
                     ${rule.searchObject.nodeType}: ${rule.searchObject.attributes[0].attributeSearch}
-                `
+                `;
       }
     },
     getRuleValue: function (rule) {
       switch (rule.sizeType) {
         case "compare":
-          return rule.size
+          return rule.size;
         case "map":
           return `
                     MAP ${rule.min} | ${rule.max}
-                `
+                `;
       }
     },
     removeAt(idx) {
-      let newRuleset = this.ruleset
-      newRuleset.splice(idx, 1)
-      this.updateRuleset({ ruleset: newRuleset, nodeLabel: this.nodeType.label, type: "size" })
+      let newRuleset = this.ruleset;
+      newRuleset.splice(idx, 1);
+      this.updateRuleset({
+        ruleset: newRuleset,
+        nodeLabel: this.nodeType.label,
+        type: "size",
+      });
     },
     onChange() {
-      this.updateRuleset({ ruleset: this.ruleset, nodeLabel: this.nodeType.label, type: "size" })
-    }
-  }
+      this.updateRuleset({
+        ruleset: this.ruleset,
+        nodeLabel: this.nodeType.label,
+        type: "size",
+      });
+    },
+  },
 };
 </script>
 <style scoped>

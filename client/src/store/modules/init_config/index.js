@@ -1,7 +1,7 @@
-import actions from "./actions"
+import actions from "./actions";
 
 export const init_config = {
-    actions
-}
+  actions,
+};
 
-export default init_config
+export default init_config;

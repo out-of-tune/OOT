@@ -1,7 +1,7 @@
-import actions from "./actions"
+import actions from "./actions";
 
 export const modes = {
-    actions
-}
+  actions,
+};
 
-export default modes
+export default modes;

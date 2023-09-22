@@ -100,7 +100,7 @@ export default {
       this.startDownloadOfUrl(
         this.$refs.downloadButton,
         this.$store.state.configuration_io.url,
-        name
+        name,
       );
     },
     deleteConfiguration: function () {

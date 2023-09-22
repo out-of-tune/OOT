@@ -84,7 +84,7 @@ export default {
       this.startDownloadOfUrl(
         this.$refs.downloadButton,
         this.$store.state.graph_io.url,
-        name
+        name,
       );
     },
     deleteGraph: function () {

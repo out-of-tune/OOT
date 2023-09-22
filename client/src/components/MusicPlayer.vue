@@ -38,7 +38,7 @@
           @click="
             findNodesInGraph(
               'artist',
-              currentSong.artists.map((artist) => artist.id)
+              currentSong.artists.map((artist) => artist.id),
             )
           "
         >
@@ -220,7 +220,7 @@ export default {
               { attributeData: sid, attributeSearch: "sid", operator: "=" },
             ],
           },
-          rootState
+          rootState,
         );
       });
       this.fitGraphToNodes(result);
@@ -234,10 +234,10 @@ export default {
 
       this.$nextTick(function () {
         this.overflows.currentSongName = this.checkOverflow(
-          this.$refs.currentSongName
+          this.$refs.currentSongName,
         );
         this.overflows.currentArtistName = this.checkOverflow(
-          this.$refs.currentArtistName
+          this.$refs.currentArtistName,
         );
       });
     },

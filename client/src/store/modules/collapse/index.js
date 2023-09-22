@@ -1,7 +1,7 @@
-import actions from "./actions"
+import actions from "./actions";
 
 export const collapse = {
-    actions
-}
+  actions,
+};
 
-export default collapse
+export default collapse;

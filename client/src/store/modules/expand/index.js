@@ -1,15 +1,15 @@
-import actions from "./actions"
+import actions from "./actions";
 
 export const expand = {
-    state: {
-        failedExpandedConnections: []
+  state: {
+    failedExpandedConnections: [],
+  },
+  actions,
+  mutations: {
+    SET_FAILED_EXPANDED_CONNECTIONS: function (state, connections) {
+      state.failedExpandedConnections = connections;
     },
-    actions,
-    mutations: {
-        SET_FAILED_EXPANDED_CONNECTIONS: function(state, connections){
-            state.failedExpandedConnections = connections
-        }
-    }
-}
+  },
+};
 
-export default expand
+export default expand;
