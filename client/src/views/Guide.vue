@@ -375,7 +375,7 @@
             <div class="actions">
                 <h1 class="header">General Actions</h1>
                 <div class="data">
-                    <template  v-for="(option, index) in actions.generalActions" :key="index" v-if="!option.hidden">
+                    <template  v-for="(option) in actions.generalActions" :key="index">
                         <div>{{option.keyCombination.join(" + ")}}</div>
                         <div>{{option.description}}</div>
                     </template>
@@ -384,7 +384,7 @@
             <div class="actions">
                 <h1 class="header">Selection Actions</h1>
                 <div class="data">
-                    <template  v-for="(option, index) in actions.selectionActions" :key="index" v-if="!option.hidden">
+                    <template  v-for="(option) in actions.selectionActions" :key="index">
                         <div>{{option.keyCombination.join(" + ")}}</div>
                         <div>{{option.description}}</div>
                     </template>
@@ -401,7 +401,6 @@
 
 export default {
   name: "guide",
-
   data: ()=>({
     actions: {
         selectionActions: {
@@ -478,7 +477,7 @@ export default {
   }
 };
 </script>
-<style scoped>
+<style >
 .user-guide {
     margin-top: 64px;
     display: grid;
