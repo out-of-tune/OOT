@@ -11,7 +11,7 @@ const getCurrentUsersPlaylists = async ({ commit, rootState }) => {
   const result = await SpotifyService.getCurrentUserPlaylists(
     rootState.authentication.accessToken,
     50,
-    0
+    0,
   );
   commit("SET_USER_PLAYLISTS", result.items);
 };
@@ -21,7 +21,7 @@ const loadMoreCurrentUsersPlaylists = async ({ commit, rootState }) => {
   const result = await SpotifyService.getCurrentUserPlaylists(
     rootState.authentication.accessToken,
     50,
-    rootState.playlists.playlists.length
+    rootState.playlists.playlists.length,
   );
   const playlists = rootState.playlists.playlists.concat(result.items);
   commit("SET_USER_PLAYLISTS", playlists);
@@ -51,7 +51,7 @@ const addSongsToPlaylist = async ({ dispatch, rootState, state }, songUris) => {
         "Added " +
           (songUris.length == 1 ? "song" : songUris.length + " songs") +
           " to " +
-          state.currentPlaylist.name
+          state.currentPlaylist.name,
       );
     } else {
       dispatch("setError", new Error("no playlist is chosen"));
@@ -69,7 +69,7 @@ const loadPlaylist = async ({ dispatch, rootState, commit }, playlistId) => {
   //get songs
   const result = await SpotifyService.getSongsFromPlaylist(
     rootState.authentication.accessToken,
-    playlistId
+    playlistId,
   );
   const songNodes = result.items.map((item) => {
     const { id, ...data } = item.track;

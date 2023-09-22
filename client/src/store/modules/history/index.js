@@ -1,14 +1,14 @@
-import actions from './actions'
-import mutations from './mutations'
+import actions from "./actions";
+import mutations from "./mutations";
 
 export const history = {
-    state: {
-        historyIndex: -1,
-        changes: [],
-        clickHistory: {}
-    },
-    actions,
-    mutations
-}
+  state: {
+    historyIndex: -1,
+    changes: [],
+    clickHistory: {},
+  },
+  actions,
+  mutations,
+};
 
-export default history
+export default history;

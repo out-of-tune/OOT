@@ -117,12 +117,12 @@ export default {
     },
     getMatchedTypes: function (types, text) {
       return types.filter((type) =>
-        type.toLowerCase().includes(text.toLowerCase())
+        type.toLowerCase().includes(text.toLowerCase()),
       );
     },
     getAttributes: function (nodeType) {
       return this.schemaNodeTypes.filter(
-        (schemaNodeType) => nodeType === schemaNodeType.label
+        (schemaNodeType) => nodeType === schemaNodeType.label,
       )[0]["attributes"];
     },
     getMatchingData: function () {
@@ -133,7 +133,7 @@ export default {
             : this.getNodeLabelNames();
         const matching = this.getMatchedTypes(
           typesToMatch,
-          this.tip.text.trim()
+          this.tip.text.trim(),
         );
         if (matching.length == 1 && matching[0] === this.tip.text) {
           return [];
@@ -165,7 +165,7 @@ export default {
             })
             .map((attribute) => {
               const searchPart = this.addNeededQuotes(
-                attribute.attributeSearch
+                attribute.attributeSearch,
               );
               const dataPart = this.addNeededQuotes(attribute.attributeData);
               return searchPart + attribute.operator + dataPart;
@@ -220,7 +220,7 @@ export default {
     useSelected: function () {
       if (this.$refs.autocomplete && this.selectedItem != -1) {
         this.addOnClick(
-          this.$refs.autocomplete.childNodes[this.selectedItem].innerText
+          this.$refs.autocomplete.childNodes[this.selectedItem].innerText,
         );
       } else {
         this.startAdvancedSearch();

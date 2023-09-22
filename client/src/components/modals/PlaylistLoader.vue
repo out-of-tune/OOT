@@ -73,7 +73,7 @@ export default {
     filteredPlaylists: {
       get() {
         return this.playlists.filter((item) =>
-          item.name.match(this.filterQuery)
+          item.name.match(this.filterQuery),
         );
       },
     },

@@ -5,8 +5,11 @@
       <draggable :list="ruleset" @change="onChange" item-key="id">
         <template #item="{ element }">
           <li class="item">
-            <div class="color" :style="{ background: formatColor(element.color) }">
-              {{element.color}}
+            <div
+              class="color"
+              :style="{ background: formatColor(element.color) }"
+            >
+              {{ element.color }}
             </div>
             <div class="text">{{ getRuleString(element) }}</div>
             <div class="close" @click="removeAt(index)">x</div>
@@ -18,54 +21,58 @@
 </template>
 
 <script>
-import draggable from "vuedraggable"
-import { mapState, mapActions } from "vuex"
+import draggable from "vuedraggable";
+import { mapState, mapActions } from "vuex";
 export default {
   components: {
-    draggable
+    draggable,
   },
-  props: [
-    'nodeType'
-  ],
+  props: ["nodeType"],
   computed: {
     ...mapState({
-      colorRules: state => state.configurations.appearanceConfiguration.nodeConfiguration.color
+      colorRules: (state) =>
+        state.configurations.appearanceConfiguration.nodeConfiguration.color,
     }),
     ruleset: {
       get() {
-        const nodeLabel = this.nodeType.label
+        const nodeLabel = this.nodeType.label;
 
         const rulesets = this.colorRules.filter(function (node) {
-          return node.nodeLabel === nodeLabel
-        })
+          return node.nodeLabel === nodeLabel;
+        });
         if (rulesets.length > 0) {
-          return rulesets[0].rules.filter((rule, index) => index != 0)
+          return rulesets[0].rules.filter((rule, index) => index != 0);
         }
-        return []
-
-      }
-    }
+        return [];
+      },
+    },
   },
   methods: {
-    ...mapActions([
-      'updateRuleset'
-    ]),
+    ...mapActions(["updateRuleset"]),
     getRuleString: function (rule) {
-      return rule.searchString
+      return rule.searchString;
     },
     formatColor: function (color) {
-      return "#" + color
+      return "#" + color;
     },
     removeAt(idx) {
-      let newRuleset = this.ruleset
-      newRuleset.splice(idx, 1)
-      this.updateRuleset({ ruleset: newRuleset, nodeLabel: this.nodeType.label, type: "color" })
+      let newRuleset = this.ruleset;
+      newRuleset.splice(idx, 1);
+      this.updateRuleset({
+        ruleset: newRuleset,
+        nodeLabel: this.nodeType.label,
+        type: "color",
+      });
     },
     onChange() {
-      this.updateRuleset({ ruleset: this.ruleset, nodeLabel: this.nodeType.label, type: "color" })
-    }
-  }
-}
+      this.updateRuleset({
+        ruleset: this.ruleset,
+        nodeLabel: this.nodeType.label,
+        type: "color",
+      });
+    },
+  },
+};
 </script>
 <style scoped>
 .buttons {

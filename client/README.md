@@ -1,4 +1,5 @@
 # OOT_CLIENT
+
 To run the client without docker, you can use the methods described in [Project setup](#project-setup)
 
 - [OOT_CLIENT](#ootclient)
@@ -10,34 +11,38 @@ To run the client without docker, you can use the methods described in [Project 
     - [Customize configuration](#customize-configuration)
   - [Modules](#modules)
 
-
 ## Project setup
+
 ```
 npm install
 ```
 
 ### Compiles and hot-reloads for development
+
 ```
 npm run serve
 ```
 
 ### Compiles and minifies for production
+
 ```
 npm run build
 ```
 
 ### Run your tests
+
 ```
 npm run test
 ```
 
 ### Lints and fixes files
+
 ```
 npm run lint
 ```
 
 ### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
 
+See [Configuration Reference](https://cli.vuejs.org/config/).
 
 ## Modules

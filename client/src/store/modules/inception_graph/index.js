@@ -1,7 +1,7 @@
-import actions from "./actions"
+import actions from "./actions";
 
 export const inception_graph = {
-    actions
-}
+  actions,
+};
 
-export default inception_graph
+export default inception_graph;

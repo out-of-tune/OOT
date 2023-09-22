@@ -1,14 +1,14 @@
-import actions from "./actions"
-import mutations from "./mutations"
+import actions from "./actions";
+import mutations from "./mutations";
 
 export const graph_io = {
-    state: {
-        storedGraphNames: [],
-        graphObject: {}
-    },
+  state: {
+    storedGraphNames: [],
+    graphObject: {},
+  },
 
-    actions,
-    mutations
-}
+  actions,
+  mutations,
+};
 
-export default graph_io
+export default graph_io;

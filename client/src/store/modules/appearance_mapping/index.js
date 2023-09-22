@@ -1,7 +1,7 @@
-import actions from "./actions"
+import actions from "./actions";
 
 export const appearance_mapping = {
-    actions
-}
+  actions,
+};
 
-export default appearance_mapping
+export default appearance_mapping;

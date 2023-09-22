@@ -1,7 +1,7 @@
-import actions from "./actions"
+import actions from "./actions";
 
 export const remove = {
-    actions
-}
+  actions,
+};
 
-export default remove
+export default remove;

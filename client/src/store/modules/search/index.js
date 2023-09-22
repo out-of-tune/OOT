@@ -1,7 +1,7 @@
-import actions from "./actions"
+import actions from "./actions";
 
 export const search = {
-    actions
-}
+  actions,
+};
 
-export default search
+export default search;

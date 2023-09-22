@@ -1,1 +1,208 @@
-{"actionConfiguration":{"expand":[{"nodeType":"artist","edges":["Artist_to_Genre","Album_to_Artist"]},{"nodeType":"genre","edges":["Genre_to_Genre","Artist_to_Genre"]},{"nodeType":"album","edges":["Album_to_Artist","Song_to_Album"]},{"nodeType":"song","edges":["Song_to_Album"]}],"collapse":[]},"appearanceConfiguration":{"nodeConfiguration":{"color":[{"nodeLabel":"genre","rules":[{"searchObject":{"valid":true,"errors":[],"nodeType":"genre","attributes":[]},"searchString":"genre","color":"da6a1dff"}]},{"nodeLabel":"artist","rules":[{"searchObject":{"valid":true,"errors":[],"nodeType":"artist","attributes":[]},"searchString":"artist","color":"1dcddaff"},{"searchObject":{"valid":true,"errors":[],"nodeType":"artist","attributes":[{"attributeSearch":"popularity","operator":">","attributeData":"50"}]},"searchString":"popularity>50","color":"ff0000ff"}]},{"nodeLabel":"album","rules":[{"searchObject":{"valid":true,"errors":[],"nodeType":"album","attributes":[]},"searchString":"album","color":"43df33ff"},{"searchObject":{"valid":true,"errors":[],"nodeType":"album","attributes":[{"attributeSearch":"album_type","operator":"=","attributeData":"single"}]},"searchString":"album_type=single","color":"ffe400ff"}]},{"nodeLabel":"song","rules":[{"searchObject":{"valid":true,"errors":[],"nodeType":"song","attributes":[]},"searchString":"song","color":"df339cff"}]}],"size":[{"nodeLabel":"artist","rules":[{"searchObject":{"valid":true,"errors":[],"nodeType":"artist","attributes":[]},"searchString":"artist","sizeType":"compare","size":10},{"searchObject":{"valid":true,"errors":[],"nodeType":"artist","attributes":[{"attributeSearch":"popularity","operator":"=","attributeData":"1"}]},"searchString":"popularity=1","sizeType":"map","min":20,"max":50}]},{"nodeLabel":"genre","rules":[{"searchObject":{"valid":true,"errors":[],"nodeType":"genre","attributes":[]},"searchString":"genre","sizeType":"compare","size":10}]},{"nodeLabel":"album","rules":[{"searchObject":{"valid":true,"errors":[],"nodeType":"album","attributes":[]},"searchString":"album","sizeType":"compare","size":10}]},{"nodeLabel":"song","rules":[{"searchObject":{"valid":true,"errors":[],"nodeType":"song","attributes":[]},"searchString":"song","sizeType":"compare","size":10}]}],"tooltip":[{"nodeLabel":"artist","attribute":"name"},{"nodeLabel":"genre","attribute":"name"},{"nodeLabel":"album","attribute":"total_tracks"},{"nodeLabel":"song","attribute":"name"}]},"edgeConfiguration":{"color":[{"edgeLabel":"Genre_to_Genre","color":"1dcdda77"},{"edgeLabel":"Artist_to_Genre","color":"fa8a3d77"},{"edgeLabel":"Album_to_Artist","color":"43Df3377"},{"edgeLabel":"Song_to_Album","color":"DF339C77"}],"size":[]}}}
+{
+  "actionConfiguration": {
+    "expand": [
+      { "nodeType": "artist", "edges": ["Artist_to_Genre", "Album_to_Artist"] },
+      { "nodeType": "genre", "edges": ["Genre_to_Genre", "Artist_to_Genre"] },
+      { "nodeType": "album", "edges": ["Album_to_Artist", "Song_to_Album"] },
+      { "nodeType": "song", "edges": ["Song_to_Album"] }
+    ],
+    "collapse": []
+  },
+  "appearanceConfiguration": {
+    "nodeConfiguration": {
+      "color": [
+        {
+          "nodeLabel": "genre",
+          "rules": [
+            {
+              "searchObject": {
+                "valid": true,
+                "errors": [],
+                "nodeType": "genre",
+                "attributes": []
+              },
+              "searchString": "genre",
+              "color": "da6a1dff"
+            }
+          ]
+        },
+        {
+          "nodeLabel": "artist",
+          "rules": [
+            {
+              "searchObject": {
+                "valid": true,
+                "errors": [],
+                "nodeType": "artist",
+                "attributes": []
+              },
+              "searchString": "artist",
+              "color": "1dcddaff"
+            },
+            {
+              "searchObject": {
+                "valid": true,
+                "errors": [],
+                "nodeType": "artist",
+                "attributes": [
+                  {
+                    "attributeSearch": "popularity",
+                    "operator": ">",
+                    "attributeData": "50"
+                  }
+                ]
+              },
+              "searchString": "popularity>50",
+              "color": "ff0000ff"
+            }
+          ]
+        },
+        {
+          "nodeLabel": "album",
+          "rules": [
+            {
+              "searchObject": {
+                "valid": true,
+                "errors": [],
+                "nodeType": "album",
+                "attributes": []
+              },
+              "searchString": "album",
+              "color": "43df33ff"
+            },
+            {
+              "searchObject": {
+                "valid": true,
+                "errors": [],
+                "nodeType": "album",
+                "attributes": [
+                  {
+                    "attributeSearch": "album_type",
+                    "operator": "=",
+                    "attributeData": "single"
+                  }
+                ]
+              },
+              "searchString": "album_type=single",
+              "color": "ffe400ff"
+            }
+          ]
+        },
+        {
+          "nodeLabel": "song",
+          "rules": [
+            {
+              "searchObject": {
+                "valid": true,
+                "errors": [],
+                "nodeType": "song",
+                "attributes": []
+              },
+              "searchString": "song",
+              "color": "df339cff"
+            }
+          ]
+        }
+      ],
+      "size": [
+        {
+          "nodeLabel": "artist",
+          "rules": [
+            {
+              "searchObject": {
+                "valid": true,
+                "errors": [],
+                "nodeType": "artist",
+                "attributes": []
+              },
+              "searchString": "artist",
+              "sizeType": "compare",
+              "size": 10
+            },
+            {
+              "searchObject": {
+                "valid": true,
+                "errors": [],
+                "nodeType": "artist",
+                "attributes": [
+                  {
+                    "attributeSearch": "popularity",
+                    "operator": "=",
+                    "attributeData": "1"
+                  }
+                ]
+              },
+              "searchString": "popularity=1",
+              "sizeType": "map",
+              "min": 20,
+              "max": 50
+            }
+          ]
+        },
+        {
+          "nodeLabel": "genre",
+          "rules": [
+            {
+              "searchObject": {
+                "valid": true,
+                "errors": [],
+                "nodeType": "genre",
+                "attributes": []
+              },
+              "searchString": "genre",
+              "sizeType": "compare",
+              "size": 10
+            }
+          ]
+        },
+        {
+          "nodeLabel": "album",
+          "rules": [
+            {
+              "searchObject": {
+                "valid": true,
+                "errors": [],
+                "nodeType": "album",
+                "attributes": []
+              },
+              "searchString": "album",
+              "sizeType": "compare",
+              "size": 10
+            }
+          ]
+        },
+        {
+          "nodeLabel": "song",
+          "rules": [
+            {
+              "searchObject": {
+                "valid": true,
+                "errors": [],
+                "nodeType": "song",
+                "attributes": []
+              },
+              "searchString": "song",
+              "sizeType": "compare",
+              "size": 10
+            }
+          ]
+        }
+      ],
+      "tooltip": [
+        { "nodeLabel": "artist", "attribute": "name" },
+        { "nodeLabel": "genre", "attribute": "name" },
+        { "nodeLabel": "album", "attribute": "total_tracks" },
+        { "nodeLabel": "song", "attribute": "name" }
+      ]
+    },
+    "edgeConfiguration": {
+      "color": [
+        { "edgeLabel": "Genre_to_Genre", "color": "1dcdda77" },
+        { "edgeLabel": "Artist_to_Genre", "color": "fa8a3d77" },
+        { "edgeLabel": "Album_to_Artist", "color": "43Df3377" },
+        { "edgeLabel": "Song_to_Album", "color": "DF339C77" }
+      ],
+      "size": []
+    }
+  }
+}

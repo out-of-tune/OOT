@@ -1,12 +1,12 @@
-import actions from "./actions"
-import mutations from "./mutations"
+import actions from "./actions";
+import mutations from "./mutations";
 
 export const user = {
-    state: {
-        me: {}
-    },
-    actions,
-    mutations
-}
+  state: {
+    me: {},
+  },
+  actions,
+  mutations,
+};
 
-export default user
+export default user;

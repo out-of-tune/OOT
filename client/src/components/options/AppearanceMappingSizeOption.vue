@@ -78,7 +78,7 @@ export default {
         });
       } else {
         this.setError(
-          new Error("rule could not be added: min/max values are invalid")
+          new Error("rule could not be added: min/max values are invalid"),
         );
       }
     },

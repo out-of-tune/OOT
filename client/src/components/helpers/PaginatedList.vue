@@ -27,93 +27,91 @@
 </template>
 <script lang="js">
 export default {
-    data(){
-        return {
-            pageNumber: 1
-        }
+  data() {
+    return {
+      pageNumber: 1,
+    };
+  },
+  props: {
+    listData: {
+      type: Array,
+      required: true,
     },
-    props:{
-        listData:{
-            type:Array,
-            required:true
-        },
-        columnOnePath: {
-            type:String,
-            required:false
-        },
-        columnTwoPath: {
-            type:String,
-            required:false
-        },
-        columnThreePath: {
-            type:String,
-            required:false
-        },
-        itemStyle: {
-            type:Object,
-            required:false
-        },
-        columnOneStyle: {
-            type:Object,
-            required:false
-        },
-        columnTwoStyle: {
-            type:Object,
-            required:false
-        },
-        columnThreeStyle: {
-            type:Object,
-            required:false
-        },
-        colorPath: {
-            type: String,
-            required: false,
-        },
-        size:{
-            type:Number,
-            required:false,
-            default: 10
-        },
-        itemClick: {
-            default: ()=>{}
-        }
+    columnOnePath: {
+      type: String,
+      required: false,
     },
-    methods:{
-        nextPage(){
-            this.pageNumber++;
-        },
-        prevPage(){
-            this.pageNumber--;
-        },
-        objectData(obj, path){
-            const attributes = path
-                .split(".")
-            const data = attributes.length>1
-                ? attributes.slice(1)
-                    .reduce((prev, curr)=>{
-                        return prev[curr]
-                    }, obj)
-                : obj
-            return data
-        },
-        getObjectColor(obj){
-            return this.objectData(obj, this.colorPath).substring(0,7)+"77"
-        }
+    columnTwoPath: {
+      type: String,
+      required: false,
     },
-    computed:{
-        pageCount(){
-        let l = this.listData.length,
-            s = this.size;
-        return Math.ceil(l/s);
-        },
-        paginatedData(){
-        const start = (this.pageNumber-1) * this.size,
-                end = start + this.size;
-        return this.listData
-                .slice(start, end);
-        }
-    }
-}
+    columnThreePath: {
+      type: String,
+      required: false,
+    },
+    itemStyle: {
+      type: Object,
+      required: false,
+    },
+    columnOneStyle: {
+      type: Object,
+      required: false,
+    },
+    columnTwoStyle: {
+      type: Object,
+      required: false,
+    },
+    columnThreeStyle: {
+      type: Object,
+      required: false,
+    },
+    colorPath: {
+      type: String,
+      required: false,
+    },
+    size: {
+      type: Number,
+      required: false,
+      default: 10,
+    },
+    itemClick: {
+      default: () => {},
+    },
+  },
+  methods: {
+    nextPage() {
+      this.pageNumber++;
+    },
+    prevPage() {
+      this.pageNumber--;
+    },
+    objectData(obj, path) {
+      const attributes = path.split(".");
+      const data =
+        attributes.length > 1
+          ? attributes.slice(1).reduce((prev, curr) => {
+              return prev[curr];
+            }, obj)
+          : obj;
+      return data;
+    },
+    getObjectColor(obj) {
+      return this.objectData(obj, this.colorPath).substring(0, 7) + "77";
+    },
+  },
+  computed: {
+    pageCount() {
+      let l = this.listData.length,
+        s = this.size;
+      return Math.ceil(l / s);
+    },
+    paginatedData() {
+      const start = (this.pageNumber - 1) * this.size,
+        end = start + this.size;
+      return this.listData.slice(start, end);
+    },
+  },
+};
 </script>
 <style scoped>
 .paginationWrapper {

@@ -51,23 +51,23 @@ import Toolbar from "./components/Toolbar.vue";
 import IntroTour from "@/components/helpers/IntroTour";
 
 const PlaylistLoader = defineAsyncComponent(() =>
-  import("@/components/modals/PlaylistLoader")
+  import("@/components/modals/PlaylistLoader"),
 );
 const PlaylistChooser = defineAsyncComponent(() =>
-  import("@/components/modals/PlaylistChooser")
+  import("@/components/modals/PlaylistChooser"),
 );
 
 const snackbar = defineAsyncComponent(() => import("./components/Snackbar"));
 import Searchbar from "./components/Searchbar.vue";
 const selectionModal = defineAsyncComponent(() =>
-  import("@/components/modals/SelectionModal")
+  import("@/components/modals/SelectionModal"),
 );
 import MusicPlayer from "./components/MusicPlayer";
 const feedbackModal = defineAsyncComponent(() =>
-  import("./components/modals/FeedbackModal")
+  import("./components/modals/FeedbackModal"),
 );
 const shareModal = defineAsyncComponent(() =>
-  import("./components/modals/ShareModal")
+  import("./components/modals/ShareModal"),
 );
 
 import { deepEqual } from "@/utils/deepEqual.js";
