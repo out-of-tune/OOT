@@ -1,72 +1,42 @@
 <template>
   <div id="searchContainer">
     <div v-if="advanced" id="advanced">
-      <div id="heading">
-        <b>Search Graph</b>
-      </div>
-      <div class="input" id="advancedInput">
-        <div
-          id="autocompleteBox"
-          @focusout="changeVisibility"
-          @keydown="selectEvent"
+      <ul
+        ref="autocomplete"
+        id="autocomplete"
+        v-if="getMatchingData().length > 0 && inputIsFocused"
+      >
+        <li
+          v-for="data in getMatchingData()"
+          @mousedown="addOnClick(data)"
+          v-bind:key="data"
         >
-          <v-text-field
+          {{ data }}
+        </li>
+      </ul>
+      <div class="input" id="advancedInput">
+        <div class="search" @focusout="changeVisibility" @keydown="selectEvent">
+          <v-icon
+            class="searchIcon"
+            slot="append"
+            @click="startAdvancedSearch()"
+            icon="mdi-magnify"
+          />
+          <input
             class="searchfield"
             type="text"
             @focus="inputIsFocused = true"
             v-bind:class="{ validString: valid, invalidString: !valid }"
             ref="searchInput"
-            name="searchField"
             v-model="searchString"
             @input="addCharacterInput(searchString)"
-          >
-            <v-icon
-              class="searchIcon"
-              slot="append"
-              @click="startAdvancedSearch()"
-              icon="mdi-magnify"
-            />
-          </v-text-field>
-          <ul
-            ref="autocomplete"
-            id="autocomplete"
-            v-if="getMatchingData().length > 0 && inputIsFocused"
-          >
-            <li
-              v-for="data in getMatchingData()"
-              @mousedown="addOnClick(data)"
-              v-bind:key="data"
-            >
-              {{ data }}
-            </li>
-          </ul>
+          />
         </div>
       </div>
-      <a @click="changeSearchMode" id="changeSearchMode">Search All</a>
     </div>
     <div v-else id="simple">
-      <div id="heading">
-        <b>Search All</b>
-      </div>
       <div class="input" id="simpleInput" @keydown="simpleSearchEvents">
-        <v-select
-          dark
-          :items="getSimpleSearchNodeTypes()"
-          cache-items
-          eager
-          v-model="selectedNode"
-          label="nodeType"
-          id="selector"
-          value="any"
-          solo
-        ></v-select>
-        <v-text-field
-          class="searchfield"
-          type="text"
-          name="searchField"
-          id="searchField"
-          v-model="simpleSearchString"
-        >
+        <div class="search">
           <v-icon
             class="searchIcon"
             slot="append"
@@ -78,16 +48,25 @@
             "
             icon="mdi-magnify"
           />
-        </v-text-field>
+          <input class="searchfield" type="text" v-model="simpleSearchString" />
+        </div>
       </div>
-      <a id="changeSearchMode" @click="changeSearchMode">Search Graph</a>
+      <NodetypeSelect v-model="selectedNode" label="nodeType"></NodetypeSelect>
     </div>
+    <select @change="changeSearchMode" class="select">
+      <option>Search Spotify</option>
+      <option>Search Graph</option>
+    </select>
   </div>
 </template>
 <script>
 import { mapActions, mapState, mapGetters } from "vuex";
 import { generateSearchObject } from "@/assets/js/searchObjectHelper";
+import NodetypeSelect from "./NodetypeSelect.vue";
 export default {
+  components: {
+    NodetypeSelect,
+  },
   methods: {
     ...mapActions([
       "startGraphQlSearch",
@@ -195,10 +174,9 @@ export default {
           this.selectedItem++;
           this.$refs.autocomplete.childNodes[this.selectedItem].className =
             "selected";
-          this.$refs.autocomplete.childNodes[this.selectedItem].scrollIntoView({
-            block: "end",
-            behavior: "smooth",
-          });
+
+          console.log(this.$refs.autocomplete.childNodes);
+          this.$refs.autocomplete.childNodes[this.selectedItem];
         }
       }
     },
@@ -210,9 +188,8 @@ export default {
           if (this.selectedItem != -1) {
             this.$refs.autocomplete.childNodes[this.selectedItem].className =
               "selected";
-            this.$refs.autocomplete.childNodes[
-              this.selectedItem
-            ].scrollIntoView({ block: "end", behavior: "smooth" });
+            console.log(this.$refs.autocomplete.childNodes[this.selectedItem]);
+            this.$refs.autocomplete.childNodes[this.selectedItem];
           }
         }
       }
@@ -289,22 +266,18 @@ export default {
 #searchContainer {
   font-family: "Roboto", sans-serif;
   width: 100%;
-}
-.v-text-field {
-  caret-color: #da6a1d !important;
+  display: flex;
+  gap: 1rem;
+  justify-items: center;
+  align-content: center;
+  align-items: center;
 }
 #advanced {
-  display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
-  grid-column-gap: 1rem;
-  grid-template-areas: "heading input changeMode";
+  display: flex;
   align-items: center;
 }
 #simple {
-  display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
-  grid-column-gap: 1rem;
-  grid-template-areas: "heading input changeMode";
+  display: flex;
   align-items: center;
 }
 #heading {
@@ -313,20 +286,9 @@ export default {
   justify-self: right;
 }
 .input {
-  grid-area: input;
-  display: grid;
-  grid-gap: 1rem;
+  display: flex;
   min-width: 300px;
-}
-#simpleInput {
-  grid-template-columns: 1fr 2fr;
-}
-#advancedInput {
-  grid-template-columns: 1fr;
-}
-#changeSearchMode {
-  grid-area: changeMode;
-  color: lightblue;
+  gap: 1rem;
 }
 button {
   border: 1px solid white;
@@ -339,9 +301,10 @@ button {
   color: black;
   max-height: 30vh;
   overflow-y: auto;
-  position: fixed;
+  position: absolute;
   border: none;
   z-index: 10;
+  top: 3rem;
 }
 li {
   padding: 1rem;
@@ -353,9 +316,6 @@ ul {
   padding: 0;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
-}
-#autocompleteBox {
-  display: inline-block;
 }
 .validString {
   color: green !important;
@@ -369,16 +329,15 @@ ul {
 .searchIcon:hover {
   color: #da6a1d;
 }
-:deep() .v-input__control {
-  min-height: 30px !important;
-  max-height: 40px;
-  align-self: center;
-}
-:deep() .v-input__control .v-input__slot {
-  margin: 0;
-}
 .searchfield {
-  padding: 0;
+  padding: 0.25rem;
   margin: 0;
+  background-color: #434343;
+  color: white;
+}
+.search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 </style>
