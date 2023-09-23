@@ -6,7 +6,7 @@ const initGraph = ({ commit, dispatch }) => {
   commit("SET_RENDERER");
   dispatch("initEvents");
   commit("START_RENDERER");
-  dispatch("generateInceptionGraph");
+  // dispatch("generateInceptionGraph");
 };
 
 export const actions = {
