@@ -39,6 +39,14 @@ export function getPinnedState(rootState, node) {
 }
 
 export function getNodePosition(rootState, node) {
+  if (
+    !rootState.mainGraph ||
+    !rootState.mainGraph.renderState ||
+    !rootState.mainGraph.renderState.Renderer
+  ) {
+    console.log(rootState);
+    console.error("no renderer defined");
+  }
   return rootState.mainGraph.renderState.Renderer.getGraphics().getNodeUI(
     node.id,
   ).position;
