@@ -83,18 +83,9 @@ const mouseDownFunctionality = ({ rootState, commit }, node) => {
     rootState.selection.selectedNodes.filter((n) => n.id == node.id).length == 1
   ) {
     commit("SET_MOUSE_PAUSED", !rootState.mainGraph.renderState.isRendered);
-    commit(
-      "SET_MOVE_ORIGIN_POSITION",
-      getNodePosition({
-        graphics: rootState.mainGraph.renderState.Renderer.getGraphics(),
-        node,
-      }),
-    );
+    commit("SET_MOVE_ORIGIN_POSITION", getNodePosition(rootState, node));
     const nodesWithPosition = rootState.selection.selectedNodes.map((node) => {
-      const pos = getNodePosition({
-        graphics: rootState.mainGraph.renderState.Renderer.getGraphics(),
-        node,
-      });
+      const pos = getNodePosition(rootState, node);
       return { node: { id: node.id }, position: { x: pos.x, y: pos.y } };
     });
     commit("SET_AFFECTED_NODES_ORIGIN_POSITION", nodesWithPosition);

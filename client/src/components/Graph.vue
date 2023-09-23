@@ -228,7 +228,7 @@ export default {
     if (uri && type) {
       this.importSharedObject({ uri, type });
     } else {
-      this.generateInceptionGraph();
+      // this.generateInceptionGraph();
     }
   },
 };
