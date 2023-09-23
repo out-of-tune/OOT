@@ -1,8 +1,6 @@
 <template>
   <div id="toolbar">
     <MouseActionRadio></MouseActionRadio>
-    <div class="spacer"></div>
-
     <div class="action">
       <button class="container tooltip" @click="undoAction">
         <v-icon class="icon" color="white" icon="mdi-undo" />
@@ -13,7 +11,6 @@
         <span class="tooltiptext">REDO</span>
       </button>
     </div>
-    <div class="spacer"></div>
     <SelectionPopover></SelectionPopover>
     <div>
       <button class="container tooltip action" @click="switchPlaylistLoader">
@@ -75,11 +72,13 @@ export default {
       "undo",
       "redo",
       "changePlaylistLoaderState",
+      "changePlaylistChooserState",
       "changeFeedbackModalState",
       "changeShareModalState",
     ]),
     switchPlaylistLoader: function () {
       this.changePlaylistLoaderState(true);
+      //this.changePlaylistChooserState(true);
     },
     trackSettings() {},
     undoAction() {
@@ -106,21 +105,20 @@ export default {
 </script>
 <style scoped>
 #toolbar {
-  padding-top: 64px;
+  margin-top: 10%;
+  margin-right: 0.5rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
   width: 30px;
-  /* padding-left: 5px; */
   right: 0px;
-  height: 100vh;
   z-index: 1;
   background-color: #302c29;
-  /* border-left: 2px solid #da6a1d; */
   position: fixed;
   color: white;
-  display: grid;
-  grid-template-rows: 0.5fr 1fr 0.5fr 1fr 1fr 1fr 1fr 1fr 2fr;
-  padding-bottom: 70px;
-  align-items: flex-start;
-  align-content: flex-start;
+  display: flex;
+  gap: 0.5rem;
+  flex-direction: column;
+  border-radius: 5px;
 }
 
 .tooltip {
@@ -160,10 +158,6 @@ export default {
   cursor: pointer;
   height: 30px;
   align-self: flex-start;
-}
-
-.action {
-  /* margin-top: 4rem; */
 }
 
 .menu {
