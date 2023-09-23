@@ -15,11 +15,12 @@
             <h2>Your playlists</h2>
             <label class="label">filter playlists:</label>
             <input type="text" class="textfield" v-model="filterQuery" />
-            <ul @click="setCurrentPlaylist" class="playlists">
+            <ul class="playlists">
               <li
                 v-for="playlist in filteredPlaylists"
                 :key="playlist.name"
                 class="playlist-item"
+                @click="() => playlistClickHandler(playlist)"
               >
                 {{ playlist.name }}
               </li>
@@ -27,12 +28,9 @@
           </div>
           <div>
             <h2>current Playlist</h2>
-            {{ currentPlaylist.name }}
+            <h2>{{ currentPlaylist.name }}</h2>
             <button class="btn" @click="loadMore()">load more</button>
-            <button
-              class="btn"
-              @click="loadPlaylistFromUser(currentPlaylist.id)"
-            >
+            <button class="btn" @click="loadPlaylistFromUser">
               load playlist
             </button>
           </div>
@@ -91,14 +89,20 @@ export default {
       const splitString = uriString.split(":");
       this.loadPlaylist(splitString[splitString.length - 1]);
     },
-    loadPlaylistFromUser(playlistId) {
-      this.loadPlaylist(playlistId);
+    loadPlaylistFromUser() {
+      console.log(this.currentPlaylist);
+      this.loadPlaylist(this.currentPlaylist.id);
     },
     loginUser() {
       this.login();
     },
     loadMore() {
       this.loadMoreCurrentUsersPlaylists();
+    },
+    playlistClickHandler(playlist) {
+      console.log(playlist);
+      this.setCurrentPlaylist(playlist);
+      console.log(this.currentPlaylist.id);
     },
   },
   mounted: function () {
