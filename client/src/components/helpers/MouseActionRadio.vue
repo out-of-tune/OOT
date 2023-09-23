@@ -91,6 +91,10 @@ export default {
 .container {
   padding: 0;
   height: 30px;
+  width: 30px;
+  display: flex;
+  align-content: center;
+  align-items: center;
 }
 
 [type="radio"]:checked + .icon {
@@ -103,7 +107,8 @@ export default {
 
 [type="radio"] + .icon {
   background-color: #da6a1dff;
-  padding: 3px;
   cursor: pointer;
+  width: 30px;
+  height: 30px;
 }
 </style>

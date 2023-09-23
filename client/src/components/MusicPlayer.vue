@@ -56,38 +56,40 @@
         </div>
       </div>
     </div>
-    <div class="controls">
-      <button
-        id="rewindButton"
-        small
-        min-width="1px"
-        color="#f14e14"
-        v-on:click="PrevSong"
-      >
-        <v-icon icon="mdi-skip-previous" />
-      </button>
+    <div class="player">
+      <div class="controls">
+        <button
+          id="rewindButton"
+          small
+          min-width="1px"
+          color="#f14e14"
+          v-on:click="PrevSong"
+        >
+          <v-icon icon="mdi-skip-previous" />
+        </button>
 
-      <button id="playButton" color="#da6a1d" v-on:click="StartStop">
-        <v-icon v-if="!isPlaying" icon="mdi-play" />
-        <v-icon v-if="isPlaying" icon="mdi-pause" />
-      </button>
+        <button id="playButton" color="#da6a1d" v-on:click="StartStop">
+          <v-icon v-if="!isPlaying" icon="mdi-play" />
+          <v-icon v-if="isPlaying" icon="mdi-pause" />
+        </button>
 
-      <button id="forwardButton" color="#f14e14" v-on:click="NextSong">
-        <v-icon icon="mdi-skip-next" />
-      </button>
-    </div>
-    <div id="timeSlider" class="sliderBox">
-      <v-slider
-        v-model="currentTime"
-        color="white"
-        :min="start"
-        :max="end"
-        :hide-details="true"
-        dark
-        @change="seekTo"
-        @start="isSeeking = true"
-        @end="isSeeking = false"
-      ></v-slider>
+        <button id="forwardButton" color="#f14e14" v-on:click="NextSong">
+          <v-icon icon="mdi-skip-next" />
+        </button>
+      </div>
+      <div id="timeSlider" class="sliderBox">
+        <v-slider
+          v-model="currentTime"
+          color="white"
+          :min="start"
+          :max="end"
+          :hide-details="true"
+          dark
+          @change="seekTo"
+          @start="isSeeking = true"
+          @end="isSeeking = false"
+        ></v-slider>
+      </div>
     </div>
     <div id="queue">
       <div id="buttons">
@@ -111,16 +113,14 @@
     </div>
 
     <div class="volume">
-      <div class="sliderBox">
-        <v-slider
-          v-model="volumePercent"
-          append-icon="mdi-volume-plus"
-          prepend-icon="mdi-volume-minus"
-          min="0"
-          max="100"
-          @change="setVolume"
-        ></v-slider>
-      </div>
+      <v-icon>mdi-volume-plus</v-icon>
+      <input
+        type="number"
+        v-model="volumePercent"
+        min="0"
+        max="100"
+        @change="setVolume"
+      />
     </div>
   </div>
 </template>
@@ -254,100 +254,50 @@ export default {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
 
-  min-height: 5rem;
-  width: 100%;
-  display: grid;
-  grid-template:
-    "songInfo controls queue volume" 1fr
-    "songInfo timeSlider queue volume"/ 2fr 4fr 1fr 1fr;
-}
-.v-input__icon {
-  color: white !important;
+  margin-left: 25%;
+  margin-bottom: 2%;
+  width: 50%;
+
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
 }
 .cover {
-  height: 4rem;
-  width: 4rem;
+  height: 3rem;
+  width: 3rem;
   object-fit: contain;
-  border: 3px solid #da6a1d;
-  grid-area: cover;
-  align-self: center;
-  display: grid;
-  grid-area: cover;
 }
 .currentSongInfo {
-  grid-area: songInfo;
-  align-self: center;
-  align-content: center;
-  margin-right: 2rem;
-  display: grid;
-  grid-template: "cover info" 5rem/4rem 1fr;
-}
-.currentSongInfo {
+  display: flex;
   cursor: pointer;
+  gap: 0.5rem;
+  align-items: center;
 }
-.currentSongInfo p {
-  margin: 0;
-}
+
 .currentSongInfo .songInfoText {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-  padding-left: 1rem;
-  grid-area: info;
-  align-self: center;
 }
-.controls {
-  grid-area: controls;
-  margin-bottom: -1.5rem;
-  text-align: center;
-}
-.volume {
-  grid-area: volume;
-  align-self: center;
-}
-#forwardButton {
-  min-height: 1rem;
-  grid-area: forwardButton;
-}
-#playButton {
-  min-height: 1rem;
-  grid-area: playButton;
-}
-#rewindButton {
-  min-height: 1rem;
-  grid-area: rewindButton;
-}
-#timeSlider {
-  grid-area: timeSlider;
-}
-#timeSlider .v-input--slider {
-  margin: 0;
-}
-#queue {
-  grid-area: queue;
-  display: grid;
-}
-#controls .button {
-  margin: 0;
-}
+
 #queueButton {
-  float: right;
-  min-width: 25%;
   background-color: #da6a1dff;
 }
 #queueButton:hover {
   background-color: #1dcdda66;
 }
 #infoButton {
-  min-width: 25%;
-  float: right;
-  background-color: rgb(241, 78, 20);
+  background-color: #da6a1dff;
 }
 #infoButton:hover {
   background-color: #1dcdda66;
 }
-.activated {
-  background-color: #1dcddaff !important;
+#infoButton .activated {
+  background-color: #1dcddaff;
+}
+#queueButton .activated {
+  background-color: #1dcddaff;
 }
 .currentSongName {
   overflow: hidden;
@@ -355,22 +305,24 @@ export default {
 .currentArtistName {
   overflow: hidden;
 }
-.innerText {
-  display: inline-block;
-}
 .currentSongName:hover .innerText {
   animation: marquee 12s linear infinite;
 }
 .currentArtistName:hover .innerText {
   animation: marquee 12s linear infinite;
 }
-#textExtension {
-  display: inline-block;
-  padding-left: 2rem;
-  padding-right: 2rem;
+input {
+  color: white;
 }
-#buttons {
-  justify-self: center;
+
+.player {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.sliderBox {
+  width: 100%;
 }
 
 @keyframes marquee {
