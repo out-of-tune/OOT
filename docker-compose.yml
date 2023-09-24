@@ -6,7 +6,6 @@ services:
     depends_on:
       - arangodb
       - memcached
-    hostname: ${APOLLO_HOST}
     env_file: .env
   client:
     image: client_base 
@@ -16,33 +15,25 @@ services:
         - VUE_APP_PROXY_URI=${PROXY_URI}
         - VUE_APP_PROXY_PORT=${PROXY_HTTP_PORT}
         - VUE_APP_APOLLO_HOST=${APOLLO_HOST}
-        - VUE_APP_AUTH_HOST=${AUTH_HOST}
-        - VUE_APP_SHARE_HOST=${SHARE_HOST}
-        - VUE_APP_KEY=${CLIENT_KEY}
-        - VUE_APP_SECRET=${CLIENT_SECRET}
-        - PORT=${CLIENT_PORT}
+        - VUE_APP_AUTH_HOST=auth
+        - VUE_APP_SHARE_HOST=share
+        - PORT=8080
         - NODE_ENV=${NODE_ENV}
-        - VUE_APP_ANALYTICS=${CLIENT_ANALYTICS}
     depends_on:
       - apollo
       - auth
-    hostname: ${CLIENT_HOST}
       
   arangodb:
-    hostname: ${ARANGODB_HOST}
     image: arangodb/arangodb
-    # volume does not work with windows
     volumes:
       - ${ARANGODB_VOLUME}:/var/lib/arangodb3
     environment:
       - ARANGO_ROOT_PASSWORD=${ARANGODB_PASSWORD}
   auth:
-    hostname: ${AUTH_HOST}
     image: auth_base
     build: ./auth
     env_file: .env
   proxy:
-    hostname: proxy
     image: proxy_base
     build: ./server
     env_file: .env
@@ -56,16 +47,14 @@ services:
       - apollo
       - share
   memcached:
-    hostname: ${MEMCACHED_HOST}
     image: memcached:alpine
   share:
-    hostname: ${SHARE_HOST}
     depends_on: 
       - arangodb
     build:
       context: ./services/share
       args:
-        - SHARE_PORT:${SHARE_PORT}
+        - SHARE_PORT:4444
     env_file: .env
 
 networks:
