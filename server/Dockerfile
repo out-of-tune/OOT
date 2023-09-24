@@ -1,7 +1,7 @@
 FROM nginx:latest
 RUN apt-get update && apt-get install --assume-yes software-properties-common certbot
 RUN apt-get install --assume-yes python3-certbot-nginx
-COPY nginx.conf.template  /etc/nginx/nginx.conf.template
+COPY nginx.conf  /etc/nginx/nginx.conf
 COPY mime.types  /etc/nginx/mime.types
 COPY run_nginx.sh /
 COPY cert.sh /
