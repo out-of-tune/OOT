@@ -1,6 +1,3 @@
-import dotenv from 'dotenv'
-dotenv.config()
-
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
 import helpers from './helpers/index.js';
@@ -13,9 +10,9 @@ import { readFileSync } from 'fs';
 
 import cache from './caching/index.js';
 import { makeExecutableSchema } from '@graphql-tools/schema';
+import * as settings from './helpers/settings.js';
 
 
-const port = process.env.APOLLO_PORT
 const type_defs = readFileSync('./schema/schema.graphql', { encoding: 'utf-8' });;
 
 let schema = makeExecutableSchema({
@@ -26,21 +23,26 @@ let schema = makeExecutableSchema({
 const server = new ApolloServer({
   schema: schema,
   formatError: helpers.formatError,
-  includeStacktraceInErrorResponses: process.env.NODE_ENV === 'development',
-  introspection: process.env.NODE_ENV === 'development',
+  includeStacktraceInErrorResponses: settings.isDev,
+  introspection: settings.isDev,
   cache: cache.memcache,
   plugins: [cache.responseCache]
 })
 
-const spotifyApiInstance = new SpotifyAPI({ cache: server.cache }, process.env.SPOTIFY_CLIENT_ID, process.env.SPOTIFY_CLIENT_SECRET, process.env.SPOTIFY_SCOPE )
+const spotifyApiInstance = new SpotifyAPI(
+  { cache: server.cache }, 
+  settings.SPOTIFY_CLIENT_ID, 
+  settings.SPOTIFY_CLIENT_SECRET, 
+  settings.SPOTIFY_SCOPE
+)
 spotifyApiInstance.start()
 
 const start = async () => {
   const arangoConnection = await ArangoAPI.connect(
-    `http://${process.env.ARANGODB_HOST}:${process.env.ARANGODB_PORT}`,
-    process.env.ARANGODB_DATABASE,
-    process.env.ARANGODB_USER,
-    process.env.ARANGODB_PASSWORD
+    `http://${settings.ARANGO_HOST}:${settings.ARANGO_PORT}`,
+    settings.ARANGO_DB,
+    settings.ARANGO_USER,
+    settings.getArangoPassword()
   )
 
   const { url } = await startStandaloneServer(server, {
@@ -52,7 +54,7 @@ const start = async () => {
         },
       };
     },
-    listen: { port: Number.parseInt(port) },
+    listen: { port: settings.API_PORT },
   })
   console.log(`-> Server ready at ${url}`)
 }
