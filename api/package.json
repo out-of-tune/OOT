@@ -5,19 +5,21 @@
   "main": "server.js",
   "scripts": {
     "test": "jest",
-    "start": "node server.js",
-    "serve": "nodemon server.js"
+    "compile": "cpm run codegen && tsc",
+    "start": "npm run compile && node ./dist/index.js",
+    "codegen": "graphql-codegen --config codegen.ts"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "apollo-datasource": "^0.3.1",
+    "@apollo/datasource-rest": "^6.0.0",
+    "@apollo/server": "^4.7.1",
+    "@graphql-tools/utils": "^9.2.1",
+    "@types/jsonwebtoken": "^9.0.2",
+    "@types/lodash": "^4.14.194",
     "apollo-errors": "^1.9.0",
-    "apollo-server": "^2.9.0",
-    "apollo-server-cache-memcached": "^0.6.1",
-    "apollo-server-plugin-response-cache": "^0.3.1",
     "arangojs": "^6.11.0",
-    "bcrypt": "^3.0.6",
+    "bcrypt": "^5.1.0",
     "dataloader": "^1.4.0",
     "dotenv": "^8.1.0",
     "js-yaml": "^3.13.1",
@@ -26,24 +28,20 @@
     "request": "^2.88.0"
   },
   "devDependencies": {
-    "apollo-server-testing": "^2.9.0",
+    "@graphql-codegen/cli": "3.3.1",
+    "@graphql-codegen/typescript": "3.0.4",
+    "@graphql-codegen/typescript-resolvers": "3.2.1",
+    "@types/jest": "^29.5.1",
+    "@types/node": "^20.1.4",
+    "@types/request": "^2.48.8",
+    "@types/request-promise-native": "^1.0.18",
     "babel-eslint": "^10.0.2",
     "casual": "^1.6.2",
-    "graphql": "^14.5.3",
-    "graphql-tools": "^4.0.5",
-    "jest": "^24.9.0",
-    "jest-cli": "^24.9.0",
-    "nodemon": "^2.0.15"
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "testPathIgnorePatterns": [
-      "/node_modules/",
-      "/dbPediaDownloader/"
-    ],
-    "coverageReporters": [
-      "lcov",
-      "html"
-    ]
+    "graphql": "^16.6.0",
+    "graphql-tools": "^8.3.20",
+    "jest": "^29.5.0",
+    "nodemon": "^2.0.15",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.0.4"
   }
 }

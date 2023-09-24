@@ -1,18 +1,18 @@
-var { ApolloServer } = require('apollo-server')
+import { ApolloServer } from '@apollo/server'
 
-const auth = require('./auth')
-const helpers = require('./helpers')
+import { middlewares } from './auth'
+import { formatError as _formatError, applyMiddleware } from './helpers'
 
-const ArangoAPI = require('./datasources/arangodb')
-const SpotifyAPI = require('./datasources/spotify')
+import ArangoAPI from './datasources/arangodb'
+import SpotifyAPI from './datasources/spotify'
 
-const resolvers = require('./resolvers')
-const type_defs = require('./schema')
-const schemaDirectives = require('./directives')
+import resolvers from './resolvers'
+import type_defs from './schema'
+import schemaDirectives from './directives'
 
 require('dotenv').config()
 
-const cache = require('./caching')
+import { memcache, responseCache } from './caching'
 const arango = new ArangoAPI()
 arango.connect(
     `http://${process.env.ARANGODB_HOST}:${process.env.ARANGODB_PORT}`, 
@@ -30,7 +30,7 @@ const port = process.env.APOLLO_PORT
 const server = new ApolloServer({
     cors: true,  
     typeDefs: type_defs,
-    formatError: helpers.formatError,
+    formatError: _formatError,
     resolvers,
     debug: process.env.NODE_ENV === 'development',
     playground: false, //process.env.NODE_ENV === 'development',
@@ -39,12 +39,12 @@ const server = new ApolloServer({
         spotify: spotifyApiInstance,
         arango: arango
     }),
-    context: helpers.applyMiddleware([
-        auth.middlewares.authenticate_client(arango),
-        auth.middlewares.authenticate_user(arango)
+    context: applyMiddleware([
+        middlewares.authenticate_client(arango),
+        middlewares.authenticate_user(arango)
     ]),
-    cache: cache.memcache,
-    plugins: [ cache.responseCache ]
+    cache: memcache,
+    plugins: [ responseCache ]
 })
 
 
