@@ -4,14 +4,10 @@ import BaseAPI from './base'
 
 
 class ArtistAPI extends BaseAPI {
-    constructor(db) {
-        super(db)
-        this._collection('Artist')
-        this._collection('artist_source', true)
-        this._collection('artist_genre', true)
-        this._info_loader = new DataLoader(ids => this._info(ids, this.db))
-        this._genres_loader = new DataLoader(ids => this._genres(ids, this.db))
-    }
+    static collection = "Artist"
+    static edges = ["artist_source", "artist_genre"]
+    private _info_loader = new DataLoader<string, unknown>(ids => this._info(ids, this.db))
+    private _genres_loader = new DataLoader<string, unknown>(ids => this._genres(ids, this.db))
 
     async info(id) {
         return await this._info_loader.load(id)

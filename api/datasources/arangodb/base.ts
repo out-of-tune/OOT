@@ -4,13 +4,15 @@ import InvalidInputError from '../../errors/InvalidInputError'
 
 class BaseAPI {
   db: any
-  private _id_loader: DataLoader<unknown, unknown>
+  protected _id_loader = new DataLoader<string, unknown>(ids => this.get_ids(ids, this.db))
+  static collection: string = null
+  static edges: string[] = []
+
   constructor(db: any) {
     this.db = db
-    this._id_loader = new DataLoader(ids => this.get_ids(ids, this.db))
   }
 
-  async get_ids(ids: string, db = this.db) {
+  async get_ids(ids: string[], db = this.db) {
     const query = aql`
         FOR id IN ${ids}
             RETURN Document(id)
@@ -19,7 +21,7 @@ class BaseAPI {
     return cursor.all()
   }
 
-  async _search(collection, value, field, limit) {
+  async _search(collection, value, field, limit=undefined) {
     limit = typeof (limit) !== 'undefined' ? limit : 1
     const query = aql`
         FOR n IN ${this.db.collection(collection)}
@@ -82,9 +84,9 @@ class BaseAPI {
 
   }
 
-  async _collection(name, edge = false) {
+  static async ensureCollection(db, name, edge = false) {
     try {
-      const collection = edge ? this.db.edgeCollection(name) : this.db.collection(name)
+      const collection = edge ? db.edgeCollection(name) : db.collection(name)
       if (!await collection.exists()) {
         console.log(`Creating '${name}' collection...`)
         await collection.create()
@@ -93,11 +95,12 @@ class BaseAPI {
       console.log(error.message)
     }
   }
-
-  initialize(config) {
-    this.context = config.context
+  
+  static async onConnect(db) {
+    await Promise.all([
+      this.ensureCollection(db, this.collection),
+      ...this.edges.map(edge => this.ensureCollection(db, edge, true))
+    ])
   }
-
-
 }
 export default BaseAPI

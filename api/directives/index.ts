@@ -1,9 +1,7 @@
-import DepractedDirective from './DepracatedDirective'
-import RequireAuthDirective from './RequireAuthDirective'
+import authDirective from './RequireAuthDirective'
 
 const schemaDirectives = {
-    depracated: DepractedDirective,
-    auth: RequireAuthDirective
+    auth: authDirective
 }
 
 export default schemaDirectives

@@ -1,4 +1,3 @@
-// import { DataSource } from 'apollo-datasource'
 import { Database } from 'arangojs'
 import ArtistAPI from './artist'
 import GenreAPI from './genre'
@@ -7,16 +6,21 @@ import SourceAPI from './source'
 import AppAPI from './app'
 
 class ArangoAPI {
-  artist: ArtistAPI
-  genre: GenreAPI
-  user: UserAPI
-  source: SourceAPI
-  app: AppAPI
-    constructor() {
-        super()
+    artist: ArtistAPI
+    genre: GenreAPI
+    user: UserAPI
+    source: SourceAPI
+    app: AppAPI
+
+    constructor(db: Database) {
+        this.artist = new ArtistAPI(db)
+        this.genre = new GenreAPI(db)
+        this.user = new UserAPI(db)
+        this.source = new SourceAPI(db)
+        this.app = new AppAPI(db)
     }
 
-    async connect(arango_url, arango_database, user, password, context=this) {
+    static async connect(arango_url, arango_database, user, password) {
         try {
             const system = new Database(arango_url)
                 .useDatabase('_system')
@@ -29,29 +33,20 @@ class ArangoAPI {
             }
 
             const db = system.useDatabase(arango_database)
-            
-            context.artist = new ArtistAPI(db)
-            context.genre = new GenreAPI(db)
-            context.user = new UserAPI(db)
-            context.source = new SourceAPI(db)
-            context.source.create_initial()
-            context.app = new AppAPI(db)
-            context.app.create_initial(process.env.CLIENT_KEY, process.env.CLIENT_SECRET)
+            ArtistAPI.onConnect(db)
+            GenreAPI.onConnect(db)
+            UserAPI.onConnect(db)
+            SourceAPI.onConnect(db)
+            AppAPI.onConnect(db)
+
             console.log('ArangoDB connected: ', await system.version())
-            
+            return db
         } catch(err) {
             if (err.message.startsWith('connect ECONNREFUSED')) {
                 console.log(err.message, 'Retrying in 5s...')
-                setTimeout(() => context.connect(arango_url, arango_database, user, password, context), 5000)
+                setTimeout(() => ArangoAPI.connect(arango_url, arango_database, user, password), 5000)
             } else console.log(err.message)
         }
-    }
-
-    initialize(config) {
-        this.context = config.context
-        this.artist.initialize(config)
-        this.user.initialize(config)
-        this.genre.initialize(config)
     }
 }
 

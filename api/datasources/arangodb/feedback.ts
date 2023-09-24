@@ -1,15 +1,10 @@
 import BaseAPI from './base'
 
 class FeedbackAPI extends BaseAPI {
-    constructor(db) {
-        super(db)
-        this._collection('Feedback')
-        this.collection = 'Feedback'
-    }
-
+    static collection = "Feedback"
 
     async create(feedback) {
-        return await super._create(this.collection, feedback)
+        return await super._create(FeedbackAPI.collection, feedback)
     }
 }
 

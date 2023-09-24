@@ -1,6 +1,12 @@
-import { MemcachedCache } from 'apollo-server-cache-memcached'
+import Keyv from "keyv"
+import KeyvMemcache from "@keyv/memcache";
+import { KeyvAdapter } from "@apollo/utils.keyvadapter"
 
-export default new MemcachedCache(
-    [ process.env.MEMCACHED_HOST],
-    { retries: 10, retry: 1000 }
-)
+const servers = [
+    process.env.MEMCACHED_HOST,
+].join(",");
+  
+const memcache = new KeyvMemcache(servers)
+
+export default new KeyvAdapter(new Keyv({ store: memcache }))
+  

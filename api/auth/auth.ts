@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken'
+import { type } from 'os'
 
 const secret = () => process.env.JWT_SECRET
 
@@ -8,7 +9,9 @@ function sign(obj, exp) {
 
 function validate(token) {
     try {
-        return jwt.verify(token, secret())
+        const res = jwt.verify(token, secret())
+        if (typeof(res) == "string") return {id: res}
+        else return res
     } catch (err) {
         throw new Error('Invalid token provided')
     }

@@ -3,17 +3,11 @@ import DataLoader from 'dataloader'
 import BaseAPI from './base'
 
 class GenreAPI extends BaseAPI{
-    private _subgenre_loader: DataLoader<unknown, unknown>
-  private _supergenre_loader: DataLoader<unknown, unknown>
-  private _artists_loader: DataLoader<unknown, unknown>
-    constructor(db) {
-        super(db)
-        this._collection('Genre')
-        this._collection('subgenre_supergenre', true)
-        this._subgenre_loader = new DataLoader(ids => this._subgenres(ids, this.db))
-        this._supergenre_loader = new DataLoader(ids => this._supergenres(ids, this.db))
-        this._artists_loader = new DataLoader(ids => this._artists(ids, this.db))
-    }
+    static collection = "Genre"
+    static edges = ["subgenre_supergenre"]
+    private _subgenre_loader = new DataLoader<string, unknown>(ids => this._subgenres(ids, this.db))
+    private _supergenre_loader = new DataLoader<string, unknown>(ids => this._supergenres(ids, this.db))
+    private _artists_loader = new DataLoader<string, unknown>(ids => this._artists(ids, this.db))
 
     async all() {
         const query = aql`

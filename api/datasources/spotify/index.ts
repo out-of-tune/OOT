@@ -32,7 +32,7 @@ class SpotifyAPI extends RESTDataSource {
               grant_type: 'client_credentials'
             },
             json: true
-          }
+        }
         request.post(authOptions, (error, response, body) => {
             if (!error && response.statusCode === 200) {
                 context.access_token = response.body.access_token

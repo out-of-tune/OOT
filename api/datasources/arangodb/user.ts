@@ -1,15 +1,12 @@
 import { aql } from 'arangojs'
 import BaseAPI from './base'
+import { User } from '../../src/generated/graphql'
 
 class UserAPI extends BaseAPI {
-  constructor(db) {
-    super(db)
-    this._collection('User')
-  }
+  static collection = "User"
 
-
-  async create(user, roles) {
-    return await super._create('User', { ...user, roles })
+  create(user, roles) {
+    return super._create('User', { ...user, roles })
   }
 
   async search(value, field, limit) {
@@ -30,12 +27,18 @@ class UserAPI extends BaseAPI {
     return data
   }
 
-  async fetch(email) {
-    return await this.search(email, 'email', 1)
+  fetch(email) {
+    return this.search(email, 'email', 1)
   }
 
-  async update(id, fields, values) {
-    return await this.set_fields('User', id, fields, values)
+  /**
+   * 
+   * @param id id of the user to update
+   * @param fields dict of keys and values to update the user document
+   * @returns changed user document
+   */
+  update(id: string, fields: {[key: string]: any}): Promise<User> {
+    return this.set_fields('User', id, fields)
   }
 }
 
