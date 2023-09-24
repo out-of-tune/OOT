@@ -56,7 +56,9 @@ describe("importConfiguration", () => {
     );
     expect(dispatch).toHaveBeenCalledWith(
       "setError",
-      new SyntaxError("Unexpected token < in JSON at position 0"),
+      new SyntaxError(
+        "Unexpected token '<', \"<tag>I am \"... is not valid JSON",
+      ),
     );
   });
 });
