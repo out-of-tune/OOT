@@ -2,16 +2,14 @@ const express = require('express')
 const simpleOauth = require('simple-oauth2')
 const qs = require('querystring')
 const router = express.Router()
+const settings = require('../../../settings')
 
-const callbackUrl = `${process.env.PROXY_URI}/${process.env.AUTH_HOST}/oauth2/spotify/callback`
-const scope = process.env.SPOTIFY_SCOPE
-
-const client_url = process.env.PROXY_URI
+const callbackUrl = `${settings.PROXY_URI}/auth/oauth2/spotify/callback`
 
 const spotify_oauth = simpleOauth.create({
     client: {
-        id: process.env.SPOTIFY_CLIENT_ID,
-        secret: process.env.SPOTIFY_CLIENT_SECRET
+        id: settings.SPOTIFY_CLIENT_ID,
+        secret: settings.SPOTIFY_CLIENT_SECRET
     },
     auth: {
         tokenHost: 'https://accounts.spotify.com',
@@ -25,7 +23,7 @@ const spotify_oauth = simpleOauth.create({
 
 const authorizationUrl = spotify_oauth.authorizationCode.authorizeURL({
     redirect_uri: callbackUrl,
-    scope
+    scope: settings.SPOTIFY_SCOPE
 })
 
 router.get('/', (req, res) => {
@@ -42,10 +40,10 @@ router.get('/callback', async (req, res) => {
 
     try {
         const result = await spotify_oauth.authorizationCode.getToken(options)
-        res.redirect(`${client_url}/#/login?${qs.stringify(result)}`)
+        res.redirect(`${settings.PROXY_URI}/#/login?${qs.stringify(result)}`)
     } catch(error) {
         console.error('Spotify Access Token Error', error.message)
-        res.redirect(`${client_url}/#/login?${qs.stringify({
+        res.redirect(`${settings.PROXY_URI}/#/login?${qs.stringify({
             error: 'authorization_failed'
         })}`)
     }
