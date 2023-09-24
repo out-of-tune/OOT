@@ -1,6 +1,6 @@
 var casual = require('casual')
-import resolvers from './artist'
-import InvalidInputError from '../../../errors/InvalidInputError'
+import { InvalidInputError } from '../../../errors/errors.js'
+import resolvers from './artist.js'
 
 casual.define('id', (base) => {
     return `${base}/${casual.integer(1, 200000)}`
@@ -46,6 +46,11 @@ const context = {
                 ])
             }
         }
+    },
+    req: {
+        headers: {
+            'client-authentication': 'token'
+        }
     }
 }
 
@@ -86,7 +91,7 @@ describe('artist resolvers', () => {
             try {
                 await resolvers.Query.artist({}, {id: casual.id('Artist'), mbid: casual.uuid}, context)
             } catch (e) {
-                if (! e instanceof InvalidInputError) throw e
+                if (!(e instanceof InvalidInputError)) throw e
                 expect(true).toBe(true)
             }
             await resolvers.Query.artist({}, {name: casual.username, limit: 6 }, context)

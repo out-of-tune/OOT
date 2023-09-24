@@ -1,23 +1,25 @@
+import dotenv from 'dotenv'
+dotenv.config()
+
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
-import auth from './auth';
-import helpers from './helpers';
+import auth from './auth/index.js';
+import helpers from './helpers/index.js';
 
-import ArangoAPI from './datasources/arangodb';
-import SpotifyAPI from './datasources/spotify';
+import ArangoAPI from './datasources/arangodb/index.js';
+import SpotifyAPI from './datasources/spotify/index.js';
 
-import resolvers from './resolvers';
+import resolvers from './resolvers/index.js';
 import { readFileSync } from 'fs';
-import schemaDirectives from './directives';
-require('dotenv').config()
+import schemaDirectives from './directives/index.js';
 
-import cache from './caching';
-import { makeExecutableSchema } from 'graphql-tools';
-import authDirectiveTransformer from './directives/RequireAuthDirective';
+import cache from './caching/index.js';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import authDirectiveTransformer from './directives/RequireAuthDirective.js';
 
 
 const port = process.env.APOLLO_PORT
-const type_defs = readFileSync('./schema.graphql', { encoding: 'utf-8' });;
+const type_defs = readFileSync('./schema/schema.graphql', { encoding: 'utf-8' });;
 
 let schema = makeExecutableSchema({
     typeDefs: type_defs,

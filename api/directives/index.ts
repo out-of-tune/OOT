@@ -1,4 +1,4 @@
-import authDirective from './RequireAuthDirective'
+import authDirective from './RequireAuthDirective.js'
 
 const schemaDirectives = {
     auth: authDirective

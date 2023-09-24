@@ -1,4 +1,4 @@
-import auth from './auth'
+import auth from './auth.js'
 
 const authenticate_user = (arango) => async (ctx) => {
     let token = ctx.req.headers['x-access-token'] || ctx.req.headers['authorization']

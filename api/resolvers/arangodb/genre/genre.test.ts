@@ -1,6 +1,6 @@
 var casual = require('casual')
-import resolvers from './genre'
-import InvalidInputError from '../../../errors/InvalidInputError'
+import { InvalidInputError } from '../../../errors/errors.js'
+import resolvers from './genre.js'
 
 casual.define('id', (base) => {
     return `${base}/${casual.integer(1, 200000)}`
@@ -75,7 +75,7 @@ describe('genre resolvers', () => {
             try {
                 await resolvers.Query.genre({}, {id: casual.id('Genre'), name: casual.name}, context)
             } catch (e) {
-                if (! e instanceof InvalidInputError) throw e
+                if (!(e instanceof InvalidInputError)) throw e
                 expect(true).toBe(true)
             }
             await resolvers.Query.genre({}, {name: casual.name, limit: 6 }, context)

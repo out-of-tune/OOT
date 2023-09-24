@@ -1,7 +1,5 @@
-import InvalidInputError from '../../../errors/InvalidInputError'
-import NotFoundError from '../../../errors/NotFoundError'
-
-import auth from '../../../auth'
+import auth from '../../../auth/index.js'
+import { InvalidInputError, NotFoundError } from '../../../errors/errors.js'
 
 const resolvers = {
     Query: {

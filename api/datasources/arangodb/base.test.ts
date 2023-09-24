@@ -1,4 +1,4 @@
-import BaseAPI from './base'
+import BaseAPI from './base.js'
 
 describe('BaseAPI.reducer', () => {
     test('BaseAPI reducer converts _id', () => {

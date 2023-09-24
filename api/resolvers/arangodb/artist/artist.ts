@@ -1,9 +1,17 @@
-import { post } from 'request-promise-native'
-import InvalidInputError from '../../../errors/InvalidInputError'
+import got from 'got'
+import { InvalidInputError } from '../../../errors/errors.js'
+
+type ArtistQuery = {
+    id?: string,
+    sid?: string,
+    mbid?: string,
+    name?: string,
+    limit?: number
+}
 
 const resolvers = {
     Query: {
-        artist: async (_, { id, sid, mbid, name, limit }, { dataSources, req }) => {
+        artist: async (_, { id, sid, mbid, name, limit }: ArtistQuery, { dataSources, req }) => {
             const filters = {id, sid, mbid, name}
             if (Object.values(filters).filter(val => val).length !== 1)
                 throw new InvalidInputError({
@@ -18,8 +26,8 @@ const resolvers = {
                 const res = await dataSources.arango.artist.search(sid, 'sid')
                 if (res.length !== 0) return res
                 try {
-                    const added = await post(`http://localhost:${process.env.APOLLO_PORT}/`, {
-                        body: {
+                    const added: any = await got.post(`http://localhost:${process.env.APOLLO_PORT}/`, {
+                        json: {
                             query: `
                                 mutation {
                                     addArtist(sid: "${sid}") {
@@ -32,11 +40,10 @@ const resolvers = {
                                 }
                             `
                         },
-                        json: true,
                         headers: {
                             'client-authentication': req.headers['client-authentication']
                         }
-                    })
+                    }).json()
                     if (added.data.addArtist.success) {
                         return [ added.data.addArtist.artist ]
                     }

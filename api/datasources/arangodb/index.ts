@@ -1,9 +1,9 @@
 import { Database } from 'arangojs'
-import ArtistAPI from './artist'
-import GenreAPI from './genre'
-import UserAPI from './user'
-import SourceAPI from './source'
-import AppAPI from './app'
+import ArtistAPI from './artist.js'
+import GenreAPI from './genre.js'
+import UserAPI from './user.js'
+import SourceAPI from './source.js'
+import AppAPI from './app.js'
 
 class ArangoAPI {
     artist: ArtistAPI

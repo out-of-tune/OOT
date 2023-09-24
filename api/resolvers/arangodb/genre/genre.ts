@@ -1,8 +1,14 @@
-import InvalidInputError from '../../../errors/InvalidInputError'
+import { InvalidInputError } from "../../../errors/errors.js"
+
+type GnereQuery = {
+    id?: string,
+    name?: string,
+    limit?: number
+}
 
 const resolvers = {
     Query: {
-        genre: (_, { id, name, limit }, {dataSources }) => {
+        genre: (_, { id, name, limit }: GnereQuery, {dataSources }) => {
             const filters = {id, name}
             if (Object.values(filters).filter(val => val).length > 1)
                 throw new InvalidInputError({

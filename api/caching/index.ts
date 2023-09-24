@@ -1,5 +1,5 @@
-import memcache from './memcached'
-import responseCache from './responsecache'
+import memcache from "./memcached.js"
+import responseCache from "./responsecache.js"
 
 export default {
     memcache,

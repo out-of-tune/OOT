@@ -1,8 +1,7 @@
 import { defaultFieldResolver } from "graphql"
-import AuthenticationError from '../errors/AuthenticationError'
-import AuthorizationError from '../errors/AuthorizationError'
 import { mapSchema, getDirective, MapperKind } from '@graphql-tools/utils'
 import { GraphQLSchema } from 'graphql'
+import { AuthenticationError, AuthorizationError } from "../errors/errors.js"
  
 const authDirectiveTransformer = (schema: GraphQLSchema, directiveName: string) => {
     return mapSchema(schema, {

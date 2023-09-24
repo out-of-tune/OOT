@@ -1,6 +1,6 @@
 import { aql } from 'arangojs'
 import DataLoader from 'dataloader'
-import BaseAPI from './base'
+import BaseAPI from './base.js'
 
 class GenreAPI extends BaseAPI{
     static collection = "Genre"

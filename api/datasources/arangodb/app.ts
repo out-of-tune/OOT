@@ -1,4 +1,4 @@
-import BaseAPI from './base'
+import BaseAPI from './base.js'
 
 class AppAPI extends BaseAPI {
     static collection = "App"

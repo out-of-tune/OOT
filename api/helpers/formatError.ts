@@ -1,8 +1,7 @@
 import { unwrapResolverError } from '@apollo/server/errors';
-import NotFoundError from '../errors/NotFoundError'
-import AuthenticationError from '../errors/AuthenticationError'
 import { GraphQLFormattedError } from 'graphql';
 import { isInstance } from 'apollo-errors';
+import { AuthenticationError, NotFoundError } from '../errors/errors.js';
 
 function myFormatError(formattedError: GraphQLFormattedError, error: Error): GraphQLFormattedError {
   // if (unwrapResolverError(error) instanceof CustomDBError) {

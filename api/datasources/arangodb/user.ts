@@ -1,6 +1,6 @@
 import { aql } from 'arangojs'
-import BaseAPI from './base'
-import { User } from '../../src/generated/graphql'
+import BaseAPI from './base.js'
+import { User } from '../../generated/graphql.js'
 
 class UserAPI extends BaseAPI {
   static collection = "User"

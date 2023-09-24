@@ -1,7 +1,7 @@
-import artistCases from './artistcases'
-import genreCases from './genrecases'
-import tokenCases from './tokencases'
-import userCases from './usercases'
+import artistCases from './artistcases.js'
+import genreCases from './genrecases.js'
+import tokenCases from './tokencases.js'
+import userCases from './usercases.js'
 
 export default [
     ...artistCases,

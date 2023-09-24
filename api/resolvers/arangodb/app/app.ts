@@ -1,4 +1,4 @@
-import auth from '../../../auth'
+import auth from '../../../auth/index.js'
 
 const resolvers = {
     Mutation: {

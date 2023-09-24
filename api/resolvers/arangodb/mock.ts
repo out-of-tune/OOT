@@ -1,5 +1,5 @@
 var casual = require('casual')
-import resolvers from './arangodb'
+import resolvers from './arangodb.js'
 
 casual.define('array', (min, max) => {
     var arr = []

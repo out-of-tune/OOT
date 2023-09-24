@@ -1,6 +1,6 @@
 import DataLoader from 'dataloader'
 import { aql } from 'arangojs'
-import InvalidInputError from '../../errors/InvalidInputError'
+import { InvalidInputError } from '../../errors/errors.js'
 
 class BaseAPI {
   db: any

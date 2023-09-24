@@ -1,8 +1,8 @@
-import { merge } from 'lodash'
-import arangodb from './arangodb'
-import spotify from './spotify'
-const resolvers = merge(
+import _ from 'lodash'
+import arangodb from './arangodb/arangodb.js'
+import spotify from './spotify.js'
+const resolvers = _.merge(
     arangodb,
     spotify
 )
-export default { resolvers }
+export default resolvers

@@ -1,8 +1,9 @@
 // import { DataSource } from 'apollo-datasource';
 import { RESTDataSource, AugmentedRequest } from '@apollo/datasource-rest';
 import type { KeyValueCache } from '@apollo/utils.keyvaluecache';
-import request from 'request';
-import rp from 'request-promise-native';
+import got, { RequestError, Response } from 'got';
+
+const delay = (time: number) => new Promise(resolve => setTimeout(resolve, time))
 
 class SpotifyAPI extends RESTDataSource {
     client_id: string;
@@ -19,42 +20,40 @@ class SpotifyAPI extends RESTDataSource {
     initialize() {/* Apollo calls this with every request */}
 
     start() {
-        this.setToken(this)
+        this.setToken()
     }
-    setToken(context){
-        console.log(context)
+    async setToken(){
         var authOptions = {
-            url: 'https://accounts.spotify.com/api/token',
             headers: {
-              'Authorization': 'Basic ' + (Buffer.from(context.client_id + ':' + context.client_secret).toString('base64'))
+                'Authorization': 'Basic ' + (Buffer.from(this.client_id + ':' + this.client_secret).toString('base64'))
             },
             form: {
-              grant_type: 'client_credentials'
-            },
-            json: true
-        }
-        request.post(authOptions, (error, response, body) => {
-            if (!error && response.statusCode === 200) {
-                context.access_token = response.body.access_token
-                setTimeout(context.setToken, response.body.expires_in*500, context)
-            } else {
-                console.log(response ? response.statusCode : 'Error' + ': ' + error)
-                console.log('Retrying...')
-                setTimeout(context.setToken, 1000, context)
+                grant_type: 'client_credentials'
             }
-        })
+        }
+        try {
+            const res: any = await got.post('https://accounts.spotify.com/api/token', authOptions).json()
+            console.log(`Loaded spotify token: ${JSON.stringify(res)}`)
+            this.access_token = res.access_token
+            await delay(res.expires_in*500)
+        } catch (e) {
+            const response: Response = e.response
+            console.log(`Error trying too fetch Spotify token (${response?.statusCode}): ${response?.body}`)
+            console.log('Retrying...')
+            await delay(1000)
+        }
+        this.setToken()
     }
     getToken(){
         return {token:this.access_token}
     }
 
     async artist_info(sid: string) {
-        const res = await rp.get(`https://api.spotify.com/v1/artists/${sid}`, {
+        const res: any = await got.get(`https://api.spotify.com/v1/artists/${sid}`, {
             headers: {
                 'Authorization': `Bearer ${this.getToken().token}`
-            },
-            json: true
-        })
+            }
+        }).json()
         return transform_artist(res)
     }
 }
