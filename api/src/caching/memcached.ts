@@ -1,9 +1,10 @@
 import Keyv from "keyv"
 import KeyvMemcache from "@keyv/memcache";
 import { KeyvAdapter } from "@apollo/utils.keyvadapter"
+import { MEMCACHED_HOST } from "../helpers/settings.js";
 
 const servers = [
-    process.env.MEMCACHED_HOST,
+    MEMCACHED_HOST,
 ].join(",");
   
 const memcache = new KeyvMemcache(servers)
