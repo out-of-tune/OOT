@@ -3,7 +3,6 @@ dotenv.config()
 
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
-import auth from './auth/index.js';
 import helpers from './helpers/index.js';
 
 import ArangoAPI from './datasources/arangodb/index.js';
@@ -11,11 +10,9 @@ import SpotifyAPI from './datasources/spotify/index.js';
 
 import resolvers from './resolvers/index.js';
 import { readFileSync } from 'fs';
-import schemaDirectives from './directives/index.js';
 
 import cache from './caching/index.js';
 import { makeExecutableSchema } from '@graphql-tools/schema';
-import authDirectiveTransformer from './directives/RequireAuthDirective.js';
 
 
 const port = process.env.APOLLO_PORT
@@ -26,18 +23,11 @@ let schema = makeExecutableSchema({
     resolvers
 })
 
-schema = authDirectiveTransformer(schema, "auth")
-
-
 const server = new ApolloServer({
   schema: schema,
   formatError: helpers.formatError,
   includeStacktraceInErrorResponses: process.env.NODE_ENV === 'development',
   introspection: process.env.NODE_ENV === 'development',
-  // context: helpers.applyMiddleware([
-  //     auth.middlewares.authenticate_client(arango),
-  //     auth.middlewares.authenticate_user(arango)
-  // ]),
   cache: cache.memcache,
   plugins: [cache.responseCache]
 })
@@ -54,11 +44,7 @@ const start = async () => {
   )
 
   const { url } = await startStandaloneServer(server, {
-    context: async ({ req }) => {
-      // const token = getTokenFromRequest(req);
-
-      
-
+    context: async () => {
       return {
         dataSources: {
           spotify: spotifyApiInstance,

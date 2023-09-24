@@ -1,7 +1,6 @@
-// import { DataSource } from 'apollo-datasource';
-import { RESTDataSource, AugmentedRequest } from '@apollo/datasource-rest';
+import { RESTDataSource } from '@apollo/datasource-rest';
 import type { KeyValueCache } from '@apollo/utils.keyvaluecache';
-import got, { RequestError, Response } from 'got';
+import got, { Response } from 'got';
 
 const delay = (time: number) => new Promise(resolve => setTimeout(resolve, time))
 

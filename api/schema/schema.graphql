@@ -59,68 +59,19 @@ input StringFilter {
   val: String!
 }
 
-type User {
-  id: ID!
-  email: String!
-  firstname: String
-  lastname: String
-  name: String!
-}
-
 type AddArtistResponse {
   success: Boolean!
   message: String
   artist: Artist
 }
 
-enum ROLES {
-  ADMIN
-  USER
-  GOD
-}
-
 type Query {
-  user(id: ID, name: String, email: String, limit: Int = 10): [User] @auth(requires: ADMIN)
-  me: User @auth
   artist(id: ID, sid: ID, mbid: ID, name: String, limit: Int = 10): [Artist]
   genre(id: ID, name: String, limit: Int = 10): [Genre]
   publicToken: Token
 }
 
-input Signup {
-  email: String!
-  firstname: String
-  lastname: String
-  name: String!
-}
-
-type LoginResponse {
-  success: Boolean!
-  message: String
-  user: User
-  token: Token
-}
-type AppLoginResponse {
-  success: Boolean!
-  message: String
-  token: Token
-}
-
 type Mutation {
-  login(email: String): LoginResponse!,
-  signup(user: Signup!): LoginResponse!,
-  addroles(id: ID!, roles: [ROLES]!): Boolean! @auth(requires: ADMIN)
-  loginapp(base: String): AppLoginResponse!
   createfeedback(feedback: String!, email: String, type: String, group: String): Boolean!
   addArtist(sid: ID!): AddArtistResponse!
 }
-
-# type Mutation {
-#   login(email: String): LoginResponse!
-# }
-
-# type LoginResponse {
-#   success: Boolean!
-#   message: String
-#   token: String
-# }
