@@ -43,8 +43,9 @@ class SpotifyAPI extends RESTDataSource {
         }
         this.setToken()
     }
+
     getToken(){
-        return {token:this.access_token}
+        return {token: this.access_token}
     }
 
     async artist_info(sid: string) {
