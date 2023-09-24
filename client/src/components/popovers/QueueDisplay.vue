@@ -30,20 +30,20 @@
     </div>
 
     <draggable :list="queue" @change="onMove" v-if="queue.length > 0">
-      <li
-        class="song"
-        v-for="(track, index) in queue"
-        v-bind:key="track.key"
-        @click="playSong(index)"
-      >
-        <button @click="removeFromQueue(index)">
-          <v-icon color="white" icon="mdi-remove" />
-        </button>
-        <div :class="{ bold: index === queueIndex }">{{ track.name }}</div>
-        <button v-if="loginState" @click="addSongToCurrentPlaylist(track.uri)">
-          <v-icon color="white" icon="mdi-playlist-plus" />
-        </button>
-      </li>
+      <template #item="{ element, index }">
+        <li class="song" @click="playSong(index)">
+          <button @click="removeFromQueue(index)">
+            <v-icon color="white" icon="mdi-minus" />
+          </button>
+          <div :class="{ bold: index === queueIndex }">{{ element.name }}</div>
+          <button
+            v-if="loginState"
+            @click="addSongToCurrentPlaylist(element.uri)"
+          >
+            <v-icon color="white" icon="mdi-playlist-plus" />
+          </button>
+        </li>
+      </template>
     </draggable>
     <h2 v-else>Nothing in queue!</h2>
   </div>
