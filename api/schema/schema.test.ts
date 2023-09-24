@@ -28,13 +28,6 @@ describe('Schema', () => {
             images: [],
             popularity: 12,
             genres: () => new MockList(1)
-        }),
-        User: () => ({
-            id: 'User/1',
-            email: 'steve@minecraft.com',
-            firstname: 'Steve',
-            lastname: null,
-            name: 'Steve'
         })
     }
 
@@ -52,18 +45,12 @@ describe('Schema', () => {
     })
 
     testcases.forEach(obj => {
-        const { id, query, variables, context: ctx, expected } = obj
+        const { id, query, expected } = obj
 
         test(`query: ${id}`, async () => {
-            return await expect(
-                graphql({
-                    schema: mockSchema,
-                    source: query,
-                    // null, 
-                    contextValue: ctx ,
-                    variableValues: variables
-                })
-            ).resolves.toEqual(expected)
+            const MockServer = mockServer(mockSchema, mocks)
+            
+            return expect(MockServer.query(query)).resolves.toEqual(expected)
         })
     })
 
