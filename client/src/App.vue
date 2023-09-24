@@ -2,14 +2,12 @@
   <v-app>
     <snackbar />
     <div class="topbar">
-      <div>
-        <a href="/">
-          <span class="hidden-sm-and-down title">out-of-tune</span>
-        </a>
-      </div>
       <Searchbar
         v-if="['Graph', 'Settings'].indexOf($route.name) > -1"
       ></Searchbar>
+      <div v-if="loggedIn">
+        {{ $store.state.playlists.currentPlaylist.name }}
+      </div>
       <div class="login" v-if="['Graph', 'Settings'].indexOf($route.name) > -1">
         <button v-if="!loggedIn" id="login" v-on:click="loginUser">
           login
@@ -161,8 +159,7 @@ a {
 .topbar {
   background-color: #252525;
   color: white;
-  display: grid;
-  grid-template-columns: 1fr 3fr 1fr;
+  display: flex;
   height: 64px;
   align-items: center;
   padding-right: 35px;
