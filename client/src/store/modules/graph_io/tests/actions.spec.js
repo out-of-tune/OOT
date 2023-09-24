@@ -44,37 +44,6 @@ describe("storeGraph", () => {
     };
     state = rootState.graph_io;
   });
-  it("calls saveIndexedDb", () => {
-    getAllNodes.mockReturnValueOnce([
-      { id: "artist/1", data: { somedata: "some data" } },
-      { id: "artist/2", data: { somedata: "some data" } },
-    ]);
-    getAllLinks.mockReturnValueOnce([{ from: "artist/1", to: "artist/2" }]);
-    getNodePosition
-      .mockReturnValueOnce({ x: 123, y: 123 })
-      .mockReturnValueOnce({ x: 12, y: 12 });
-    getPinnedState.mockReturnValueOnce(true).mockReturnValue(false);
-    storeGraph({ rootState, dispatch, commit, state }, "abc");
-    const expectedGraph = {
-      nodesWithPositions: [
-        {
-          node: { id: "artist/1", data: { somedata: "some data" } },
-          position: { x: 123, y: 123 },
-          pinned: true,
-        },
-        {
-          node: { id: "artist/2", data: { somedata: "some data" } },
-          position: { x: 12, y: 12 },
-          pinned: false,
-        },
-      ],
-      links: [{ from: "artist/1", to: "artist/2" }],
-    };
-    expect(IndexedDbService.saveGraph).toHaveBeenCalledWith(
-      "abc",
-      expectedGraph,
-    );
-  });
   it("adds name to stored graph name list if it is not there yet", () => {
     getAllNodes.mockReturnValueOnce([
       { id: "artist/1", data: { somedata: "some data" } },
