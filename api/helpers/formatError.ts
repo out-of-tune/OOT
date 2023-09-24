@@ -1,28 +1,31 @@
-import { isInstance, formatError } from '@apollo/server'
+import { unwrapResolverError } from '@apollo/server/errors';
 import NotFoundError from '../errors/NotFoundError'
 import AuthenticationError from '../errors/AuthenticationError'
+import { GraphQLFormattedError } from 'graphql';
+import { isInstance } from 'apollo-errors';
 
-function myFormatError(error) {
-    if (error.message.startsWith('DataLoader must be constructed'))  return formatError(new NotFoundError('Id Not Found'))
-    if (error.message.startsWith('Context creation failed: ')) {
-        error.message = error.message.replace('Context creation failed: ', '')
-    }
+function myFormatError(formattedError: GraphQLFormattedError, error: Error): GraphQLFormattedError {
+  // if (unwrapResolverError(error) instanceof CustomDBError) {
+  //   return { message: 'Internal server error' };
+  // }
+  if (error.message.startsWith('DataLoader must be constructed')) return new NotFoundError('Id Not Found')
+  if (error.message.startsWith('Context creation failed: ')) {
+    error.message = error.message.replace('Context creation failed: ', '')
+  }
 
-    if (error.message.startsWith('AuthenticationError: ')) return formatError(new AuthenticationError({ data: { unexpected: error.message.replace('AuthenticationError: ', '') } }))
+  if (error.message.startsWith('AuthenticationError: ')) return new AuthenticationError({ data: { unexpected: error.message.replace('AuthenticationError: ', '') } })
 
-    const { originalError } = error;
-
-    if (isInstance(originalError) && !originalError.internalData.skiplog) {
-        // log internalData to stdout but not include it in the formattedError
-        console.log({
-            type: originalError.name,
-            data: originalError.data,
-            internalData: originalError.internalData
-        })
-    } else if(!isInstance(originalError)) ;
-        console.log(error)
-    //console.log(error)
-    return formatError(error)
+  // if (isInstance(error) && !error.internalData.skiplog) {
+    // log internalData to stdout but not include it in the formattedError
+    // console.log({
+    //   type: error.name,
+      // data: error.data,
+      // internalData: error.internalData
+    // })
+  // } else if (!isInstance(error))
+  //   console.log(error)
+  console.log(formattedError)
+  return formattedError
 }
 
 export default myFormatError

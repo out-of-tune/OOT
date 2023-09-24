@@ -3,6 +3,9 @@ import DataLoader from 'dataloader'
 import BaseAPI from './base'
 
 class GenreAPI extends BaseAPI{
+    private _subgenre_loader: DataLoader<unknown, unknown>
+  private _supergenre_loader: DataLoader<unknown, unknown>
+  private _artists_loader: DataLoader<unknown, unknown>
     constructor(db) {
         super(db)
         this._collection('Genre')

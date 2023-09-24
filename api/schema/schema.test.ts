@@ -2,9 +2,10 @@ import { makeExecutableSchema, addMockFunctionsToSchema, mockServer, MockList } 
 
 import { graphql } from 'graphql'
 
-import typeDefs from './schema'
-
 import testcases from './testcases'
+import { readFileSync } from 'fs';
+
+const type_defs = readFileSync('./schema.graphql', { encoding: 'utf-8' });
 
 describe('Schema', () => {
     const mockSchema = makeExecutableSchema({ typeDefs })

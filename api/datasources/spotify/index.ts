@@ -1,17 +1,21 @@
-import { DataSource } from 'apollo-datasource';
+// import { DataSource } from 'apollo-datasource';
 import { RESTDataSource, AugmentedRequest } from '@apollo/datasource-rest';
+import type { KeyValueCache } from '@apollo/utils.keyvaluecache';
 import request from 'request';
 import rp from 'request-promise-native';
 
-class SpotifyAPI extends DataSource {
-    constructor(client_id, client_secret, scope) {
-        super()
+class SpotifyAPI extends RESTDataSource {
+    client_id: string;
+    client_secret: string;
+    scope: string;
+    access_token: string;
+    constructor(options: { cache: KeyValueCache }, client_id: string, client_secret: string, scope: string) {
+        super(options)
         this.client_id = client_id
         this.client_secret = client_secret
         this.scope = scope
         this.access_token = ""
     }
-
     initialize() {/* Apollo calls this with every request */}
 
     start() {
@@ -44,7 +48,7 @@ class SpotifyAPI extends DataSource {
         return {token:this.access_token}
     }
 
-    async artist_info(sid) {
+    async artist_info(sid: string) {
         const res = await rp.get(`https://api.spotify.com/v1/artists/${sid}`, {
             headers: {
                 'Authorization': `Bearer ${this.getToken().token}`

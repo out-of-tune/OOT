@@ -1,4 +1,4 @@
-import { DataSource } from 'apollo-datasource'
+// import { DataSource } from 'apollo-datasource'
 import { Database } from 'arangojs'
 import ArtistAPI from './artist'
 import GenreAPI from './genre'
@@ -6,7 +6,12 @@ import UserAPI from './user'
 import SourceAPI from './source'
 import AppAPI from './app'
 
-class ArangoAPI extends DataSource {
+class ArangoAPI {
+  artist: ArtistAPI
+  genre: GenreAPI
+  user: UserAPI
+  source: SourceAPI
+  app: AppAPI
     constructor() {
         super()
     }

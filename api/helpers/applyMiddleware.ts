@@ -13,4 +13,4 @@ function resolveInput(middleware) {
     }
 }
 
-export default { applyMiddleware }
+export default applyMiddleware

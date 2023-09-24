@@ -13,29 +13,16 @@ require('dotenv').config()
 
 import cache from './caching';
 
-const arango = new ArangoAPI()
-arango.connect(
-  `http://${process.env.ARANGODB_HOST}:${process.env.ARANGODB_PORT}`,
-  process.env.ARANGODB_DATABASE,
-  process.env.ARANGODB_USER,
-  process.env.ARANGODB_PASSWORD
-)
-
-const spotifyApiInstance = new SpotifyAPI(process.env.SPOTIFY_CLIENT_ID, process.env.SPOTIFY_CLIENT_SECRET, process.env.SPOTIFY_SCOPE)
-spotifyApiInstance.start()
 
 const port = process.env.APOLLO_PORT
-//const address = "0.0.0.0"
 const type_defs = readFileSync('./schema.graphql', { encoding: 'utf-8' });;
 
 const server = new ApolloServer({
-  // cors: true,  
   typeDefs: type_defs,
-  // formatError: helpers.formatError,
+  formatError: helpers.formatError,
   resolvers,
-  // debug: process.env.NODE_ENV === 'development',
-  // playground: false, //process.env.NODE_ENV === 'development',
-  // schemaDirectives,
+  includeStacktraceInErrorResponses: process.env.NODE_ENV === 'development',
+  introspection: process.env.NODE_ENV === 'development',
   // dataSources: () => ({
   //     spotify: spotifyApiInstance,
   //     arango: arango
@@ -44,12 +31,33 @@ const server = new ApolloServer({
   //     auth.middlewares.authenticate_client(arango),
   //     auth.middlewares.authenticate_user(arango)
   // ]),
-  // cache: cache.memcache,
-  // plugins: [ cache.responseCache ]
+  cache: cache.memcache,
+  plugins: [cache.responseCache]
 })
 
 
 const { url } = await startStandaloneServer(server, {
+  context: async ({ req }) => {
+    // const token = getTokenFromRequest(req);
+    const { cache } = server;
+    const spotifyApiInstance = new SpotifyAPI({ cache },process.env.SPOTIFY_CLIENT_ID, process.env.SPOTIFY_CLIENT_SECRET, process.env.SPOTIFY_SCOPE )
+    spotifyApiInstance.start()
+
+    const arango = new ArangoAPI()
+    arango.connect(
+      `http://${process.env.ARANGODB_HOST}:${process.env.ARANGODB_PORT}`,
+      process.env.ARANGODB_DATABASE,
+      process.env.ARANGODB_USER,
+      process.env.ARANGODB_PASSWORD
+    )
+
+    return {
+      dataSources: {
+        spotify: spotifyApiInstance,
+        arango: arango
+      },
+    };
+  },
   listen: { port: Number.parseInt(port) },
 });
 
