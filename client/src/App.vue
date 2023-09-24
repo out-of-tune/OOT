@@ -9,7 +9,7 @@
         {{ $store.state.playlists.currentPlaylist.name }}
       </div>
       <div class="login" v-if="['Graph', 'Settings'].indexOf($route.name) > -1">
-        <button v-if="!loggedIn" id="login" v-on:click="loginUser">
+        <button class="btn" v-if="!loggedIn" id="login" v-on:click="loginUser">
           login
         </button>
         <div v-if="loggedIn" class="username">
@@ -174,6 +174,8 @@ a {
   justify-self: right;
   display: flex;
   align-items: center;
+  align-content: center;
+  justify-items: center;
 }
 
 .btn {
@@ -183,9 +185,7 @@ a {
   box-shadow: 1px 1px 4px rgba(45, 156, 219, 0.25);
   border-radius: 5px;
   padding: 3px;
-  margin-right: 1rem;
   width: 100px;
-  margin-bottom: 1rem;
   cursor: pointer;
 }
 
