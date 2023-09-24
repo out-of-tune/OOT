@@ -1,0 +1,73 @@
+directive @deprecated(
+  reason: String = "No longer supported"
+) on FIELD_DEFINITION | ENUM_VALUE
+
+directive @cacheControl(
+  maxAge: Int
+  scope: String
+) on FIELD_DEFINITION | OBJECT
+
+type Artist @cacheControl(maxAge: 1000) {
+  id: ID!
+  sid: String
+  mbid: String
+  name: String!
+  genres: [Genre]
+  images: [String]
+  popularity: Int @cacheControl(maxAge: 60)
+}
+
+type Genre @cacheControl(maxAge: 1000) {
+  id: ID!
+  name: String!
+  artists: [Artist]
+  subgenres: [Genre]
+  supergenres: [Genre]
+}
+
+type Token {
+  token: String
+  expires_in: String
+}
+
+enum NUMCOMP {
+  LT
+  GT
+  EQ
+  LTEQ
+  GTEQ
+  IN
+}
+
+input NumericsFilter {
+  comp: NUMCOMP!
+  val: Int!
+  val2: Int
+}
+
+enum STRCOMP {
+  LIKE
+  EQ
+}
+
+input StringFilter {
+  comp: STRCOMP!
+  val: String!
+}
+
+type AddArtistResponse {
+  success: Boolean!
+  message: String
+  artist: Artist
+}
+
+type Query {
+  artist(id: ID, sid: ID, mbid: ID, name: String, limit: Int = 10): [Artist]
+  genre(id: ID, name: String, limit: Int = 10): [Genre]
+  publicToken: Token
+}
+
+type Mutation {
+  createfeedback(feedback: String!, email: String, type: String, group: String): Boolean!
+  addArtist(sid: ID!): AddArtistResponse!
+}
