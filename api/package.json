@@ -6,9 +6,9 @@
   "scripts": {
     "test": "node --harmony node_modules/.bin/jest",
     "compile": "npm run codegen && tsc && cp schema/schema.graphql dist/schema/",
-    "start": "npm run compile && node ./dist/index.js",
-    "codegen": "graphql-codegen --config codegen.ts",
-    "serve": "npm run codegen && nodemon index.ts"
+    "start": "npm run compile && node ./dist/src/index.js",
+    "codegen": "graphql-codegen --config src/codegen.ts",
+    "serve": "npm run codegen && nodemon src/index.ts"
   },
   "type": "module",
   "author": "",
