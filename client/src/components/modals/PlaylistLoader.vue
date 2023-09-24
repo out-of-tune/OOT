@@ -13,8 +13,16 @@
         <div class="playlist-box" v-if="loggedIn">
           <div>
             <h2>Your playlists</h2>
-            <label class="label">filter playlists:</label>
-            <input type="text" class="textfield" v-model="filterQuery" />
+            <div class="playlists-header">
+              <div>
+                {{ playlists.length }}
+                <button class="btn" @click="loadMore()">load more</button>
+              </div>
+              <div>
+                <label class="label">filter playlists:</label>
+                <input type="text" class="textfield" v-model="filterQuery" />
+              </div>
+            </div>
             <ul class="playlists">
               <li
                 v-for="playlist in filteredPlaylists"
@@ -27,12 +35,20 @@
             </ul>
           </div>
           <div>
-            <h2>current Playlist</h2>
-            <h2>{{ currentPlaylist.name }}</h2>
-            <button class="btn" @click="loadMore()">load more</button>
+            <h2>selected Playlist</h2>
+            <h3 v-if="selectedPlaylist">{{ selectedPlaylist.name }}</h3>
+            <h3 v-else>no playlist selected</h3>
             <button class="btn" @click="loadPlaylistFromUser">
-              load playlist
+              load playlist graph
             </button>
+            <button class="btn" @click="changeCurrentPlaylist">
+              edit playlist
+            </button>
+          </div>
+          <div>
+            <h2>current Playlist to edit</h2>
+            <h3 v-if="currentPlaylist">{{ currentPlaylist.name }}</h3>
+            <h3 v-else>no playlist for editing selected</h3>
           </div>
         </div>
         <div v-else class="login-box">
@@ -60,6 +76,7 @@ export default {
   data: () => ({
     uriString: "",
     filterQuery: "",
+    selectedPlaylist: undefined,
   }),
   computed: {
     ...mapState({
@@ -90,8 +107,7 @@ export default {
       this.loadPlaylist(splitString[splitString.length - 1]);
     },
     loadPlaylistFromUser() {
-      console.log(this.currentPlaylist);
-      this.loadPlaylist(this.currentPlaylist.id);
+      this.loadPlaylist(this.selectedPlaylist.id);
     },
     loginUser() {
       this.login();
@@ -100,8 +116,10 @@ export default {
       this.loadMoreCurrentUsersPlaylists();
     },
     playlistClickHandler(playlist) {
-      console.log(playlist);
-      this.setCurrentPlaylist(playlist);
+      this.selectedPlaylist = playlist;
+    },
+    changeCurrentPlaylist() {
+      this.setCurrentPlaylist(this.selectedPlaylist);
       console.log(this.currentPlaylist.id);
     },
   },
@@ -156,8 +174,7 @@ export default {
 }
 
 .playlist-box {
-  display: grid;
-  grid-template-columns: 400px 1fr;
+  display: flex;
   margin: 1rem;
   grid-gap: 1rem;
 }
@@ -191,5 +208,10 @@ export default {
 
 .playlist-item:hover {
   color: #f2994a;
+}
+
+.playlists-header {
+  display: flex;
+  flex-direction: column;
 }
 </style>
