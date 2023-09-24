@@ -1,10 +1,8 @@
-var casual = require('casual')
+import casual from 'casual'
 import { InvalidInputError } from '../../../errors/errors.js'
 import resolvers from './artist.js'
 
-casual.define('id', (base) => {
-    return `${base}/${casual.integer(1, 200000)}`
-})
+const genId = (base='Artist') => `${base}/${casual.integer(1, 200000)}`
 
 const context = {
     dataSources: {
@@ -56,26 +54,26 @@ const context = {
 
 describe('artist resolvers', () => {
     test('name', async () => {
-        const res = await resolvers.Artist.name({ id: casual.id('Artist') }, {}, context)
+        const res = await resolvers.Artist.name({ id: genId() }, {}, context)
         expect(res).toMatch('Bob D.')
     })
     test('mbid', async () => {
-        const res = await resolvers.Artist.mbid({ id: casual.id('Artist') }, {}, context)
+        const res = await resolvers.Artist.mbid({ id: genId() }, {}, context)
         expect(typeof(res)).toBe('string')
         expect(res).toMatch('a4df10e9-fd63-4f4a-8aa4-c6945676dc2b')
     })
     test('sid', async () => {
-        const res = await resolvers.Artist.sid({ id: casual.id('Artist') }, {}, context)
+        const res = await resolvers.Artist.sid({ id: genId() }, {}, context)
         expect(typeof(res)).toBe('string')
         expect(res).toMatch('445771199x')
     })
     test('popularity', async () => {
-        const res = await resolvers.Artist.popularity({ id: casual.id('Artist') }, {}, context)
+        const res = await resolvers.Artist.popularity({ id: genId() }, {}, context)
         expect(typeof(res)).toBe('number')
         expect(res).toBe(54)
     })
     test('images', async () => {
-        const res = await resolvers.Artist.images({ id: casual.id('Artist') }, {}, context)
+        const res = await resolvers.Artist.images({ id: genId() }, {}, context)
         expect(typeof(res)).toBe('object')
         expect(res.length).toBeGreaterThan(0)
         expect(res[0]).toMatch('image1.png')
@@ -89,7 +87,7 @@ describe('artist resolvers', () => {
     describe('parent resolver', () => {
         test('invalid argument count', async () => {
             try {
-                await resolvers.Query.artist({}, {id: casual.id('Artist'), mbid: casual.uuid}, context)
+                await resolvers.Query.artist({}, {id: genId(), mbid: casual.uuid}, context)
             } catch (e) {
                 if (!(e instanceof InvalidInputError)) throw e
                 expect(true).toBe(true)
@@ -99,7 +97,7 @@ describe('artist resolvers', () => {
             
         })
         test('id argument', async () => {
-            const id = casual.id('Artist')
+            const id = genId()
             const res = await resolvers.Query.artist({}, { id }, context)
             expect(typeof(res)).toBe('object')
             expect(res).toHaveLength(1)

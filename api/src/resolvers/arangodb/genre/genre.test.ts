@@ -1,10 +1,8 @@
-var casual = require('casual')
+import casual from 'casual'
 import { InvalidInputError } from '../../../errors/errors.js'
 import resolvers from './genre.js'
 
-casual.define('id', (base) => {
-    return `${base}/${casual.integer(1, 200000)}`
-})
+const genId = (base='Genre') => `${base}/${casual.integer(1, 200000)}`
 
 const genre = {
     id: 'Genre/1',
@@ -38,11 +36,11 @@ const context = {
 
 describe('genre resolvers', () => {
     test('name', async () => {
-        const res = await resolvers.Genre.name({ id: casual.id('Genre') }, {}, context)
+        const res = await resolvers.Genre.name({ id: genId() }, {}, context)
         expect(res).toMatch('rock')
     })
     test('artists', async () => {
-        const res = await resolvers.Genre.artists({ id: casual.id }, {}, context)
+        const res = await resolvers.Genre.artists({ id: genId() }, {}, context)
         expect(typeof(res)).toBe('object')
         expect(res).toHaveLength(1)
         expect(res[0]).toMatchObject({
@@ -52,7 +50,7 @@ describe('genre resolvers', () => {
         })
     })
     test('subgenres', async () => {
-        const res = await resolvers.Genre.subgenres({ id: casual.id }, {}, context)
+        const res = await resolvers.Genre.subgenres({ id: genId() }, {}, context)
         expect(typeof(res)).toBe('object')
         expect(res).toHaveLength(1)
         expect(res[0]).toMatchObject({
@@ -61,7 +59,7 @@ describe('genre resolvers', () => {
         })
     })
     test('supergenres', async () => {
-        const res = await resolvers.Genre.supergenres({ id: casual.id }, {}, context)
+        const res = await resolvers.Genre.supergenres({ id: genId() }, {}, context)
         expect(typeof(res)).toBe('object')
         expect(res).toHaveLength(1)
         expect(res[0]).toMatchObject({
@@ -73,7 +71,7 @@ describe('genre resolvers', () => {
     describe('parent resolver', () => {
         test('invalid argument count', async () => {
             try {
-                await resolvers.Query.genre({}, {id: casual.id('Genre'), name: casual.name}, context)
+                await resolvers.Query.genre({}, {id: genId(), name: casual.name}, context)
             } catch (e) {
                 if (!(e instanceof InvalidInputError)) throw e
                 expect(true).toBe(true)
@@ -83,7 +81,7 @@ describe('genre resolvers', () => {
             
         })
         test('id argument', async () => {
-            const id = casual.id('Genre')
+            const id = genId()
             const res = await resolvers.Query.genre({}, { id }, context)
             expect(typeof(res)).toBe('object')
             expect(res).toHaveLength(1)
