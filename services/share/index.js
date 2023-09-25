@@ -7,7 +7,6 @@ const createSharedResource = require('./routes/create')
 const ensureTypeDirs = require('./directory_structure')
 
 const ensureTypes = require('./middleware/type-enforcement')
-const check_auth = require('./middleware/authentication')
 const handleErrors = require('./middleware/error-handling')
 
 

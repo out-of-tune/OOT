@@ -1,6 +1,4 @@
 const arangojs = require('arangojs')
-const UserAPI = require('./user')
-const AppAPI = require('./app')
 const ShareAPI = require('./share')
 
 class ArangoAPI {
@@ -21,8 +19,6 @@ class ArangoAPI {
 
             const db = system.useDatabase(arango_database)
             
-            context.user = new UserAPI(db)
-            context.app = new AppAPI(db)
             context.share = new ShareAPI(db)
             console.log('ArangoDB connected: ', await system.version())
             
