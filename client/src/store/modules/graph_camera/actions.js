@@ -3,6 +3,7 @@ import {
   getNodePosition,
   getNodeColor,
 } from "@/assets/js/graphHelper.js";
+import { isProd } from "../../../settings";
 
 const moveToNode = ({ commit, rootState }, node) => {
   var layout = rootState.mainGraph.renderState.layout;
@@ -161,7 +162,7 @@ const setNodeLabels = ({ commit }, nodeLabels) => {
   commit("SET_NODE_LABELS", nodeLabels);
 };
 export const actions =
-  process.env.NODE_ENV !== "production"
+  isProd
     ? {
         moveToNode,
         fitGraphToScreen,
@@ -169,7 +170,6 @@ export const actions =
         displayNodeLabels,
         removeNodeLabels,
         setNodeLabels,
-        placeNodeLabel,
         fitGraphToNodes,
       }
     : {
@@ -179,6 +179,7 @@ export const actions =
         displayNodeLabels,
         removeNodeLabels,
         setNodeLabels,
+        placeNodeLabel,
         fitGraphToNodes,
       };
 export default actions;

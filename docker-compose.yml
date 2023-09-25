@@ -13,11 +13,6 @@ services:
       context: ./client
       args: 
         - VUE_APP_PROXY_URI=${PROXY_URI}
-        - VUE_APP_PROXY_PORT=${PROXY_HTTP_PORT}
-        - VUE_APP_APOLLO_HOST=${APOLLO_HOST}
-        - VUE_APP_AUTH_HOST=auth
-        - VUE_APP_SHARE_HOST=share
-        - PORT=8080
         - NODE_ENV=${NODE_ENV}
     depends_on:
       - apollo

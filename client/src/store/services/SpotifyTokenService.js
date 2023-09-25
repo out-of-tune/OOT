@@ -10,7 +10,7 @@ class SpotifyTokenService extends BaseService {
             }`,
     };
     return this.post(
-      `/${process.env.VUE_APP_APOLLO_HOST}/`,
+      `/apollo/`,
       params,
       graphQlToken,
     ).then((response) => response.data);

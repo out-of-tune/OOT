@@ -1,8 +1,9 @@
 import axios from "axios";
+import { PROXY_URI } from "../../settings";
 
 class AuthenticationService {
   constructor() {
-    this.api = `${process.env.VUE_APP_PROXY_URI}/${process.env.VUE_APP_AUTH_HOST}`;
+    this.api = `${PROXY_URI}/auth`;
   }
   getFromAPI(url, params = null, headers = {}) {
     let config = {};

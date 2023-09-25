@@ -1,8 +1,9 @@
 import axios from "axios";
+import { PROXY_URI } from "../../settings";
 
 export default class BaseService {
   constructor() {
-    this.api = `${process.env.VUE_APP_PROXY_URI}`;
+    this.api = `${PROXY_URI}`;
   }
   post(url, params = null, token = null, headers = {}) {
     let config = token
