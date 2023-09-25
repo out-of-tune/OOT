@@ -40,9 +40,6 @@ const resolvers = {
                                     }
                                 }
                             `
-                        },
-                        headers: {
-                            'client-authentication': req.headers['client-authentication']
                         }
                     }).json()
                     if (added.data.addArtist.success) {

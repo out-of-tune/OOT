@@ -45,11 +45,7 @@ const context = {
             }
         }
     },
-    req: {
-        headers: {
-            'client-authentication': 'token'
-        }
-    }
+    req: {}
 }
 
 describe('artist resolvers', () => {
