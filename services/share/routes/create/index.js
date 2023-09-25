@@ -2,6 +2,7 @@ const fs = require('fs').promises
 const base58 = require('base58')
 
 const arango = require('../../datasources/arangodb')
+const { STORAGE_PATH } = require('../../settings')
 const INITIAL_ID = 'abcd'
 
 async function create(req, res) {
@@ -13,7 +14,7 @@ async function create(req, res) {
     if (!key || key.length === 0 || !key[0].key) key = [await arango.share.create(INITIAL_ID, type)]
     const id = key[0].key
 
-    await fs.writeFile(`${process.env.SHARE_LOC}/${type}/${id}`, data)
+    await fs.writeFile(`${STORAGE_PATH}/${type}/${id}`, data)
     await arango.share.update(key[0].id, { key: increment(id) })
 
     res.json({

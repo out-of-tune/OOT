@@ -48,8 +48,6 @@ services:
       - arangodb
     build:
       context: ./services/share
-      args:
-        - SHARE_PORT:4444
     env_file: .env
 
 networks:
