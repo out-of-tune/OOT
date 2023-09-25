@@ -1,5 +1,6 @@
 const arangojs = require('arangojs')
 const ShareAPI = require('./share')
+const settings = require('../../settings')
 
 class ArangoAPI {
     constructor() {
@@ -33,10 +34,10 @@ class ArangoAPI {
 
 const arango = new ArangoAPI()
 arango.connect(
-    `http://${process.env.ARANGODB_HOST}:${process.env.ARANGODB_PORT}`, 
-    process.env.ARANGODB_DATABASE, 
-    process.env.ARANGODB_USER, 
-    process.env.ARANGODB_PASSWORD
+    `http://${settings.ARANGO_HOST}:${settings.ARANGO_PORT}`, 
+    settings.ARANGO_DB, 
+    settings.ARANGO_USER, 
+    settings.getArangoPassword()
 )
 
 module.exports = arango

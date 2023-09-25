@@ -8,24 +8,22 @@ const ensureTypeDirs = require('./directory_structure')
 
 const ensureTypes = require('./middleware/type-enforcement')
 const handleErrors = require('./middleware/error-handling')
+const settings = require('./settings')
 
 
 const app = express()
-const port = process.env.SHARE_PORT
 
 app.use(cors())
 app.use(bodyParser.json({ limit: '50MB' }))
 app.use(bodyParser.urlencoded({ limit: '50MB' , extended: true }))
-app.use(check_auth)
 
-const types = process.env.SHARE_TYPES.split(' ')
-ensureTypeDirs(process.env.SHARE_LOC, types)
+ensureTypeDirs(settings.STORAGE_PATH, settings.TYPES)
 
-app.post('/:type/create', ensureTypes(types), createSharedResource)
-app.use(express.static(process.env.SHARE_LOC, {
+app.post('/:type/create', ensureTypes(settings.TYPES), createSharedResource)
+app.use(express.static(settings.STORAGE_PATH, {
     index: false
 }))
 
 app.use(handleErrors)
 
-app.listen(port, () => console.log(`Server running on port ${port}`))
+app.listen(settings.PORT, () => console.log(`Server running on port ${settings.PORT}`))
