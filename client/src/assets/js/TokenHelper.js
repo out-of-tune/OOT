@@ -40,30 +40,20 @@ export async function handleTokenError(
   return data;
 }
 
-async function getNewGraphqlToken(dispatch, rootState) {
-  await dispatch("authenticateClient");
-  return rootState.authentication.clientAuthenticationToken;
-}
-
 export async function handleGraphqlTokenError(
   fn,
   args,
   dispatch,
   rootState,
   tries = 0,
-  newToken = null,
 ) {
-  const token = newToken
-    ? newToken
-    : rootState.authentication.clientAuthenticationToken;
-  const promises = fn(...args, token);
+  const promises = fn(...args);
   const p =
     promises instanceof Array
       ? Promise.all(promises)
       : Promise.resolve(promises);
   const data = await p.catch(async (error) => {
     if (error.response.status == 500) {
-      const newToken = await getNewGraphqlToken(dispatch, rootState);
       if (tries < 3) {
         dispatch(
           "setError",
@@ -80,7 +70,6 @@ export async function handleGraphqlTokenError(
           dispatch,
           rootState,
           tries + 1,
-          newToken,
         );
       } else {
         dispatch(

@@ -41,9 +41,7 @@ function buildInceptionQuery() {
 const generateInceptionGraph = async ({ commit, dispatch, rootState }) => {
   const query = buildInceptionQuery();
   const queryResult = await handleGraphqlTokenError(
-    (query, token) => {
-      return GraphService.getNodes(query, token);
-    },
+    GraphService.getNodes.bind(GraphService),
     [query],
     dispatch,
     rootState,

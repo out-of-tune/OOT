@@ -96,7 +96,6 @@ export default {
       "login",
       "logout",
       "requireAccessToken",
-      "authenticateClient",
     ]),
     loginUser() {
       this.login();

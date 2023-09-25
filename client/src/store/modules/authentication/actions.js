@@ -39,9 +39,7 @@ const setExpiryTime = ({ commit }, time) => {
 };
 
 const requireAccessToken = async ({ commit, rootState }) => {
-  const result = await SpotifyTokenService.getAccessToken(
-    rootState.authentication.clientAuthenticationToken,
-  );
+  const result = await SpotifyTokenService.getAccessToken();
   const spotifyAccessToken = result.publicToken.token;
   commit("SET_SPOTIFY_ACCESS_TOKEN", spotifyAccessToken);
   return result;
@@ -63,32 +61,6 @@ const logout = ({ dispatch, commit }) => {
   dispatch("setInfo", "Logged out");
 };
 
-const authenticateClient = async ({ commit, dispatch, rootState }) => {
-  console.log(process.env);
-  const key = new ArrayBuffer(
-    `${process.env.CLIENT_KEY}:${process.env.CLIENT_SECRET}`,
-  ).toString("base64");
-
-  try {
-    const response = await AuthenticationService.login("/app/login", {
-      "App-Login": key,
-    });
-    if (response.success) {
-      commit("SET_CLIENT_AUTHENTICATION_TOKEN", response.token.token);
-    } else {
-      dispatch("setError", new Error(response.message));
-    }
-    return response;
-  } catch (error) {
-    dispatch(
-      "setError",
-      new Error(
-        "Could not authenticate the client! please refresh the webpage",
-      ),
-    );
-  }
-  return;
-};
 
 export const actions = {
   login,
@@ -100,7 +72,6 @@ export const actions = {
   refreshTokenAfterTimeout,
   requireAccessToken,
   logout,
-  authenticateClient,
 };
 
 export default actions;

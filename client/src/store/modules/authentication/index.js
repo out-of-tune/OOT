@@ -7,7 +7,6 @@ export const authentication = {
     refreshToken: "",
     expiryTime: 10,
     loginState: false,
-    clientAuthenticationToken: "",
   },
   actions,
   mutations,

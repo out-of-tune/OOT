@@ -12,7 +12,7 @@ const changeShareModalState = ({ state, commit }) => {
 const generateShareLink = async ({ commit, rootState, dispatch }, type) => {
   const object =
     type === "graph" ? getGraphObject(rootState) : rootState.configurations;
-  const compressed = pako.deflate(JSON.stringify(object), { to: "string" });
+  const compressed = pako.deflate(JSON.stringify(object), { to: "string" }).toString();
   const response = await handleGraphqlTokenError(
     ShareService.getShareLink.bind(ShareService),
     [type, compressed],

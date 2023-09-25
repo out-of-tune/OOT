@@ -17,9 +17,7 @@ const sendFeedback = async (
     `;
 
   const result = await handleGraphqlTokenError(
-    (query, token) => {
-      return GraphService.getNodes(query, token);
-    },
+    GraphService.getNodes.bind(GraphService),
     [query],
     dispatch,
     rootState,

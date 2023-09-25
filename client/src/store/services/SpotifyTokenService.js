@@ -1,7 +1,7 @@
 import BaseService from "./BaseService";
 
 class SpotifyTokenService extends BaseService {
-  getAccessToken(graphQlToken) {
+  getAccessToken() {
     let params = {
       query: `{
                 publicToken {
@@ -12,7 +12,6 @@ class SpotifyTokenService extends BaseService {
     return this.post(
       `/apollo/`,
       params,
-      graphQlToken,
     ).then((response) => response.data);
   }
 }

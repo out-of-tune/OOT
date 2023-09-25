@@ -21,9 +21,6 @@ export const mutations = {
       (state.expiryTime = 10);
   },
 
-  SET_CLIENT_AUTHENTICATION_TOKEN(state, token) {
-    state.clientAuthenticationToken = token;
-  },
 };
 
 export default mutations;
