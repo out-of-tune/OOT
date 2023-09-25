@@ -148,9 +148,7 @@ async function getFromGraphQl(
 ) {
   const query = buildSearchQuery(nodeTypes, searchParameters);
   return await handleGraphqlTokenError(
-    (query, token) => {
-      return GraphService.getNodes(query, token);
-    },
+    GraphService.getNodes.bind(GraphService),
     [query],
     dispatch,
     rootState,

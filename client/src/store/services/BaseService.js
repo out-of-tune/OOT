@@ -5,17 +5,8 @@ export default class BaseService {
   constructor() {
     this.api = `${PROXY_URI}`;
   }
-  post(url, params = null, token = null, headers = {}) {
-    let config = token
-      ? {
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Accept-Encoding": "gzip",
-            "Client-Authentication": token,
-            ...headers,
-          },
-        }
-      : {
+  post(url, params = null, headers = {}) {
+    let config = {
           headers: {
             "Access-Control-Allow-Origin": "*",
             "Accept-Encoding": "gzip",
@@ -33,17 +24,8 @@ export default class BaseService {
         });
     });
   }
-  get(url, params = null, token = null, headers = {}) {
-    let config = token
-      ? {
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Client-Authentication": token,
-            ...headers,
-          },
-          params,
-        }
-      : {
+  get(url, params = null, headers = {}) {
+    let config = {
           headers: {
             "Access-Control-Allow-Origin": "*",
             ...headers,

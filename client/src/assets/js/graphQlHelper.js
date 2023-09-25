@@ -16,9 +16,7 @@ async function checkNodesExistence(
   );
   const query = mergeGraphQlQueries(queries);
   const response = await handleGraphqlTokenError(
-    (query, token) => {
-      return GraphService.getNodes(query, token);
-    },
+    GraphService.getNodes.bind(GraphService),
     [query],
     dispatch,
     rootState,

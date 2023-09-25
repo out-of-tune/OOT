@@ -150,7 +150,6 @@ describe("startGraphQlSearch", () => {
       authentication: {
         loginState: false,
         accessToken: "asdklasdmkl",
-        clientAuthenticationToken: "",
       },
     };
   });
@@ -239,7 +238,6 @@ describe("startSimpleGraphSearch", () => {
     commit = jest.fn();
     rootState = {
       authentication: {
-        clientAuthenticationToken: "",
       },
       searchObject: {
         valid: false,

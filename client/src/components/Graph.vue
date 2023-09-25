@@ -108,7 +108,6 @@ export default {
       "displayNodeLabels",
       "removeNodeLabels",
       "updateNodeLabels",
-      "authenticateClient",
       "requireAccessToken",
       "setLoginState",
       "refreshToken",
@@ -167,8 +166,6 @@ export default {
     },
   },
   mounted: async function () {
-    await this.authenticateClient();
-
     if (this.$store.state.authentication.refreshToken) {
       try {
         await this.refreshToken();

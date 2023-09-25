@@ -15,7 +15,6 @@ describe("generateInceptionGraph", () => {
     dispatch = jest.fn();
     rootState = {
       authentication: {
-        clientAuthenticationToken: "",
       },
     };
   });

@@ -72,7 +72,6 @@ describe("requireAccessToken", () => {
     (commit = jest.fn()),
       (rootState = {
         authentication: {
-          clientAuthenticationToken: "",
         },
       });
   });
