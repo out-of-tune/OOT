@@ -2,6 +2,7 @@ import ShareService from "@/store/services/ShareService";
 import { handleGraphqlTokenError } from "@/assets/js/TokenHelper";
 import pako from "pako";
 import { getGraphObject } from "@/assets/js/graphHelper";
+import { PROXY_URI } from "../../../settings";
 
 const changeShareModalState = ({ state, commit }) => {
   const modalState = !state.shareModalOpen;
@@ -21,7 +22,7 @@ const generateShareLink = async ({ commit, rootState, dispatch }, type) => {
   console.log(response);
   commit(
     "SET_SHARE_LINK",
-    `${process.env.VUE_APP_PROXY_URI}/#/graph?uri=${response.uri}&type=${type}`,
+    `${PROXY_URI}/#/graph?uri=${response.uri}&type=${type}`,
   );
 };
 

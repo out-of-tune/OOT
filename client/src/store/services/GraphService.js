@@ -6,7 +6,7 @@ class GraphService extends BaseService {
       query: query,
     };
     return this.post(
-      `/${process.env.VUE_APP_APOLLO_HOST}/`,
+      `/apollo/`,
       params,
       token,
     ).then((response) => response.data);
