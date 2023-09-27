@@ -1,27 +1,23 @@
 <template>
   <div class="card">
     <div class="close">
-      <span id="nodeLabel" v-if="node">{{ node.data.label }}</span>
       <v-icon
         id="close-icon"
         @click="closeWindow"
         size="1.5rem"
-        color="white"
         icon="mdi-close"
       />
     </div>
+    <span id="nodeLabel" v-if="node">{{ node.data.label }}</span>
     <div class="content">
       <div v-if="!node.data.label">
-        <v-img :src="logo" aspect-ratio="1" class="cover" id="image"> </v-img>
+        <img :src="logo" aspect-ratio="1" class="image" />
       </div>
       <div v-if="node.data.label === 'artist'">
-        <v-img
+        <img
           :src="node.data.images ? node.data.images[0] : logo"
-          aspect-ratio="1"
-          class="cover"
-          id="image"
-        >
-        </v-img>
+          class="image"
+        />
         <h2 class="nodeName">
           <a
             class="innerText"
@@ -40,7 +36,7 @@
         <h3>Top songs</h3>
         <ul>
           <li
-            v-for="track in node.data.tracks"
+            v-for="track in tracks"
             v-bind:key="track.id"
             :class="{ noPreview: !track.preview_url }"
           >
@@ -70,8 +66,7 @@
         </ul>
       </div>
       <div v-if="node.data.label === 'genre'">
-        <v-img :src="logo" aspect-ratio="1" class="cover" id="image"> </v-img>
-
+        <img :src="logo" class="image" />
         <h2 id="genreName">
           <a @click="fitGraphToNodes([node])" class="innerText">{{
             node.data.name
@@ -79,13 +74,10 @@
         </h2>
       </div>
       <div v-if="node.data.label === 'album'">
-        <v-img
+        <img
           :src="node.data.images ? node.data.images[0].url : logo"
-          aspect-ratio="1"
-          class="cover"
-          id="image"
-        >
-        </v-img>
+          class="image"
+        />
         <h2 class="nodeName">
           <a class="innerText" @click="fitGraphToNodes([node])">{{
             node.data.name
@@ -97,7 +89,6 @@
           target="_blank"
           >Visit on Spotify</a
         >
-
         <h3>release date</h3>
         <div>{{ node.data.release_date }}</div>
         <h3>total tracks</h3>
@@ -134,14 +125,11 @@
         </ul>
       </div>
       <div v-if="node.data.label === 'song'">
-        <v-img
+        <img
           v-if="node.data.images"
           :src="node.data.images[0].url"
-          aspect-ratio="1"
-          class="cover"
-          id="image"
-        >
-        </v-img>
+          class="image"
+        />
         <h2 class="nodeName">
           <a @click="fitGraphToNodes([node])" class="innerText">{{
             node.data.name
@@ -153,7 +141,6 @@
           target="_blank"
           >Visit on Spotify</a
         >
-
         <h3>Duration:</h3>
         {{ new Date(node.data.duration_ms).toISOString().slice(11, -5) }}
         <div v-if="node.data.album">
@@ -179,6 +166,7 @@ export default {
   computed: {
     ...mapState({
       node: (state) => state.mainGraph.currentNode,
+      tracks: (state) => state.mainGraph.currentNode.data.tracks,
     }),
     artistUrl() {
       return this.node.data.label === "artist"
@@ -225,51 +213,30 @@ export default {
 <style scoped>
 .card {
   color: white;
-  border: 2px solid white;
   background-color: rgb(37, 37, 37);
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
   transition: 0.3s;
   border-radius: 5px;
-  padding-left: 1rem;
-  padding-right: 1rem;
+  padding: 1rem;
 
   margin: 0.5rem;
   width: 20rem;
   overflow-y: auto;
-  height: 40%;
-  display: grid;
-  grid-template-rows: 3rem 1fr;
-  grid-template-columns: 1fr;
-  grid-template-areas:
-    "actions"
-    "content";
+  height: 25rem;
+  display: flex;
+  flex-direction: column;
 }
 .close {
-  grid-area: actions;
-  position: sticky;
-  top: 0;
-  padding-top: 1rem;
-  padding-bottom: 0.5rem;
-
-  background-color: #252525;
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
 }
 #close-icon {
   cursor: pointer;
-  float: right;
-  border-radius: 2px 0 0 0;
-  box-shadow: -1px -1px -13px -6px rgba(0, 0, 0, 1);
 }
 #nodeLabel {
   text-transform: uppercase;
   font-weight: bold;
-}
-.content {
-  width: 100%;
-  grid-area: content;
-}
-#image {
-  margin-bottom: 5px;
-  z-index: -1;
 }
 ul {
   list-style-type: none;
@@ -356,5 +323,10 @@ a {
   100% {
     transform: translate(-50%, 0);
   }
+}
+
+.image {
+  object-fit: cover;
+  width: 100%;
 }
 </style>
