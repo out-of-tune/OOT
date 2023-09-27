@@ -13,6 +13,7 @@ services:
       context: ./client
       args: 
         - VUE_APP_PROXY_URI=${PROXY_URI}
+        - VUE_APP_MOUNT_PATH=${APP_MOUNT_PATH}
         - NODE_ENV=${NODE_ENV}
     depends_on:
       - apollo

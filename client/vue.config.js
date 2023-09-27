@@ -1,5 +1,7 @@
+const { APP_MOUNT_PATH } = require("./src/settings");
+
 module.exports = {
-  publicPath: "/app/",
+  publicPath: APP_MOUNT_PATH,
   configureWebpack: {
     resolve: {
       fallback: {
