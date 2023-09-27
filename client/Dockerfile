@@ -3,9 +3,11 @@ FROM node:16 as build-stage
 
 ARG NODE_ENV
 ARG VUE_APP_PROXY_URI
+ARG VUE_APP_MOUNT_PATH
 
 ENV NODE_ENV=$NODE_ENV
 ENV VUE_APP_PROXY_URI=$VUE_APP_PROXY_URI
+ENV VUE_APP_MOUNT_PATH=$VUE_APP_MOUNT_PATH
 
 WORKDIR /app
 COPY package*.json ./
@@ -20,4 +22,3 @@ COPY nginx.conf /etc/nginx/nginx.conf
 COPY mime.types  /etc/nginx/mime.types
 
 EXPOSE 8080
-CMD ["nginx", "-g", "'daemon off;'"]
