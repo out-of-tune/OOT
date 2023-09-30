@@ -514,6 +514,7 @@ describe("startSimpleGraphSearch", () => {
     handleTokenError.mockReturnValue([
       { tracks: { items: [{ id: "13", name: "josef" }] } },
     ]);
+
     await startSimpleGraphSearch(
       { dispatch, rootState },
       { nodeType: "song", searchString: "josef" },

@@ -194,7 +194,12 @@ async function queryAllNodeTypes(searchString, rootState, dispatch, limit) {
     .map((nodeType) => nodeType.label);
 
   //Searches for nodes only with spotify endpoint
-  const spotifyNodes = await searchSpotify(searchString, rootState, dispatch, spotifyNodeTypes);
+  const spotifyNodes = await searchSpotify(
+    searchString,
+    rootState,
+    dispatch,
+    spotifyNodeTypes,
+  );
 
   //Searches for nodes with that include graphql endpoint
   const graphQlNodes = await searchGraphql(
@@ -208,11 +213,14 @@ async function queryAllNodeTypes(searchString, rootState, dispatch, limit) {
   );
 
   //If no nodes were found in graphql search for a given node type, and it has a spotify endpoint, use the spotify endpoint to check for entries
+  //Gets all found node types
   const foundTypes = graphQlNodes.map((node) => node.data.label);
+  //Gets all node types that haven't been found
   const additionalSpotifyNodeTypes = _.difference(
     graphQlAndSpotifyNodeTypes,
     foundTypes,
   );
+  //Searches spotify if type was not found at all
   const graphQlAndSpotifyNodes =
     additionalSpotifyNodeTypes.length > 0
       ? await searchSpotify(
@@ -221,7 +229,7 @@ async function queryAllNodeTypes(searchString, rootState, dispatch, limit) {
           dispatch,
           graphQlAndSpotifyNodeTypes,
         )
-      : [ ];
+      : [];
 
   additionalSpotifyNodeTypes.forEach((type) =>
     checkNodesExistence(
@@ -235,6 +243,38 @@ async function queryAllNodeTypes(searchString, rootState, dispatch, limit) {
 
   return [...spotifyNodes, ...graphQlNodes, ...graphQlAndSpotifyNodes];
 }
+
+const searchNodeTypeInGraphQl = async (
+  schemaNodeType,
+  searchString,
+  limit,
+  rootState,
+  dispatch,
+) => {
+  if (!schemaNodeType.endpoints.includes("graphql")) return [];
+  return searchGraphql(
+    [
+      { attributeSearch: "name", operator: "=", attributeData: searchString },
+      { attributeSearch: "limit", operator: "=", attributeData: limit },
+    ],
+    [schemaNodeType],
+    dispatch,
+    rootState,
+  );
+};
+
+const searchNodeTypeInSpotify = async (
+  schemaNodeType,
+  searchString,
+  rootState,
+  dispatch,
+) => {
+  if (!schemaNodeType.endpoints.includes("spotify")) return [];
+  return searchSpotify(searchString, rootState, dispatch, [
+    schemaNodeType.label,
+  ]);
+};
+
 async function queryNodeType(
   nodeType,
   searchString,
@@ -242,72 +282,32 @@ async function queryNodeType(
   rootState,
   dispatch,
 ) {
-  const fetchFromGraphQlThenSpotify = async () => {
-    const graphQlNodes = await searchGraphql(
-      [
-        { attributeSearch: "name", operator: "=", attributeData: searchString },
-        { attributeSearch: "limit", operator: "=", attributeData: limit },
-      ],
-      [schemaNodeType],
+  const schemaNodeType = rootState.schema.nodeTypes.find(
+    (type) => nodeType === type.label,
+  );
+  if (!schemaNodeType)
+    throw new Error("Node " + nodeType + " not found in schema");
+  const results = await Promise.all([
+    searchNodeTypeInSpotify(schemaNodeType, searchString, rootState, dispatch),
+    searchNodeTypeInGraphQl(
+      schemaNodeType,
+      searchString,
+      limit,
+      rootState,
+      dispatch,
+    ),
+  ]);
+  if (schemaNodeType.label === "artist") {
+    checkNodesExistence(
+      "artist",
+      results[0].map((node) => node.data.sid),
+      rootState.schema,
       dispatch,
       rootState,
     );
-    const result =
-      (await graphQlNodes.length) > 0
-        ? graphQlNodes
-        : (async () => {
-            const spotifyResult = await searchSpotify(
-              searchString,
-              rootState,
-              dispatch,
-              spotifyNodeTypes,
-            );
-            console.log(spotifyResult);
-            checkNodesExistence(
-              "artist",
-              spotifyResult.map((node) => node.data.sid),
-              rootState.schema,
-              dispatch,
-              rootState,
-            );
-            return spotifyResult;
-          })();
-    return result;
-  };
-  const schemaNodeType = rootState.schema.nodeTypes.filter(
-    (type) => nodeType === type.label,
-  )[0];
+  }
 
-  const spotifyNodeTypes = schemaNodeType.endpoints.includes("spotify")
-    ? [schemaNodeType.label]
-    : [];
-
-  const nodes =
-    schemaNodeType.endpoints.includes("graphql") &&
-    schemaNodeType.endpoints.includes("spotify")
-      ? await fetchFromGraphQlThenSpotify()
-      : schemaNodeType.endpoints.includes("graphql")
-      ? await searchGraphql(
-          [
-            {
-              attributeSearch: "name",
-              operator: "=",
-              attributeData: searchString,
-            },
-            { attributeSearch: "limit", operator: "=", attributeData: limit },
-          ],
-          [schemaNodeType],
-          dispatch,
-          rootState,
-        )
-      : await searchSpotify(
-          searchString,
-          rootState,
-          dispatch,
-          spotifyNodeTypes,
-        );
-
-  return nodes;
+  return results.flatMap((i) => i);
 }
 function convertSpotifyResult(spotifyQueryResults, key) {
   if (key != undefined) {
