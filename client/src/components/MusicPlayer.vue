@@ -13,7 +13,7 @@
       Your browser does not support the audio element.
     </audio>
     <div class="currentSongInfo">
-      <v-img :src="coverUrl" aspect-ratio="1" class="cover" id="image"> </v-img>
+      <img :src="coverUrl" class="cover" id="image" />
       <div class="songInfoText">
         <h3
           ref="currentSongName"
