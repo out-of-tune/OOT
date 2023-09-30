@@ -5,10 +5,7 @@
       @keydown="selectEvent"
       @focusout="changeVisibility"
     >
-      <v-text-field
-        autocomplete="off"
-        dark
-        color="white"
+      <input
         type="text"
         @focus="inputIsFocused = true"
         v-bind:class="{
@@ -17,10 +14,10 @@
         }"
         ref="searchInput"
         name="searchField"
-        id="searchField"
+        class="searchField"
         label="add Rule"
         v-model="localSearchString"
-      ></v-text-field>
+      />
       <ul
         ref="autocomplete"
         id="autocomplete"
@@ -239,20 +236,21 @@ ul {
   border: none;
   z-index: 1;
 }
-.validString {
-  color: green !important;
+.searchField.validString {
+  color: #60bb40;
 }
-.invalidString {
-  color: red !important ;
+.searchField.invalidString {
+  color: red;
 }
 .selected {
   color: #da6a1d;
 }
-#searchField {
-  color: white !important;
+.searchField {
+  color: white;
+  background: #000;
   display: flex;
   align-self: center;
   justify-self: center;
-  margin: 0 !important;
+  margin: 0;
 }
 </style>
