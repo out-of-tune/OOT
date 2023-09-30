@@ -36,7 +36,7 @@
         <h3>Top songs</h3>
         <ul>
           <li
-            v-for="track in tracks"
+            v-for="track in node.data.tracks"
             v-bind:key="track.id"
             :class="{ noPreview: !track.preview_url }"
           >
@@ -126,8 +126,8 @@
       </div>
       <div v-if="node.data.label === 'song'">
         <img
-          v-if="node.data.images"
-          :src="node.data.images[0].url"
+          v-if="node.data.album && node.data.album.images"
+          :src="node.data.album.images[0].url"
           class="image"
         />
         <h2 class="nodeName">
@@ -158,29 +158,28 @@
 <script>
 import { mapState, mapActions } from "vuex";
 import logo from "@/assets/logo.png";
+import _ from "lodash";
 
 export default {
   data: () => ({
     logo: logo,
   }),
   computed: {
-    ...mapState({
-      node: (state) => state.mainGraph.currentNode,
-      tracks: (state) => state.mainGraph.currentNode.data.tracks,
-    }),
+    node() {
+      console.log(this.$store.state.mainGraph.currentNode);
+      let node = _.cloneDeep(this.$store.state.mainGraph.currentNode);
+      console.log(node);
+      if (node.data.label === "artist") {
+        console.log("its an artist");
+
+        console.log(node.data.tracks);
+      }
+      return node;
+    },
     artistUrl() {
       return this.node.data.label === "artist"
         ? "https://open.spotify.com/artist/" + this.node.data.sid
         : "";
-    },
-    node: {
-      get() {
-        this.$nextTick(function () {
-          this.isOverflowing = this.checkOverflow(this.$refs.currentNode);
-        });
-        return this.$store.state.mainGraph.currentNode;
-      },
-      set(value) {},
     },
   },
   methods: {

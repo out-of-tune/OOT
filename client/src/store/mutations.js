@@ -239,8 +239,15 @@ const SET_SPOTIFY_ACCESS_TOKEN = (state, accessToken) => {
 };
 
 const ADD_NODE_DATA = (state, { node, data }) => {
-  node.data = { ...node.data, ...data };
+  state.mainGraph.currentNode = {
+    ...node,
+    data: {
+      ...node.data,
+      ...data,
+    },
+  };
 };
+
 const SET_SEARCH_OBJECT = (state, searchObject) => {
   state.searchObject = searchObject;
 };
