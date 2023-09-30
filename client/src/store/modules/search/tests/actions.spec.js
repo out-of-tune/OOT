@@ -13,7 +13,8 @@ import SpotifyService from "@/store/services/SpotifyService";
 jest.mock("@/store/services/SpotifyService");
 import searchObjectHelper from "@/assets/js/searchObjectHelper";
 jest.mock("@/assets/js/searchObjectHelper");
-
+import "@/assets/js/graphQlHelper.js";
+jest.mock("@/assets/js/graphQlHelper.js");
 import {
   handleGraphqlTokenError,
   handleTokenError,
@@ -237,8 +238,7 @@ describe("startSimpleGraphSearch", () => {
     dispatch = jest.fn();
     commit = jest.fn();
     rootState = {
-      authentication: {
-      },
+      authentication: {},
       searchObject: {
         valid: false,
         errors: [],
@@ -365,6 +365,7 @@ describe("startSimpleGraphSearch", () => {
     });
     handleGraphqlTokenError.mockReset();
     handleTokenError.mockReset();
+    jest.clearAllMocks();
   });
   it("selects nodes of nodeType", async () => {
     await startSimpleGraphSearch(
@@ -470,11 +471,9 @@ describe("startSimpleGraphSearch", () => {
     });
   });
   it("calls spotify correctly without nodetype", async () => {
-    handleGraphqlTokenError
-      .mockReturnValueOnce({ genre: [] })
-      .mockReturnValue({
-        artist: [{ id: "artist/113", name: "frank sinitra" }],
-      });
+    handleGraphqlTokenError.mockReturnValueOnce({ genre: [] }).mockReturnValue({
+      artist: [{ id: "artist/113", name: "frank sinitra" }],
+    });
     handleTokenError.mockReturnValue([
       {
         albums: { items: [{ id: "13", name: "frank" }] },
@@ -494,11 +493,9 @@ describe("startSimpleGraphSearch", () => {
     );
   });
   it("calls graphql correctly without nodetype", async () => {
-    handleGraphqlTokenError
-      .mockReturnValueOnce({ genre: [] })
-      .mockReturnValue({
-        artist: [{ id: "artist/113", name: "frank sinitra" }],
-      });
+    handleGraphqlTokenError.mockReturnValueOnce({ genre: [] }).mockReturnValue({
+      artist: [{ id: "artist/113", name: "frank sinitra" }],
+    });
     handleTokenError.mockReturnValue([
       {
         albums: { items: [{ id: "13", name: "frank" }] },

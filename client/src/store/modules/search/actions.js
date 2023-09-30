@@ -173,70 +173,65 @@ async function searchGraphql(
   });
 }
 async function queryAllNodeTypes(searchString, rootState, dispatch, limit) {
-  //TODO: refactor this function
-  const fetchFromGraphQlThenSpotify = async () => {
-    const graphQlNodes = await searchGraphql(
-      [
-        { attributeSearch: "name", operator: "=", attributeData: searchString },
-        { attributeSearch: "limit", operator: "=", attributeData: limit },
-      ],
-      graphQlAndSpotifyNodeTypes,
-      dispatch,
-      rootState,
-    );
-    const result =
-      (await graphQlNodes.length) > 0
-        ? graphQlNodes
-        : (async () => {
-            const spotifyResult = await searchSpotify(
-              searchString,
-              rootState,
-              dispatch,
-              graphQlAndSpotifyNodeTypes.map((type) => type.label),
-            );
-            checkNodesExistence(
-              "artist",
-              spotifyResult.map((node) => node.data.sid),
-              rootState.schema,
-              dispatch,
-              rootState,
-            );
-            return spotifyResult;
-          })();
-    return result;
-  };
-  const spotifyNodes = await searchSpotify(searchString, rootState, dispatch, [
-    "album",
-    "song",
-  ]);
+  // Gets nodetypes based on endpoint
+  // Only spotify
+  const spotifyNodeTypes = rootState.schema.nodeTypes
+    .filter((nodeType) => nodeType.endpoints.includes("spotify"))
+    .map((nodeType) => nodeType.label);
 
-  const graphQlNodeTypes = rootState.schema.nodeTypes.filter((nodeType) => {
-    return (
-      nodeType.endpoints.includes("graphql") &&
-      !nodeType.endpoints.includes("spotify")
-    );
-  });
-
-  const graphQlAndSpotifyNodeTypes = rootState.schema.nodeTypes.filter(
-    (nodeType) => {
-      return (
-        nodeType.endpoints.includes("graphql") &&
-        nodeType.endpoints.includes("spotify")
-      );
-    },
+  //Only GraphQL
+  const graphQlNodeTypes = rootState.schema.nodeTypes.filter((nodeType) =>
+    nodeType.endpoints.includes("graphql"),
   );
 
+  //Spotify and graphql
+  const graphQlAndSpotifyNodeTypes = rootState.schema.nodeTypes
+    .filter(
+      (nodeType) =>
+        nodeType.endpoints.includes("graphql") &&
+        nodeType.endpoints.includes("spotify"),
+    )
+    .map((nodeType) => nodeType.label);
+
+  //Searches for nodes only with spotify endpoint
+  const spotifyNodes = await searchSpotify(searchString, rootState, dispatch, spotifyNodeTypes);
+
+  //Searches for nodes with that include graphql endpoint
   const graphQlNodes = await searchGraphql(
     [
       { attributeSearch: "name", operator: "=", attributeData: searchString },
-      { attributeSearch: "limit", operator: "=", attributeData: 50 },
+      { attributeSearch: "limit", operator: "=", attributeData: limit },
     ],
     graphQlNodeTypes,
     dispatch,
     rootState,
   );
 
-  const graphQlAndSpotifyNodes = await fetchFromGraphQlThenSpotify();
+  //If no nodes were found in graphql search for a given node type, and it has a spotify endpoint, use the spotify endpoint to check for entries
+  const foundTypes = graphQlNodes.map((node) => node.data.label);
+  const additionalSpotifyNodeTypes = _.difference(
+    graphQlAndSpotifyNodeTypes,
+    foundTypes,
+  );
+  const graphQlAndSpotifyNodes =
+    additionalSpotifyNodeTypes.length > 0
+      ? await searchSpotify(
+          searchString,
+          rootState,
+          dispatch,
+          graphQlAndSpotifyNodeTypes,
+        )
+      : [ ];
+
+  additionalSpotifyNodeTypes.forEach((type) =>
+    checkNodesExistence(
+      type,
+      graphQlAndSpotifyNodes.map((node) => node.data.sid),
+      rootState.schema,
+      dispatch,
+      rootState,
+    ),
+  );
 
   return [...spotifyNodes, ...graphQlNodes, ...graphQlAndSpotifyNodes];
 }
