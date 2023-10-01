@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vite",
-    "build": "vite build",
+    "build": "vite build --base=$BASE_URL",
     "preview": "vite preview",
     "lint": "eslint --ext .js,.vue --ignore-path .eslintignore --fix src",
     "format": "npx prettier . --write",
