@@ -12,7 +12,7 @@ services:
       - "8529"
   auth:
     ports:
-      - "$4000"
+      - "4000"
   proxy:
     ports:
       - "80:80"
