@@ -9,8 +9,7 @@ import {
   checkNodesExistence,
   mergeGraphQlQueries,
 } from "@/assets/js/graphQlHelper.js";
-
-var fp = require("lodash/fp");
+import fp from "lodash/fp"
 
 function getRelevantConfiguredConnections(expandConfiguration, node) {
   return expandConfiguration

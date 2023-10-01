@@ -1,3 +1,4 @@
+import createGraph from "ngraph.graph";
 import Viva from "vivagraphjs";
 
 const SET_GRAPHCONTAINER = (state, graphContainer) => {
@@ -9,7 +10,6 @@ const SET_CURRENTNODE = (state, node) => {
 };
 
 const CREATE_GRAPH = (state) => {
-  const createGraph = require("ngraph.graph");
   state.mainGraph.Graph = createGraph();
 };
 

@@ -13,5 +13,10 @@ export default defineConfig({
   },
   test: {
     globals: true
+  },
+  server: {
+    port: 8080,
+    strictPort: true,
+    host: "0.0.0.0"
   }
 });
