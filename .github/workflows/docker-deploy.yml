@@ -10,14 +10,14 @@ jobs:
   matrix_maker:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.result }}
+      matrix: ${{ steps.set-matrix.outputs }}
     steps:
     - uses: actions/checkout@v3
     - name: Find Dockerimages to build
       id: set-matrix
-      run: find -name Dockerfile
+      run: find -name Dockerfile >> "$GITHUB_OUTPUT"
     - name: Debug output
-      run: echo "${{ steps.set-matrix.outputs.result }}"
+      run: echo "${{ steps.set-matrix.outputs }}"
       
 
   build:
