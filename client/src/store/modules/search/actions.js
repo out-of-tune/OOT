@@ -201,7 +201,7 @@ async function queryAllNodeTypes(searchString, rootState, dispatch, limit) {
     spotifyNodeTypes,
   );
 
-  //Searches for nodes with that include graphql endpoint
+  //Searches for nodes that include the graphql endpoint
   const graphQlNodes = await searchGraphql(
     [
       { attributeSearch: "name", operator: "=", attributeData: searchString },
