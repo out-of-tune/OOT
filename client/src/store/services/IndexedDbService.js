@@ -1,29 +1,25 @@
 class IndexedDbService {
   saveGraph(name, graphObject) {
-    try {
-      const request = window.indexedDB.open("OUT_OF_TUNE_GRAPHS", 1);
-      request.onsuccess = function (event) {
-        this.db = event.target.result;
-        const transaction = this.db.transaction("graphs", "readwrite");
-        transaction.onerror = function (event) {
-          throw new Error("AN ERROR OCCURED");
-        };
-        transaction.onabort = function (event) {
-          throw new Error("AN ERROR OCCURED");
-        };
-        const graphStore = transaction.objectStore("graphs");
-        graphStore.put({ graph: graphObject, name });
-      };
-      request.onerror = function (event) {
+    const request = window.indexedDB.open("OUT_OF_TUNE_GRAPHS", 1);
+    request.onsuccess = function (event) {
+      this.db = event.target.result;
+      const transaction = this.db.transaction("graphs", "readwrite");
+      transaction.onerror = function (event) {
         throw new Error("AN ERROR OCCURED");
       };
-      request.onupgradeneeded = function (event) {
-        this.db = event.target.result;
-        this.store = this.db.createObjectStore("graphs", { keyPath: "name" });
+      transaction.onabort = function (event) {
+        throw new Error("AN ERROR OCCURED");
       };
-    } catch (e) {
-      throw e;
-    }
+      const graphStore = transaction.objectStore("graphs");
+      graphStore.put({ graph: graphObject, name });
+    };
+    request.onerror = function (event) {
+      throw new Error("AN ERROR OCCURED");
+    };
+    request.onupgradeneeded = function (event) {
+      this.db = event.target.result;
+      this.store = this.db.createObjectStore("graphs", { keyPath: "name" });
+    };
   }
   async getGraph(name) {
     return new Promise((resolve, reject) => {
@@ -56,32 +52,28 @@ class IndexedDbService {
   }
 
   saveConfiguration(name, configuration) {
-    try {
-      const request = window.indexedDB.open("OUT_OF_TUNE_CONFIGURATIONS", 1);
-      request.onsuccess = function (event) {
-        this.db = event.target.result;
-        const transaction = this.db.transaction("configurations", "readwrite");
-        transaction.onerror = function (event) {
-          throw new Error("AN ERROR OCCURED");
-        };
-        transaction.onabort = function (event) {
-          throw new Error("AN ERROR OCCURED");
-        };
-        const graphStore = transaction.objectStore("configurations");
-        graphStore.put({ configuration, name });
-      };
-      request.onerror = function (event) {
+    const request = window.indexedDB.open("OUT_OF_TUNE_CONFIGURATIONS", 1);
+    request.onsuccess = function (event) {
+      this.db = event.target.result;
+      const transaction = this.db.transaction("configurations", "readwrite");
+      transaction.onerror = function (event) {
         throw new Error("AN ERROR OCCURED");
       };
-      request.onupgradeneeded = function (event) {
-        this.db = event.target.result;
-        this.store = this.db.createObjectStore("configurations", {
-          keyPath: "name",
-        });
+      transaction.onabort = function (event) {
+        throw new Error("AN ERROR OCCURED");
       };
-    } catch (e) {
-      throw e;
-    }
+      const graphStore = transaction.objectStore("configurations");
+      graphStore.put({ configuration, name });
+    };
+    request.onerror = function (event) {
+      throw new Error("AN ERROR OCCURED");
+    };
+    request.onupgradeneeded = function (event) {
+      this.db = event.target.result;
+      this.store = this.db.createObjectStore("configurations", {
+        keyPath: "name",
+      });
+    };
   }
   async getConfiguration(name) {
     return new Promise((resolve, reject) => {
@@ -115,58 +107,50 @@ class IndexedDbService {
   }
 
   deleteConfiguration(name) {
-    try {
-      const request = window.indexedDB.open("OUT_OF_TUNE_CONFIGURATIONS", 1);
-      request.onsuccess = function (event) {
-        this.db = event.target.result;
-        const transaction = this.db.transaction("configurations", "readwrite");
-        transaction.onerror = function (event) {
-          throw new Error("AN ERROR OCCURED");
-        };
-        transaction.onabort = function (event) {
-          throw new Error("AN ERROR OCCURED");
-        };
-        const graphStore = transaction.objectStore("configurations");
-        graphStore.delete(name);
-      };
-      request.onerror = function (event) {
+    const request = window.indexedDB.open("OUT_OF_TUNE_CONFIGURATIONS", 1);
+    request.onsuccess = function (event) {
+      this.db = event.target.result;
+      const transaction = this.db.transaction("configurations", "readwrite");
+      transaction.onerror = function (event) {
         throw new Error("AN ERROR OCCURED");
       };
-      request.onupgradeneeded = function (event) {
-        this.db = event.target.result;
-        this.store = this.db.createObjectStore("configurations", {
-          keyPath: "name",
-        });
+      transaction.onabort = function (event) {
+        throw new Error("AN ERROR OCCURED");
       };
-    } catch (e) {
-      throw e;
-    }
+      const graphStore = transaction.objectStore("configurations");
+      graphStore.delete(name);
+    };
+    request.onerror = function (event) {
+      throw new Error("AN ERROR OCCURED");
+    };
+    request.onupgradeneeded = function (event) {
+      this.db = event.target.result;
+      this.store = this.db.createObjectStore("configurations", {
+        keyPath: "name",
+      });
+    };
   }
   deleteGraph(name) {
-    try {
-      const request = window.indexedDB.open("OUT_OF_TUNE_GRAPHS", 1);
-      request.onsuccess = function (event) {
-        this.db = event.target.result;
-        const transaction = this.db.transaction("graphs", "readwrite");
-        transaction.onerror = function (event) {
-          throw new Error("AN ERROR OCCURED");
-        };
-        transaction.onabort = function (event) {
-          throw new Error("AN ERROR OCCURED");
-        };
-        const graphStore = transaction.objectStore("graphs");
-        graphStore.delete(name);
-      };
-      request.onerror = function (event) {
+    const request = window.indexedDB.open("OUT_OF_TUNE_GRAPHS", 1);
+    request.onsuccess = function (event) {
+      this.db = event.target.result;
+      const transaction = this.db.transaction("graphs", "readwrite");
+      transaction.onerror = function (event) {
         throw new Error("AN ERROR OCCURED");
       };
-      request.onupgradeneeded = function (event) {
-        this.db = event.target.result;
-        this.store = this.db.createObjectStore("graphs", { keyPath: "name" });
+      transaction.onabort = function (event) {
+        throw new Error("AN ERROR OCCURED");
       };
-    } catch (e) {
-      throw e;
-    }
+      const graphStore = transaction.objectStore("graphs");
+      graphStore.delete(name);
+    };
+    request.onerror = function (event) {
+      throw new Error("AN ERROR OCCURED");
+    };
+    request.onupgradeneeded = function (event) {
+      this.db = event.target.result;
+      this.store = this.db.createObjectStore("graphs", { keyPath: "name" });
+    };
   }
 }
 export default new IndexedDbService();

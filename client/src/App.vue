@@ -81,7 +81,6 @@ export default {
     MusicPlayer,
     feedbackModal,
     shareModal,
-    IntroTour,
   },
   data: () => ({
     drawer: null,

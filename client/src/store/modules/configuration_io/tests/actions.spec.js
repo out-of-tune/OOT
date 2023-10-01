@@ -142,9 +142,9 @@ describe("loadConfigurationFromIndexedDb", () => {
   });
   it("sets error message when IndexedDb errors", async () => {
     IndexedDbService.getConfiguration = vi.fn();
-    IndexedDbService.getConfiguration.mockImplementationOnce(
-      new Error("An error occured"),
-    );
+    IndexedDbService.getConfiguration.mockImplementationOnce(() => {
+      throw new Error("An error occured");
+    });
     await loadConfigurationFromIndexedDb({ dispatch }, "non existent");
     expect(dispatch).toHaveBeenCalledWith(
       "setError",
@@ -197,9 +197,9 @@ describe("removeConfigurationFromIndexedDb", () => {
   });
   it("sets error message when IndexedDb errors", async () => {
     IndexedDbService.deleteConfiguration = vi.fn();
-    IndexedDbService.deleteConfiguration.mockImplementationOnce(
-      new Error("An error occured"),
-    );
+    IndexedDbService.deleteConfiguration.mockImplementationOnce(() => {
+      throw new Error("An error occured");
+    });
     await removeConfigurationFromIndexedDb(
       { dispatch, commit, state },
       "MamboNo2",

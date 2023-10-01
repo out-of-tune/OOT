@@ -291,7 +291,7 @@ describe("handleAreaSelected", () => {
   it("removes nodes from temporary selection", () => {
     topLeft = { x: -91.93242967690891, y: -3.086346444249347 };
     bottomRight = { x: 35.24307976348013, y: 73.68063124210396 };
-    nodePos = { x: -601.12435098964026, y: 37.50443237426515 };
+    nodePos = { x: -601.124350989640, y: 37.50443237426515 };
     getNodeUi
       .mockReturnValueOnce({ position: nodePos, size: 10 })
       .mockReturnValueOnce({ position: { x: 0, y: 0 }, size: 10 });

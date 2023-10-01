@@ -219,7 +219,7 @@ describe("startGraphQlSearch", () => {
       ],
     };
     await startGraphQlSearch({ commit, rootState, dispatch });
-    const expectedQuery = `{artist(name:\"nice value1\"){name,id,popularity,sid,mbid,images}}`;
+    const expectedQuery = `{artist(name:"nice value1"){name,id,popularity,sid,mbid,images}}`;
     expect(handleGraphqlTokenError).toHaveBeenCalledWith(
       expect.anything(),
       [expectedQuery],
@@ -237,7 +237,6 @@ describe("startSimpleGraphSearch", () => {
     dispatch = vi.fn();
     commit = vi.fn();
     rootState = {
-      authentication: {},
       searchObject: {
         valid: false,
         errors: [],

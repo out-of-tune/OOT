@@ -6,7 +6,7 @@
     "serve": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src",
+    "lint": "eslint --ext .js,.vue --ignore-path .eslintignore --fix src",
     "format": "npx prettier . --write",
     "test": "vitest"
   },
@@ -17,6 +17,7 @@
     "flatbush": "^3.1.1",
     "flatted": "^2.0.1",
     "jsonschema": "^1.4.1",
+    "lodash": "^4.17.21",
     "ngraph.cw": "^2.0.0",
     "ngraph.forcelayout": "^0.5.0",
     "ngraph.generators": "0.0.19",
@@ -39,6 +40,9 @@
   "devDependencies": {
     "@mdi/font": "^7.2.96",
     "@vitejs/plugin-vue": "^4.3.4",
+    "eslint": "^8.50.0",
+    "eslint-plugin-vitest-globals": "^1.4.0",
+    "eslint-plugin-vue": "^9.17.0",
     "json-loader": "^0.5.7",
     "prettier": "3.0.3",
     "vite": "^4.4.9",
@@ -48,14 +52,17 @@
     "root": true,
     "env": {
       "node": true,
-      "es2022": true
+      "es6": true,
+      "vitest-globals/env": true
     },
     "extends": [
       "plugin:vue/essential",
-      "eslint:recommended"
+      "eslint:recommended",
+      "plugin:vitest-globals/recommended"
     ],
     "rules": {
-      "no-unused-vars": "warn"
+      "no-unused-vars": "warn",
+      "vue/multi-word-component-names": "off"
     }
   },
   "browserslist": [

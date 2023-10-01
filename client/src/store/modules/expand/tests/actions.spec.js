@@ -126,10 +126,7 @@ describe("expandAction", () => {
             },
           },
         ],
-      },
-      expand: {
-        failedExpandedConnections: [],
-      },
+      }
     };
     const nodes = [
       {

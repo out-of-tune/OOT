@@ -620,7 +620,7 @@ const addToGraph = ({ commit, dispatch, rootState }, { nodes, links }) => {
       link.fromId,
       link.toId,
     );
-    return !!existingLink
+    return existingLink
       ? !existingLink.linkTypes.includes(link.linkTypes[0])
       : true;
   });
