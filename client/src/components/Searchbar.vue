@@ -175,7 +175,6 @@ export default {
           this.$refs.autocomplete.childNodes[this.selectedItem].className =
             "selected";
 
-          console.log(this.$refs.autocomplete.childNodes);
           this.$refs.autocomplete.childNodes[this.selectedItem];
         }
       }
@@ -188,7 +187,6 @@ export default {
           if (this.selectedItem != -1) {
             this.$refs.autocomplete.childNodes[this.selectedItem].className =
               "selected";
-            console.log(this.$refs.autocomplete.childNodes[this.selectedItem]);
             this.$refs.autocomplete.childNodes[this.selectedItem];
           }
         }

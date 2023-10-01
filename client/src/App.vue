@@ -1,5 +1,4 @@
 <template>
-  <v-app>
   <div id="app">
     <snackbar />
     <div class="topbar">
@@ -33,14 +32,17 @@
     <feedbackModal></feedbackModal>
     <shareModal></shareModal>
     <!-- TODO: fix intro tour -->
-    <MusicPlayer
-      class="musicPlayer"
-      v-if="['Graph'].indexOf($route.name) > -1"
-    ></MusicPlayer>
     <IntroTour></IntroTour>
+    <div class="bottom">
+      <InfoToggles></InfoToggles>
+      <MusicPlayer
+        class="musicPlayer"
+        v-if="['Graph'].indexOf($route.name) > -1"
+      ></MusicPlayer>
+    </div>
 
     <Toolbar v-if="['Graph'].indexOf($route.name) > -1"></Toolbar>
-  </v-app>
+  </div>
 </template>
 
 <script>
@@ -48,6 +50,7 @@ import { defineAsyncComponent } from "vue";
 import { mapActions, mapState } from "vuex";
 import Toolbar from "./components/Toolbar.vue";
 import IntroTour from "./components/helpers/IntroTour.vue";
+import InfoToggles from "./components/InfoToggles.vue";
 
 const PlaylistLoader = defineAsyncComponent(() =>
   import("@/components/modals/PlaylistLoader.vue"),
@@ -82,6 +85,8 @@ export default {
     MusicPlayer,
     feedbackModal,
     shareModal,
+    IntroTour,
+    InfoToggles,
   },
   data: () => ({
     drawer: null,
@@ -143,11 +148,26 @@ export default {
 }
 
 .musicPlayer {
+  color: white;
+  flex-grow: 1;
+  max-width: 800px;
+}
+
+@media screen and (max-width: 500px) {
+  .bottom {
+    flex-direction: column;
+  }
+}
+
+.bottom {
   position: absolute;
   z-index: 2;
-  bottom: 0px;
+  bottom: 1rem;
   left: 0px;
-  color: white;
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  gap: 1rem;
 }
 
 a {
