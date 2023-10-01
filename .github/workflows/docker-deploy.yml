@@ -31,12 +31,18 @@ jobs:
         file: ${{ fromJSON(needs.matrix_maker.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v3
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build the Docker image ${{ matrix.file }}
         run: |
           cd $(dirname ${{ matrix.file }})
-          TAG=$(basename $(dirname ${{ matrix.file }})):$VERSION
-          docker build . --file Dockerfile --tag $TAG
-          docker image save $TAG
+          IMAGE_NAME=$(basename $(dirname ${{ matrix.file }}))
+          docker build . --file Dockerfile -t ghcr.io/out-of-tune/$IMAGE_NAME:$VERSION -t ghcr.io/out-of-tune/$IMAGE_NAME:latest
+          docker push ghcr.io/out-of-tune/$IMAGE_NAME:$VERSION
 
   test-client:
     runs-on: ubuntu-latest
