@@ -1,8 +1,0 @@
-{
-  "packages": [
-    "auth",
-    "packages/*",
-    "services/**"
-  ],
-  "version": "independent"
-}

@@ -1,8 +1,9 @@
 {
-  "name": "oot-api",
+  "name": "@out-of-tune/api",
   "version": "1.0.0",
   "description": "API for the oot webapp",
   "main": "./dist/src/index.js",
+  "private": true,
   "scripts": {
     "test": "node --experimental-vm-modules --harmony node_modules/.bin/jest",
     "compile": "npm run codegen && tsc && cp schema/schema.graphql dist/schema/",
