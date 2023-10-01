@@ -10,14 +10,15 @@ jobs:
   matrix_maker:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs }}
+      matrix: ${{ steps.set-matrix.outputs.result }}
     steps:
     - uses: actions/checkout@v3
     - name: Find Dockerimages to build
       id: set-matrix
-      run: echo $(find -name Dockerfile | tr '\n' ' ')
+      #run: echo $(find -name Dockerfile | tr '\n' ' ')
+      run: echo '["./server/Dockerfile", "./client/Dockerfile", "./auth/Dockerfile", "./db/arango/Dockerfile", "./services/share/Dockerfile", "./api/Dockerfile"]'
     - name: Debug output
-      run: echo "${{ steps.set-matrix.outputs }}"
+      run: echo "${{ steps.set-matrix.outputs.result }}"
       
 
   build:
@@ -25,8 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix: 
-        #file: ${{ needs.matrix_maker.outputs.matrix }}
-        file: ["./server/Dockerfile", "./client/Dockerfile", "./auth/Dockerfile", "./db/arango/Dockerfile", "./services/share/Dockerfile", "./api/Dockerfile"]
+        file: ${{ fromJSON(needs.matrix_maker.outputs.matrix) }}
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image (${{ matrix.file }})
