@@ -97,11 +97,11 @@
 </template>
 <script>
 import { mapGetters, mapState, mapActions } from "vuex";
-import GraphModificationOption from "@/components/options/GraphModificationOption";
-import AppearanceMappingColorOption from "@/components/options/AppearanceMappingColorOption";
-import AppearanceMappingSizeOption from "@/components/options/AppearanceMappingSizeOption";
-import AppearanceMappingTooltipOption from "@/components/options/AppearanceMappingTooltipOption";
-import AppearanceMappingEdgeColor from "@/components/options/AppearanceMappingEdgeColor";
+import GraphModificationOption from "@/components/options/GraphModificationOption.vue";
+import AppearanceMappingColorOption from "@/components/options/AppearanceMappingColorOption.vue";
+import AppearanceMappingSizeOption from "@/components/options/AppearanceMappingSizeOption.vue";
+import AppearanceMappingTooltipOption from "@/components/options/AppearanceMappingTooltipOption.vue";
+import AppearanceMappingEdgeColor from "@/components/options/AppearanceMappingEdgeColor.vue";
 
 export default {
   components: {

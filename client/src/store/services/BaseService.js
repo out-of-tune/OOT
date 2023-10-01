@@ -1,9 +1,8 @@
 import axios from "axios";
-import { PROXY_URI } from "../../settings";
 
 export default class BaseService {
   constructor() {
-    this.api = `${PROXY_URI}`;
+    this.api = `${import.meta.env.VITE_PROXY_URI}`;
   }
   post(url, params = null, headers = {}) {
     let config = {

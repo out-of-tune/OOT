@@ -46,26 +46,26 @@
 import { defineAsyncComponent } from "vue";
 import { mapActions, mapState } from "vuex";
 import Toolbar from "./components/Toolbar.vue";
-import IntroTour from "@/components/helpers/IntroTour";
+import IntroTour from "@/components/helpers/IntroTour.vue";
 
 const PlaylistLoader = defineAsyncComponent(() =>
-  import("@/components/modals/PlaylistLoader"),
+  import("@/components/modals/PlaylistLoader.vue"),
 );
 const PlaylistChooser = defineAsyncComponent(() =>
-  import("@/components/modals/PlaylistChooser"),
+  import("@/components/modals/PlaylistChooser.vue"),
 );
 
-const snackbar = defineAsyncComponent(() => import("./components/Snackbar"));
+const snackbar = defineAsyncComponent(() => import("./components/Snackbar.vue"));
 import Searchbar from "./components/Searchbar.vue";
 const selectionModal = defineAsyncComponent(() =>
-  import("@/components/modals/SelectionModal"),
+  import("@/components/modals/SelectionModal.vue"),
 );
-import MusicPlayer from "./components/MusicPlayer";
+import MusicPlayer from "./components/MusicPlayer.vue";
 const feedbackModal = defineAsyncComponent(() =>
-  import("./components/modals/FeedbackModal"),
+  import("./components/modals/FeedbackModal.vue"),
 );
 const shareModal = defineAsyncComponent(() =>
-  import("./components/modals/ShareModal"),
+  import("./components/modals/ShareModal.vue"),
 );
 
 import { deepEqual } from "@/utils/deepEqual.js";

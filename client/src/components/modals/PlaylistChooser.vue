@@ -43,7 +43,7 @@
   </div>
 </template>
 <script>
-import PaginatedList from "@/components/helpers/PaginatedList";
+import PaginatedList from "@/components/helpers/PaginatedList.vue";
 import { mapState, mapActions } from "vuex";
 export default {
   components: {
