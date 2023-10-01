@@ -60,6 +60,7 @@ jobs:
       - name: Install and run tests
         working-directory: ./client
         run: |
+          NODE_ENV=development
           npm ci
           npm run test
 
@@ -75,5 +76,6 @@ jobs:
       - name: Install and run tests
         working-directory: ./api
         run: |
+          NODE_ENV=development
           npm ci
           npm run test
