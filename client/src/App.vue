@@ -1,5 +1,6 @@
 <template>
   <v-app>
+  <div id="app">
     <snackbar />
     <div class="topbar">
       <Searchbar
@@ -32,11 +33,11 @@
     <feedbackModal></feedbackModal>
     <shareModal></shareModal>
     <!-- TODO: fix intro tour -->
-    <!-- <IntroTour v-if="['Graph'].indexOf($route.name) > -1"></IntroTour> -->
     <MusicPlayer
       class="musicPlayer"
       v-if="['Graph'].indexOf($route.name) > -1"
     ></MusicPlayer>
+    <IntroTour></IntroTour>
 
     <Toolbar v-if="['Graph'].indexOf($route.name) > -1"></Toolbar>
   </v-app>
@@ -46,7 +47,7 @@
 import { defineAsyncComponent } from "vue";
 import { mapActions, mapState } from "vuex";
 import Toolbar from "./components/Toolbar.vue";
-import IntroTour from "@/components/helpers/IntroTour.vue";
+import IntroTour from "./components/helpers/IntroTour.vue";
 
 const PlaylistLoader = defineAsyncComponent(() =>
   import("@/components/modals/PlaylistLoader.vue"),

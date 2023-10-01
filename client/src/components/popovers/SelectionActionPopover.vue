@@ -1,6 +1,6 @@
 <template>
   <Popper>
-    <button class="container action tooltip">
+    <button id="selection-button" class="container action tooltip">
       <v-icon class="icon" color="white" icon="mdi-select-all" />
       <span class="tooltiptext">SELECTION</span>
     </button>
@@ -12,27 +12,30 @@
 
             <div>
               <div class="actions">
-                <btn class="btn" @click="collapse">Collapse</btn>
-                <btn class="btn" @click="expand">Expand</btn>
+                <button class="btn" @click="collapse">Collapse</button>
+                <button class="btn" @click="expand">Expand</button>
 
-                <btn class="btn" @click="remove">Remove</btn>
-                <btn dark class="btn" @click="pin(selectedNodes)">Pin</btn>
-                <btn
+                <button class="btn" @click="remove">Remove</button>
+                <button dark class="btn" @click="pin(selectedNodes)">
+                  Pin
+                </button>
+                <button
                   dark
                   small
                   outline
                   class="btn"
                   @click="unpin(selectedNodes)"
-                  >Unpin</btn
                 >
-                <btn class="btn" @click="invert">Invert</btn>
-                <btn class="btn" @click="sortNodes">sort</btn>
-                <btn class="btn" @click="addToQueue">Add to queue</btn>
-                <btn class="btn" @click="openPlaylistChooser"
-                  >Add to playlist</btn
-                >
+                  Unpin
+                </button>
+                <button class="btn" @click="invert">Invert</button>
+                <button class="btn" @click="sortNodes">sort</button>
+                <button class="btn" @click="addToQueue">Add to queue</button>
+                <button class="btn" @click="openPlaylistChooser">
+                  Add to playlist
+                </button>
               </div>
-              <btn class="btn-orange" @click="showItems">show items</btn>
+              <button class="btn-orange" @click="showItems">show items</button>
             </div>
           </div>
         </div>
@@ -51,7 +54,6 @@ export default defineComponent({
   components: {
     Popper,
   },
-  data: () => {},
   methods: {
     ...mapActions([
       "changeSelectionModalState",

@@ -1,6 +1,6 @@
 <template>
   <Popper placement="top">
-    <button class="container tooltip">
+    <button id="io-button" class="container tooltip">
       <v-icon class="icon" color="white" icon="mdi-content-save" />
       <span class="tooltiptext">SAVE/LOAD</span>
     </button>

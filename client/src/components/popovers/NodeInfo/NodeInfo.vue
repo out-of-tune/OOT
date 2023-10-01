@@ -166,14 +166,7 @@ export default {
   }),
   computed: {
     node() {
-      console.log(this.$store.state.mainGraph.currentNode);
       let node = _.cloneDeep(this.$store.state.mainGraph.currentNode);
-      console.log(node);
-      if (node.data.label === "artist") {
-        console.log("its an artist");
-
-        console.log(node.data.tracks);
-      }
       return node;
     },
     artistUrl() {
