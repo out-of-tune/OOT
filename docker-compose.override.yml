@@ -21,9 +21,9 @@ services:
     ports:
       - "8529:8529"
   auth:
-    entrypoint: ["/bin/sh", "-c", "npm install && npm run serve"]
+    entrypoint: ["/bin/sh", "-c", "npm ci --workspace=@out-of-tune/auth-service && npm run serve --workspace=@out-of-tune/auth-service"]
     volumes:
-      - "./auth:/usr/src/app"
+      - "./:/usr/src/app"
     ports:
       - "4000:4000"
   proxy:

@@ -1,7 +1,9 @@
-const express = require('express')
-const cors = require('cors')
-const oauth2Routes = require('./routes/oauth2')
+import { Config } from '@out-of-tune/settings'
+Config.load([Config.general, Config.spotify])
 
+import express from 'express'
+import cors from 'cors'
+import oauth2Routes from './routes/oauth2/index.js'
 
 const app = express()
 const port = 4000

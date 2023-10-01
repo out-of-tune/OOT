@@ -3,6 +3,7 @@
   "version": "1.2.3",
   "description": "auth-service",
   "main": "index.js",
+  "type": "module",
   "private": true,
   "scripts": {
     "start": "node index.js",
@@ -18,9 +19,9 @@
   "homepage": "https://bitbucket.org/millii19/server#readme",
   "dependencies": {
     "cors": "^2.8.5",
-    "dotenv": "^8.1.0",
     "express": "^4.17.1",
-    "simple-oauth2": "^2.2.1"
+    "simple-oauth2": "^2.2.1",
+    "@out-of-tune/settings": "^1.0.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"

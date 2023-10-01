@@ -1,7 +1,7 @@
-const express = require('express')
-const router = express.Router()
-const spotifyRoutes = require('./spotify')
+import express from 'express'
+import spotifyRoutes from './spotify/index.js'
 
+const router = express.Router()
 router.use('/spotify', spotifyRoutes)
 
-module.exports = router
+export default router
