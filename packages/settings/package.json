@@ -1,0 +1,23 @@
+{
+  "name": "@out-of-tune/settings",
+  "version": "1.0.0",
+  "description": "settings helper for out-of-tune services",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "test": "jest",
+    "postinstall": "tsc"
+  },
+  "author": "Aemilian Mayrhofer",
+  "license": "ISC",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.7.0",
+    "typescript": "^5.2.2"
+  }
+}
