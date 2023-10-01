@@ -45,8 +45,8 @@
   </Popper>
 </template>
 <script>
-import LoadSaveConfigurationOption from "@/components/options/LoadSaveConfigurationOption";
-import LoadSaveGraphOption from "@/components/options/LoadSaveGraphOption";
+import LoadSaveConfigurationOption from "@/components/options/LoadSaveConfigurationOption.vue";
+import LoadSaveGraphOption from "@/components/options/LoadSaveGraphOption.vue";
 
 import Popper from "vue3-popper";
 

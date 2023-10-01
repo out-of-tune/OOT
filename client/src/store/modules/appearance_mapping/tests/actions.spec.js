@@ -1,15 +1,14 @@
 import { actions } from "../actions";
-global.expect = require("expect");
 import Viva from "vivagraphjs";
 import searchObjectHelper from "@/assets/js/searchObjectHelper";
-jest.mock("@/assets/js/searchObjectHelper");
+vi.mock("@/assets/js/searchObjectHelper");
 import {
   getNodesByLabel,
   getNodeColor,
   searchGraph,
   getAllNodes,
 } from "@/assets/js/graphHelper";
-jest.mock("@/assets/js/graphHelper");
+vi.mock("@/assets/js/graphHelper");
 
 const {
   setNodeColorDefault,
@@ -56,7 +55,7 @@ describe("setNodeColorDefault", () => {
         },
       },
     ];
-    commit = jest.fn();
+    commit = vi.fn();
   });
   it("sets nodes to default color", () => {
     setNodeColorDefault(
@@ -87,8 +86,8 @@ describe("setNodeColorRule", () => {
   let selectedNodes;
   let rootState;
   beforeEach(() => {
-    dispatch = jest.fn();
-    commit = jest.fn();
+    dispatch = vi.fn();
+    commit = vi.fn();
     rootState = {
       mainGraph: {
         Graph: {},
@@ -139,8 +138,8 @@ describe("setNodeSizeRule", () => {
   let rootState;
   let selectedNodes;
   beforeEach(() => {
-    dispatch = jest.fn();
-    commit = jest.fn();
+    dispatch = vi.fn();
+    commit = vi.fn();
     rootState = {
       mainGraph: {
         Graph: {},
@@ -257,7 +256,7 @@ describe("applyNodeConfiguration", () => {
         links: [],
       },
     ];
-    dispatch = jest.fn();
+    dispatch = vi.fn();
     getAllNodes.mockReturnValue(nodes);
   });
 
@@ -376,7 +375,7 @@ describe("applyNodeColorConfiguration", () => {
         },
       },
     };
-    dispatch = jest.fn();
+    dispatch = vi.fn();
   });
   it("calls applyNodeConfiguration with correct configuration and arguments", () => {
     applyNodeColorConfiguration({
@@ -449,7 +448,7 @@ describe("applyNodeSizeConfiguration", () => {
         },
       },
     };
-    dispatch = jest.fn();
+    dispatch = vi.fn();
   });
   it("calls applyNodeConfiguration with correct configuration and arguments", () => {
     applyNodeSizeConfiguration({
@@ -490,7 +489,7 @@ describe("applyNodeSizeConfiguration", () => {
 describe("setNodeSizeMapped", () => {
   let commit;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
   });
   it("maps the nodes and calls SET_NODE_SIZE", () => {
     const nodes = [
@@ -588,8 +587,8 @@ describe("addRule", () => {
   let dispatch;
   let validateSearchObject;
   beforeEach(() => {
-    commit = jest.fn();
-    dispatch = jest.fn();
+    commit = vi.fn();
+    dispatch = vi.fn();
     searchObjectHelper.validateSearchObject.mockReturnValue(true);
   });
   it("adds a valid color rule", () => {
@@ -776,7 +775,7 @@ describe("applyEdgeColorConfiguration", () => {
   let commit;
   let links;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     rootState = {
       appearance: {
         highlight: false,
@@ -853,7 +852,7 @@ describe("setConfiguratedEdgeColor", () => {
   let commit;
   let links;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     rootState = {
       mainGraph: {
         Graph: new Viva.Graph.graph(),
@@ -926,7 +925,7 @@ describe("markClickedNodes", () => {
   let rootState;
   let commit;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     rootState = {
       history: {
         clickHistory: {
@@ -936,7 +935,7 @@ describe("markClickedNodes", () => {
       },
       mainGraph: {
         Graph: {
-          getNode: jest.fn(),
+          getNode: vi.fn(),
         },
       },
     };
@@ -965,7 +964,7 @@ describe("updateRuleset", () => {
   let type;
   let nodeLabel;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     ruleset = "a ruleset";
     type = "type";
     nodeLabel = "genre";
@@ -984,7 +983,7 @@ describe("updateEdgeRules", () => {
   let commit;
   let rules;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     rules = "a rule";
   });
   it("updates node ruleset", () => {
@@ -997,7 +996,7 @@ describe("updateTooltipRules", () => {
   let commit;
   let rules;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     rules = "a rule";
   });
   it("updates edge ruleset", () => {

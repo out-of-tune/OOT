@@ -1,12 +1,11 @@
 import { actions } from "../actions";
-global.expect = require("expect");
 import {
   getAllNodes,
   getAllLinks,
   getNodeColor,
   getLinkColor,
 } from "@/assets/js/graphHelper";
-jest.mock("@/assets/js/graphHelper");
+vi.mock("@/assets/js/graphHelper");
 import Viva from "vivagraphjs";
 
 const {
@@ -28,7 +27,7 @@ const {
 
 describe("toggleEdgeVisibility", () => {
   it("calls the hide edges function when displayEdges is true", () => {
-    const commit = jest.fn();
+    const commit = vi.fn();
 
     let rootState = {
       mainGraph: {
@@ -44,7 +43,7 @@ describe("toggleEdgeVisibility", () => {
     expect(commit).toHaveBeenCalledWith("HIDE_EDGES");
   });
   it("calls the show edges function when displayEdges is false", () => {
-    const commit = jest.fn();
+    const commit = vi.fn();
 
     let rootState = {
       mainGraph: {
@@ -63,7 +62,7 @@ describe("toggleEdgeVisibility", () => {
 
 describe("switchRendering", () => {
   it("calls the pause rendering mutation when isRendered is true", () => {
-    const commit = jest.fn();
+    const commit = vi.fn();
 
     let rootState = {
       mainGraph: {
@@ -79,7 +78,7 @@ describe("switchRendering", () => {
     expect(commit).toHaveBeenCalledWith("PAUSE_RENDERING");
   });
   it("calls the show edges function when displayEdges is false", () => {
-    const commit = jest.fn();
+    const commit = vi.fn();
 
     let rootState = {
       mainGraph: {
@@ -99,7 +98,7 @@ describe("switchRendering", () => {
 describe("rerenderGraph", () => {
   let commit;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
   });
   it("rerenders the graph", () => {
     rerenderGraph({ commit });
@@ -111,7 +110,7 @@ describe("addPendingRequest", () => {
   let commit;
   let state;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     state = {
       pendingRequestCount: 0,
     };
@@ -126,7 +125,7 @@ describe("removesPendingRequest", () => {
   let commit;
   let state;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     state = {
       pendingRequestCount: 1,
     };
@@ -143,13 +142,13 @@ describe("storeColors", () => {
   let nodes;
   let links;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     rootState = {
       mainGraph: {
         Graph: {},
         renderState: {
           Renderer: {
-            getGraphics: jest.fn(),
+            getGraphics: vi.fn(),
           },
         },
       },
@@ -192,8 +191,8 @@ describe("loadColors", () => {
   let nodes;
   let links;
   beforeEach(() => {
-    commit = jest.fn();
-    dispatch = jest.fn();
+    commit = vi.fn();
+    dispatch = vi.fn();
     state = {
       colors: {
         links: [
@@ -248,8 +247,8 @@ describe("highlight", () => {
   let allLinks;
   let allNodes;
   beforeEach(() => {
-    commit = jest.fn();
-    dispatch = jest.fn();
+    commit = vi.fn();
+    dispatch = vi.fn();
     rootState = {
       mainGraph: {
         Graph: Viva.Graph.graph(),
@@ -322,7 +321,7 @@ describe("toggleHighlight", () => {
   let commit;
   let state;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     state = {
       highligh: false,
     };
@@ -339,13 +338,13 @@ describe("clusterLoop", () => {
   let nodes;
   let links;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
     rootState = {};
     nodes = [];
     links = [];
     getAllNodes.mockReturnValue(nodes);
     getAllLinks.mockReturnValue(links);
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
   it("stores all colors", () => {
     clusterLoop({ dispatch, rootState });
@@ -369,7 +368,7 @@ describe("clusterLoop", () => {
   });
   it("resets graph after it is finished", () => {
     clusterLoop({ dispatch, rootState });
-    jest.advanceTimersByTime(8000);
+    vi.advanceTimersByTime(8000);
     expect(dispatch).toHaveBeenCalledWith("loadColors");
   });
 });
@@ -381,14 +380,14 @@ describe("fadeOut", () => {
   let nodes;
   let links;
   beforeEach(() => {
-    dispatch = jest.fn();
-    commit = jest.fn();
+    dispatch = vi.fn();
+    commit = vi.fn();
     rootState = {};
     nodes = [{ id: "1" }, { id: "2" }, { id: "3" }];
     links = [];
     getAllNodes.mockReturnValue(nodes);
     getAllLinks.mockReturnValue(links);
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
   it("calls getAllNodes", () => {
     fadeOut({ commit, dispatch, rootState });
@@ -400,12 +399,12 @@ describe("fadeOut", () => {
   });
   it("calls deletes nodes", () => {
     fadeOut({ commit, dispatch, rootState });
-    jest.advanceTimersByTime(3);
+    vi.advanceTimersByTime(3);
     expect(commit).toHaveBeenCalledWith("REMOVE_NODE", nodes[2]);
   });
   it("calls deletes nodes for all nodes", () => {
     fadeOut({ commit, dispatch, rootState });
-    jest.advanceTimersByTime(9);
+    vi.advanceTimersByTime(9);
     expect(commit).toHaveBeenCalledTimes(3);
   });
 });

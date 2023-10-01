@@ -1,7 +1,6 @@
 import { mutations } from "../mutations";
 
 const { SET_NODE_LABELS, ADD_NODE_LABEL, REMOVE_NODE_LABEL } = mutations;
-global.expect = require("expect");
 
 describe("SET_NODE_LABELS", () => {
   let state;

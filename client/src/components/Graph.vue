@@ -42,7 +42,7 @@
 <script>
 import { defineAsyncComponent } from "vue";
 import { mapActions, mapState } from "vuex";
-import NodeInfo from "@/components/popovers/NodeInfo";
+import NodeInfo from "@/components/popovers/NodeInfo.vue";
 const QueueDisplay = defineAsyncComponent(() =>
   import("@/components/popovers/QueueDisplay.vue"),
 );

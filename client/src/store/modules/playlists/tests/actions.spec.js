@@ -1,7 +1,6 @@
-global.expect = require("expect");
 import SpotifyService from "@/store/services/SpotifyService";
-import "babel-polyfill";
-jest.mock("@/store/services/SpotifyService");
+
+vi.mock("@/store/services/SpotifyService");
 import { actions } from "../actions";
 
 const {
@@ -15,7 +14,7 @@ const {
 
 describe("changePlaylistLoaderState", () => {
   it("changes playlistOpen to true", () => {
-    let commit = jest.fn();
+    let commit = vi.fn();
     let modalState = true;
     changePlaylistLoaderState({ commit }, modalState);
     expect(commit).toHaveBeenCalledWith("CHANGE_PLAYLIST_LOADER_STATE", true);
@@ -26,7 +25,7 @@ describe("getCurrentUsersPlaylists", () => {
   let commit;
   let rootState;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     rootState = {
       authentication: {
         accessToken: 123,
@@ -46,7 +45,7 @@ describe("getCurrentUsersPlaylists", () => {
 });
 
 describe("setCurrentPlaylist", () => {
-  let commit = jest.fn();
+  let commit = vi.fn();
   let playlist = { name: "playlist 1" };
   it("sets current playlist", () => {
     setCurrentPlaylist({ commit }, playlist);
@@ -58,10 +57,10 @@ describe("setCurrentPlaylist", () => {
 describe("addSongToPlaylist", () => {
   let dispatch;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
   });
   it("calls add songs to playlist", async () => {
-    SpotifyService.addSongToPlaylist = jest.fn();
+    SpotifyService.addSongToPlaylist = vi.fn();
     await addSongToPlaylist({ dispatch }, "SongURIString");
     expect(dispatch).toHaveBeenCalledWith("addSongsToPlaylist", [
       "SongURIString",
@@ -73,7 +72,7 @@ describe("addSongsToPlaylist", () => {
   let rootState;
   let state;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
     rootState = {
       playlist: {
         currentPlaylist: {
@@ -88,7 +87,7 @@ describe("addSongsToPlaylist", () => {
     state = rootState.playlist;
   });
   it("adds Songs to playlist", async () => {
-    SpotifyService.addSongsToPlaylist = jest.fn();
+    SpotifyService.addSongsToPlaylist = vi.fn();
     await addSongsToPlaylist({ dispatch, rootState, state }, [
       "SongURIString",
       "AnotherSongURI",
@@ -100,7 +99,7 @@ describe("addSongsToPlaylist", () => {
     );
   });
   it("sets success message", async () => {
-    SpotifyService.addSongsToPlaylist = jest.fn();
+    SpotifyService.addSongsToPlaylist = vi.fn();
     SpotifyService.addSongsToPlaylist.mockReturnValue("Success");
     await addSongsToPlaylist({ dispatch, rootState, state }, [
       "SongURIString",
@@ -137,8 +136,8 @@ describe("loadPlaylist", () => {
   let state;
   let commit;
   beforeEach(() => {
-    dispatch = jest.fn();
-    commit = jest.fn();
+    dispatch = vi.fn();
+    commit = vi.fn();
     rootState = {
       playlist: {
         currentPlaylist: {
@@ -153,7 +152,7 @@ describe("loadPlaylist", () => {
         changes: [{ data: { nodes: [] } }],
       },
     };
-    SpotifyService.getSongsFromPlaylist = jest.fn();
+    SpotifyService.getSongsFromPlaylist = vi.fn();
     SpotifyService.getSongsFromPlaylist.mockReturnValue({
       items: [
         {

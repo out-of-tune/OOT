@@ -5,7 +5,7 @@
       :value="modelValue"
       @input="$emit('update:modelValue', $event.target.value)"
     >
-      <option class="option" v-for="option in getSimpleSearchNodeTypes()">
+      <option class="option" v-for="option in getSimpleSearchNodeTypes()" :key="option">
         {{ option }}
       </option>
     </select>

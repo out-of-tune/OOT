@@ -1,5 +1,4 @@
 import { mutations } from "../mutations";
-global.expect = require("expect");
 const { SET_CURRENT_USER } = mutations;
 
 describe("SET_CURRENT_USER", () => {

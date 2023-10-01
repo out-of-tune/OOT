@@ -3,7 +3,6 @@
  */
 
 import { actions } from "../actions";
-global.expect = require("expect");
 import IndexedDbService from "@/store/services/IndexedDbService";
 import {
   getAllNodes,
@@ -11,8 +10,8 @@ import {
   getNodePosition,
   getPinnedState,
 } from "@/assets/js/graphHelper";
-jest.mock("@/assets/js/graphHelper");
-jest.mock("@/store/services/IndexedDbService");
+vi.mock("@/assets/js/graphHelper");
+vi.mock("@/store/services/IndexedDbService");
 const {
   downloadGraph,
   storeGraph,
@@ -28,8 +27,8 @@ describe("storeGraph", () => {
   let state;
   let dispatch;
   beforeEach(() => {
-    commit = jest.fn();
-    dispatch = jest.fn();
+    commit = vi.fn();
+    dispatch = vi.fn();
     rootState = {
       graph_io: {
         storedGraphNames: ["MamboNo1"],
@@ -37,7 +36,7 @@ describe("storeGraph", () => {
       mainGraph: {
         renderState: {
           layout: {
-            isNodePinned: jest.fn(),
+            isNodePinned: vi.fn(),
           },
         },
       },
@@ -106,8 +105,8 @@ describe("loadGraph", () => {
   let dispatch;
   let graph;
   beforeEach(() => {
-    commit = jest.fn();
-    dispatch = jest.fn();
+    commit = vi.fn();
+    dispatch = vi.fn();
     graph = {
       nodesWithPositions: [
         {
@@ -200,12 +199,12 @@ describe("downloadGraph", () => {
   let commit;
   let rootState;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     rootState = {
       mainGraph: {
         renderState: {
           layout: {
-            isNodePinned: jest.fn(),
+            isNodePinned: vi.fn(),
           },
         },
       },
@@ -223,7 +222,7 @@ describe("downloadGraph", () => {
     getNodePosition
       .mockReturnValueOnce({ x: 123, y: 123 })
       .mockReturnValueOnce({ x: 12, y: 12 });
-    global.URL.createObjectURL = jest.fn();
+    global.URL.createObjectURL = vi.fn();
     global.URL.createObjectURL.mockReturnValue(
       "blob://out-of-tune.org/123123123123",
     );
@@ -238,31 +237,31 @@ describe("downloadGraph", () => {
 describe("loadGraphFromIndexedDb", () => {
   let dispatch;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
   });
   it("calls indexedDbWith correct name", async () => {
-    IndexedDbService.getGraph = jest.fn();
+    IndexedDbService.getGraph = vi.fn();
     IndexedDbService.getGraph.mockReturnValue("A graph");
     await loadGraphFromIndexedDb({ dispatch }, "graph1");
     expect(IndexedDbService.getGraph).toHaveBeenCalledWith("graph1");
   });
   it("calls loadGraph", async () => {
-    IndexedDbService.getGraph = jest.fn();
+    IndexedDbService.getGraph = vi.fn();
     IndexedDbService.getGraph.mockReturnValue({ id: "A graph" });
     await loadGraphFromIndexedDb({ dispatch }, "graph1");
     expect(dispatch).toHaveBeenCalledWith("loadGraph", { id: "A graph" });
   });
   it("sets success message", async () => {
-    IndexedDbService.getGraph = jest.fn();
+    IndexedDbService.getGraph = vi.fn();
     IndexedDbService.getGraph.mockReturnValue({ id: "A graph" });
     await loadGraphFromIndexedDb({ dispatch }, "graph1");
     expect(dispatch).toHaveBeenCalledWith("setSuccess", "Graph loaded");
   });
   it("sets error message when IndexedDb errors", async () => {
-    IndexedDbService.getGraph = jest.fn();
-    IndexedDbService.getGraph.mockImplementationOnce(
-      new Error("An error occured"),
-    );
+    IndexedDbService.getGraph = vi.fn();
+    IndexedDbService.getGraph.mockImplementationOnce(() => {
+      throw new Error("An error occured");
+    });
     await loadGraphFromIndexedDb({ dispatch }, "graph1");
     expect(dispatch).toHaveBeenCalledWith(
       "setError",
@@ -276,32 +275,32 @@ describe("removeGraphFromIndexedDb", () => {
   let commit;
   let state;
   beforeEach(() => {
-    dispatch = jest.fn();
-    commit = jest.fn();
+    dispatch = vi.fn();
+    commit = vi.fn();
     state = {
       storedGraphNames: ["GraphNo1", "MamboNo2"],
     };
   });
   it("calls indexedDbWith correct name", async () => {
-    IndexedDbService.deleteGraph = jest.fn();
+    IndexedDbService.deleteGraph = vi.fn();
     await removeGraphFromIndexedDb({ dispatch, commit, state }, "MamboNo2");
     expect(IndexedDbService.deleteGraph).toHaveBeenCalledWith("MamboNo2");
   });
   it("sets new graph names", async () => {
-    IndexedDbService.deleteGraph = jest.fn();
+    IndexedDbService.deleteGraph = vi.fn();
     await removeGraphFromIndexedDb({ dispatch, commit, state }, "MamboNo2");
     expect(commit).toHaveBeenCalledWith("SET_STORED_GRAPH_NAMES", ["GraphNo1"]);
   });
   it("sets success message", async () => {
-    IndexedDbService.deleteGraph = jest.fn();
+    IndexedDbService.deleteGraph = vi.fn();
     await removeGraphFromIndexedDb({ dispatch, commit, state }, "MamboNo2");
     expect(dispatch).toHaveBeenCalledWith("setSuccess", "Graph deleted");
   });
   it("sets error message when IndexedDb errors", async () => {
-    IndexedDbService.deleteGraph = jest.fn();
-    IndexedDbService.deleteGraph.mockImplementationOnce(
-      new Error("An error occured"),
-    );
+    IndexedDbService.deleteGraph = vi.fn();
+    IndexedDbService.deleteGraph.mockImplementationOnce(() => {
+      throw new Error("An error occured");
+    });
     await removeGraphFromIndexedDb({ dispatch, commit, state }, "MamboNo2");
     expect(dispatch).toHaveBeenCalledWith(
       "setError",
@@ -314,7 +313,7 @@ describe("importGraph", () => {
   let dispatch;
   let graph;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
     graph = {
       nodesWithPositions: [
         {

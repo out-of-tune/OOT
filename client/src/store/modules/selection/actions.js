@@ -6,7 +6,7 @@ import {
 } from "@/assets/js/graphHelper";
 import { handleTokenError } from "@/assets/js/TokenHelper.js";
 import SpotifyService from "@/store/services/SpotifyService";
-var fp = require("lodash/fp");
+import fp from "lodash/fp"
 import Flatbush from "flatbush";
 import _ from "lodash";
 

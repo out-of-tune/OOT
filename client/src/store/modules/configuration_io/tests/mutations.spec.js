@@ -1,5 +1,4 @@
 import { mutations } from "../mutations";
-global.expect = require("expect");
 const { SET_CONFIGURATION_URL, SET_STORED_CONFIGURATION_NAMES } = mutations;
 
 describe("SET_CONFIGURATION_URL", () => {

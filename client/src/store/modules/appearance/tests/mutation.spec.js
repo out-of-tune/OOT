@@ -1,5 +1,4 @@
 import { mutations } from "../mutations";
-global.expect = require("expect");
 const { SET_PENDING_REQUEST_COUNT, SET_COLORS, SET_HIGHLIGHT_ACTIVE } =
   mutations;
 

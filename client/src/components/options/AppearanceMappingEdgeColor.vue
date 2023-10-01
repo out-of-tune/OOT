@@ -10,7 +10,7 @@
 </template>
 <script>
 import { mapState } from "vuex";
-import AppearanceMappingEdgeColorOption from "./AppearanceMappingEdgeColorOption";
+import AppearanceMappingEdgeColorOption from "./AppearanceMappingEdgeColorOption.vue";
 export default {
   components: {
     AppearanceMappingEdgeColorOption,

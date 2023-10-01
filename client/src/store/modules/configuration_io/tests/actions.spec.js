@@ -3,9 +3,8 @@
  */
 
 import { actions } from "../actions";
-global.expect = require("expect");
 import IndexedDbService from "@/store/services/IndexedDbService";
-jest.mock("@/store/services/IndexedDbService");
+vi.mock("@/store/services/IndexedDbService");
 
 const {
   importConfiguration,
@@ -19,7 +18,7 @@ const {
 describe("importConfiguration", () => {
   let dispatch;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
   });
   it("verifies a correct schema", () => {
     const js = require("./schema.json");
@@ -69,8 +68,8 @@ describe("storeConfiguration", () => {
   let state;
   let dispatch;
   beforeEach(() => {
-    commit = jest.fn();
-    dispatch = jest.fn();
+    commit = vi.fn();
+    dispatch = vi.fn();
     rootState = {
       configuration_io: {
         storedConfigurationNames: ["MamboNo1Config"],
@@ -115,16 +114,16 @@ describe("storeConfiguration", () => {
 describe("loadConfigurationFromIndexedDb", () => {
   let dispatch;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
   });
   it("calls indexedDbWith correct name", async () => {
-    IndexedDbService.getConfiguration = jest.fn();
+    IndexedDbService.getConfiguration = vi.fn();
     IndexedDbService.getConfiguration.mockReturnValue("A graph");
     await loadConfigurationFromIndexedDb({ dispatch }, "graph1");
     expect(IndexedDbService.getConfiguration).toHaveBeenCalledWith("graph1");
   });
   it("calls loadGraph", async () => {
-    IndexedDbService.getConfiguration = jest.fn();
+    IndexedDbService.getConfiguration = vi.fn();
     IndexedDbService.getConfiguration.mockReturnValue({
       id: "A configuration",
     });
@@ -134,7 +133,7 @@ describe("loadConfigurationFromIndexedDb", () => {
     });
   });
   it("it applies configurations", async () => {
-    IndexedDbService.getConfiguration = jest.fn();
+    IndexedDbService.getConfiguration = vi.fn();
     IndexedDbService.getConfiguration.mockReturnValue({
       id: "A configuration",
     });
@@ -142,10 +141,10 @@ describe("loadConfigurationFromIndexedDb", () => {
     expect(dispatch).toHaveBeenCalledWith("applyAllConfigurations");
   });
   it("sets error message when IndexedDb errors", async () => {
-    IndexedDbService.getConfiguration = jest.fn();
-    IndexedDbService.getConfiguration.mockImplementationOnce(
-      new Error("An error occured"),
-    );
+    IndexedDbService.getConfiguration = vi.fn();
+    IndexedDbService.getConfiguration.mockImplementationOnce(() => {
+      throw new Error("An error occured");
+    });
     await loadConfigurationFromIndexedDb({ dispatch }, "non existent");
     expect(dispatch).toHaveBeenCalledWith(
       "setError",
@@ -159,14 +158,14 @@ describe("removeConfigurationFromIndexedDb", () => {
   let commit;
   let state;
   beforeEach(() => {
-    dispatch = jest.fn();
-    commit = jest.fn();
+    dispatch = vi.fn();
+    commit = vi.fn();
     state = {
       storedConfigurationNames: ["GraphNo1", "MamboNo2"],
     };
   });
   it("calls indexedDb with correct name", async () => {
-    IndexedDbService.deleteConfiguration = jest.fn();
+    IndexedDbService.deleteConfiguration = vi.fn();
     await removeConfigurationFromIndexedDb(
       { dispatch, commit, state },
       "MamboNo2",
@@ -176,7 +175,7 @@ describe("removeConfigurationFromIndexedDb", () => {
     );
   });
   it("sets new configuration names", async () => {
-    IndexedDbService.deleteConfiguration = jest.fn();
+    IndexedDbService.deleteConfiguration = vi.fn();
     await removeConfigurationFromIndexedDb(
       { dispatch, commit, state },
       "MamboNo2",
@@ -186,7 +185,7 @@ describe("removeConfigurationFromIndexedDb", () => {
     ]);
   });
   it("sets success message", async () => {
-    IndexedDbService.deleteConfiguration = jest.fn();
+    IndexedDbService.deleteConfiguration = vi.fn();
     await removeConfigurationFromIndexedDb(
       { dispatch, commit, state },
       "MamboNo2",
@@ -197,10 +196,10 @@ describe("removeConfigurationFromIndexedDb", () => {
     );
   });
   it("sets error message when IndexedDb errors", async () => {
-    IndexedDbService.deleteConfiguration = jest.fn();
-    IndexedDbService.deleteConfiguration.mockImplementationOnce(
-      new Error("An error occured"),
-    );
+    IndexedDbService.deleteConfiguration = vi.fn();
+    IndexedDbService.deleteConfiguration.mockImplementationOnce(() => {
+      throw new Error("An error occured");
+    });
     await removeConfigurationFromIndexedDb(
       { dispatch, commit, state },
       "MamboNo2",
@@ -216,8 +215,8 @@ describe("loadConfiguration", () => {
   let commit;
   let dispatch;
   beforeEach(() => {
-    commit = jest.fn();
-    dispatch = jest.fn();
+    commit = vi.fn();
+    dispatch = vi.fn();
   });
   it("sets success message", () => {
     loadConfiguration({ dispatch, commit }, { name: "a config" });
@@ -238,7 +237,7 @@ describe("downloadConfiguration", () => {
   let commit;
   let rootState;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     rootState = {
       configurations: {
         name: "Here be configurations",
@@ -246,7 +245,7 @@ describe("downloadConfiguration", () => {
     };
   });
   it("sets the download URL", () => {
-    global.URL.createObjectURL = jest.fn();
+    global.URL.createObjectURL = vi.fn();
     global.URL.createObjectURL.mockReturnValue(
       "blob://out-of-tune.org/123123123123",
     );

@@ -1,11 +1,10 @@
 import { actions } from "../actions";
-global.expect = require("expect");
 
 const { deleteGraph, deleteNodes } = actions;
 
 describe("deleteGraph", () => {
   it("calls the clear graph mutation", () => {
-    const commit = jest.fn();
+    const commit = vi.fn();
 
     deleteGraph({
       commit,
@@ -15,7 +14,7 @@ describe("deleteGraph", () => {
 });
 describe("deleteNodes", () => {
   it("calls the clear nodes with a certain label mutation", () => {
-    const commit = jest.fn();
+    const commit = vi.fn();
 
     deleteNodes(
       {

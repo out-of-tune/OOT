@@ -4,10 +4,10 @@ import {
   getNodeColor,
   getLinkColor,
 } from "@/assets/js/graphHelper";
+import createChineseWhisper from "ngraph.cw";
 
 const clusterNodes = ({ rootState, commit }) => {
-  var createWhisper = require("ngraph.cw");
-  var whisper = createWhisper(rootState.mainGraph.Graph);
+  var whisper = createChineseWhisper(rootState.mainGraph.Graph);
   // The algorithm is iterative. We should continue running it until change
   // rate within clusters is large:
 

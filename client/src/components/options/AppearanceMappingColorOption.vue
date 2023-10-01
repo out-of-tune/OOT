@@ -20,7 +20,7 @@
 <script>
 import { mapActions } from "vuex";
 import Draggable from "./ColorDraggable.vue";
-import AppearanceMappingInput from "@/components/helpers/AppearanceMappingInput";
+import AppearanceMappingInput from "@/components/helpers/AppearanceMappingInput.vue";
 export default {
   components: {
     Draggable,

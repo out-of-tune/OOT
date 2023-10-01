@@ -1,8 +1,7 @@
 import { actions } from "../actions";
-global.expect = require("expect");
-import "babel-polyfill";
+
 import SpotifyService from "@/store/services/SpotifyService";
-jest.mock("@/store/services/SpotifyService");
+vi.mock("@/store/services/SpotifyService");
 
 const {
   getSongSamples,
@@ -22,8 +21,8 @@ describe("getSongSamples", () => {
   let dispatch;
   let node;
   beforeEach(() => {
-    commit = jest.fn();
-    dispatch = jest.fn();
+    commit = vi.fn();
+    dispatch = vi.fn();
     rootState = {
       spotify: {
         accessToken: "IBimsEinsToken",
@@ -72,7 +71,7 @@ describe("getSongSamples", () => {
 describe("setCurrentSong", () => {
   let commit;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
   });
   it("commits SET_CURRENT_SONG", () => {
     const song = { id: "12" };
@@ -83,7 +82,7 @@ describe("setCurrentSong", () => {
 describe("insertInQueue", () => {
   let commit;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
   });
   it("commits SET_CURRENT_SONG", () => {
     const song = { id: "12" };
@@ -97,7 +96,7 @@ describe("insertInQueue", () => {
 describe("addToQueue", () => {
   let commit;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
   });
   it("commits ADD_TO_QUEUE", () => {
     const song = { id: "12" };
@@ -109,7 +108,7 @@ describe("playNextInQueue", () => {
   let dispatch;
   let state;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
     state = {
       queue: [{ el: "one dummy element" }, { el: "two dummy element" }],
       queueIndex: 1,
@@ -129,7 +128,7 @@ describe("playSong", () => {
   let dispatch;
   let state;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
     state = {
       queue: [],
       queueIndex: 0,
@@ -162,7 +161,7 @@ describe("playPreviousInQueue", () => {
   let dispatch;
   let state;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
     state = {
       queue: [{ el: "one dummy element" }, { el: "two dummy element" }],
       queueIndex: 1,
@@ -182,7 +181,7 @@ describe("playAtIndexInQueue", () => {
   let commit;
   let state;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     state = {
       queue: [{ el: "one dummy element" }, { el: "two dummy element" }],
       queueIndex: 0,

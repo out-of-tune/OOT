@@ -57,7 +57,7 @@
 </template>
 <script>
 import { mapState, mapActions } from "vuex";
-import PaginatedList from "@/components/helpers/PaginatedList";
+import PaginatedList from "@/components/helpers/PaginatedList.vue";
 import { getNodeColor } from "@/assets/js/graphHelper";
 
 export default {

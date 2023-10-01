@@ -1,7 +1,6 @@
 import { mutations } from "../mutations";
 
 const { SET_HISTORY_INDEX, SET_CHANGES, ADD_TO_CLICK_HISTORY } = mutations;
-global.expect = require("expect");
 
 describe("SET_HISTORY_INDEX", () => {
   let state;

@@ -54,8 +54,8 @@
 </template>
 <script>
 import MouseActionRadio from "@/components/helpers/MouseActionRadio.vue";
-import LoadSavePopover from "@/components/popovers/LoadSavePopover";
-import SelectionPopover from "@/components/popovers/SelectionActionPopover";
+import LoadSavePopover from "@/components/popovers/LoadSavePopover.vue";
+import SelectionPopover from "@/components/popovers/SelectionActionPopover.vue";
 import { mapActions, mapState } from "vuex";
 
 export default {

@@ -1,5 +1,4 @@
 import { mutations } from "../mutations";
-global.expect = require("expect");
 const { SET_MESSAGE, SET_SNACK_COLOR } = mutations;
 
 describe("SET_MESSAGE", () => {

@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 services:
   apollo:
     image: apollo_base
@@ -8,17 +8,17 @@ services:
       - memcached
     env_file: .env
   client:
-    image: client_base 
-    build: 
+    image: client_base
+    build:
       context: ./client
-      args: 
-        - VUE_APP_PROXY_URI=${PROXY_URI}
-        - VUE_APP_MOUNT_PATH=${APP_MOUNT_PATH}
+      args:
+        - PROXY_URI=${PROXY_URI}
+        - BASE_URL=${APP_MOUNT_PATH}
         - NODE_ENV=${NODE_ENV}
     depends_on:
       - apollo
       - auth
-      
+
   arangodb:
     image: arangodb/arangodb
     volumes:
@@ -45,7 +45,7 @@ services:
   memcached:
     image: memcached:alpine
   share:
-    depends_on: 
+    depends_on:
       - arangodb
     build:
       context: ./services/share

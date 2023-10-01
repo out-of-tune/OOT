@@ -3,22 +3,22 @@
  */
 
 import { actions } from "../actions";
-global.expect = require("expect");
-import "babel-polyfill";
+
 import GraphService from "@/store/services/GraphService";
-jest.mock("@/store/services/GraphService");
+vi.mock("@/store/services/GraphService");
 import _ from "lodash";
 import Viva from "vivagraphjs";
 import SpotifyService from "@/store/services/SpotifyService";
-jest.mock("@/store/services/SpotifyService");
+vi.mock("@/store/services/SpotifyService");
 import searchObjectHelper from "@/assets/js/searchObjectHelper";
-jest.mock("@/assets/js/searchObjectHelper");
-
+vi.mock("@/assets/js/searchObjectHelper");
+import "@/assets/js/graphQlHelper.js";
+vi.mock("@/assets/js/graphQlHelper.js");
 import {
   handleGraphqlTokenError,
   handleTokenError,
 } from "@/assets/js/TokenHelper";
-jest.mock("@/assets/js/TokenHelper");
+vi.mock("@/assets/js/TokenHelper");
 
 const {
   generateSearchObject,
@@ -36,7 +36,7 @@ describe("setSearch", () => {
   let input;
   let searchObject;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     input = "Artist: name=John";
     searchObject = { dummy: "object" };
     searchObjectHelper.generateSearchObject.mockReturnValue(searchObject);
@@ -56,8 +56,8 @@ describe("startGraphQlSearch", () => {
   let rootState;
   let dispatch;
   beforeEach(() => {
-    commit = jest.fn();
-    dispatch = jest.fn();
+    commit = vi.fn();
+    dispatch = vi.fn();
     rootState = {
       searchObject: {
         valid: false,
@@ -167,7 +167,7 @@ describe("startGraphQlSearch", () => {
       ],
     };
     handleGraphqlTokenError.mockReturnValue(new Error());
-    window.alert = jest.fn();
+    window.alert = vi.fn();
     await startGraphQlSearch({ commit, rootState, dispatch });
     expect(commit).not.toHaveBeenCalled();
   });
@@ -219,7 +219,7 @@ describe("startGraphQlSearch", () => {
       ],
     };
     await startGraphQlSearch({ commit, rootState, dispatch });
-    const expectedQuery = `{artist(name:\"nice value1\"){name,id,popularity,sid,mbid,images}}`;
+    const expectedQuery = `{artist(name:"nice value1"){name,id,popularity,sid,mbid,images}}`;
     expect(handleGraphqlTokenError).toHaveBeenCalledWith(
       expect.anything(),
       [expectedQuery],
@@ -234,11 +234,9 @@ describe("startSimpleGraphSearch", () => {
   let rootState;
   let commit;
   beforeEach(() => {
-    dispatch = jest.fn();
-    commit = jest.fn();
+    dispatch = vi.fn();
+    commit = vi.fn();
     rootState = {
-      authentication: {
-      },
       searchObject: {
         valid: false,
         errors: [],
@@ -365,6 +363,7 @@ describe("startSimpleGraphSearch", () => {
     });
     handleGraphqlTokenError.mockReset();
     handleTokenError.mockReset();
+    vi.clearAllMocks();
   });
   it("selects nodes of nodeType", async () => {
     await startSimpleGraphSearch(
@@ -470,11 +469,9 @@ describe("startSimpleGraphSearch", () => {
     });
   });
   it("calls spotify correctly without nodetype", async () => {
-    handleGraphqlTokenError
-      .mockReturnValueOnce({ genre: [] })
-      .mockReturnValue({
-        artist: [{ id: "artist/113", name: "frank sinitra" }],
-      });
+    handleGraphqlTokenError.mockReturnValueOnce({ genre: [] }).mockReturnValue({
+      artist: [{ id: "artist/113", name: "frank sinitra" }],
+    });
     handleTokenError.mockReturnValue([
       {
         albums: { items: [{ id: "13", name: "frank" }] },
@@ -494,11 +491,9 @@ describe("startSimpleGraphSearch", () => {
     );
   });
   it("calls graphql correctly without nodetype", async () => {
-    handleGraphqlTokenError
-      .mockReturnValueOnce({ genre: [] })
-      .mockReturnValue({
-        artist: [{ id: "artist/113", name: "frank sinitra" }],
-      });
+    handleGraphqlTokenError.mockReturnValueOnce({ genre: [] }).mockReturnValue({
+      artist: [{ id: "artist/113", name: "frank sinitra" }],
+    });
     handleTokenError.mockReturnValue([
       {
         albums: { items: [{ id: "13", name: "frank" }] },
@@ -517,6 +512,7 @@ describe("startSimpleGraphSearch", () => {
     handleTokenError.mockReturnValue([
       { tracks: { items: [{ id: "13", name: "josef" }] } },
     ]);
+
     await startSimpleGraphSearch(
       { dispatch, rootState },
       { nodeType: "song", searchString: "josef" },
@@ -590,7 +586,7 @@ describe("startAdvancedGraphSearch", () => {
   let dispatch;
   let rootState;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
     searchObjectHelper.validateSearchObject.mockReturnValue(true);
     rootState = {
       searchObject: {
@@ -1070,7 +1066,7 @@ describe("setSearchString", () => {
   let commit;
   let input;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     input = "Artist: name=12";
   });
   it("sets the search string", () => {
@@ -1083,7 +1079,7 @@ describe("setSearchObject", () => {
   let commit;
   let input;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     input = { searchString: "Artist: name=12" };
   });
   it("sets the search string", () => {
@@ -1096,7 +1092,7 @@ describe("setAdvancedOpen", () => {
   let commit;
   let input;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     input = true;
   });
   it("sets the search string", () => {

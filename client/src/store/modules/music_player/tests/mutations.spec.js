@@ -1,5 +1,4 @@
 import { mutations } from "../mutations";
-global.expect = require("expect");
 
 const { SET_CURRENT_SONG, SET_QUEUE_INDEX, ADD_TO_QUEUE, INSERT_IN_QUEUE } =
   mutations;

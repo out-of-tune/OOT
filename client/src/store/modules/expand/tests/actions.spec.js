@@ -1,13 +1,11 @@
 import { actions } from "../actions";
-global.expect = require("expect");
-import "babel-polyfill";
 import Viva from "vivagraphjs";
 import GraphService from "@/store/services/GraphService";
 import SpotifyService from "@/store/services/SpotifyService";
 import { getAllNodes } from "@/assets/js/graphHelper";
-jest.mock("@/store/services/GraphService");
-jest.mock("@/store/services/SpotifyService");
-jest.mock("@/assets/js/graphHelper");
+vi.mock("@/store/services/GraphService");
+vi.mock("@/store/services/SpotifyService");
+vi.mock("@/assets/js/graphHelper");
 
 const { expandAction, addToGraph } = actions;
 
@@ -17,8 +15,8 @@ describe("expandAction", () => {
   let rootState;
   let state;
   beforeEach(() => {
-    (dispatch = jest.fn()),
-      (commit = jest.fn()),
+    (dispatch = vi.fn()),
+      (commit = vi.fn()),
       (state = {
         failedExpandedNodes: [],
       });
@@ -36,7 +34,7 @@ describe("expandAction", () => {
         Graph: Viva.Graph.graph(),
         renderState: {
           layout: {
-            getNodePosition: jest.fn(),
+            getNodePosition: vi.fn(),
           },
         },
       },
@@ -128,10 +126,7 @@ describe("expandAction", () => {
             },
           },
         ],
-      },
-      expand: {
-        failedExpandedConnections: [],
-      },
+      }
     };
     const nodes = [
       {
@@ -171,7 +166,7 @@ describe("expandAction", () => {
       x: 100,
       y: 100,
     });
-    rootState.mainGraph.renderState.layout.isNodePinned = jest.fn();
+    rootState.mainGraph.renderState.layout.isNodePinned = vi.fn();
     rootState.mainGraph.renderState.layout.isNodePinned.mockReturnValueOnce(
       true,
     );
@@ -606,8 +601,8 @@ describe("addToGraph", () => {
         },
       },
     };
-    commit = jest.fn();
-    dispatch = jest.fn();
+    commit = vi.fn();
+    dispatch = vi.fn();
     nodes = [
       {
         id: "Auftrag/1",
