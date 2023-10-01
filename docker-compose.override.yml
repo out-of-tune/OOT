@@ -3,8 +3,8 @@ services:
   apollo:
     entrypoint: ["/bin/sh", "-c", "npm ci --workspace=@out-of-tune/api && npm run serve --workspace=@out-of-tune/api"]
     volumes:
-      - "./:/usr/src/app"
-      - "/dev/null:/usr/src/app/api/.env"
+      - "./:/oot"
+      - "/dev/null:/oot/api/.env"
     ports:
       - "3003:3003"
   client:
@@ -16,26 +16,21 @@ services:
     entrypoint: ["/bin/sh", "-c", "npm install && npm run serve"]
     ports:
       - "8080:8080"
-      
   arangodb:
     ports:
       - "8529:8529"
   auth:
     entrypoint: ["/bin/sh", "-c", "npm ci --workspace=@out-of-tune/auth-service && npm run serve --workspace=@out-of-tune/auth-service"]
     volumes:
-      - "./:/usr/src/app"
+      - "./:/oot"
     ports:
       - "4000:4000"
-  proxy:
-    ports:
-      - "80:80"
-      - "443:443"
   memcached:
     ports:
       - "11211:11211"
   share:
     entrypoint: ["/bin/sh", "-c", "npm ci --workspace=@out-of-tune/share-service && npm run serve --workspace=@out-of-tune/share-service"]
     volumes:
-      - "./:/usr/src/app"
+      - "./:/oot"
     ports:
       - "4444:4444"

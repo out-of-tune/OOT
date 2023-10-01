@@ -1,34 +1,46 @@
-version: "3"
+version: '3'
 services:
   apollo:
     image: apollo_base
-    build: ./api
+    build:
+      args:
+        - WORKSPACE=@out-of-tune/api
     depends_on:
       - arangodb
       - memcached
     env_file: .env
+    ports:
+      - "3003"
   client:
-    image: client_base
-    build:
+    image: client_base 
+    build: 
       context: ./client
-      args:
-        - PROXY_URI=${PROXY_URI}
-        - BASE_URL=${APP_MOUNT_PATH}
+      args: 
+        - VUE_APP_PROXY_URI=${PROXY_URI}
+        - VUE_APP_MOUNT_PATH=${APP_MOUNT_PATH}
         - NODE_ENV=${NODE_ENV}
+      target: production-stage
     depends_on:
       - apollo
       - auth
-
+    ports:
+      - "8080"
   arangodb:
     image: arangodb/arangodb
     volumes:
       - ${ARANGODB_VOLUME}:/var/lib/arangodb3
     environment:
       - ARANGO_ROOT_PASSWORD=${ARANGODB_PASSWORD}
+    ports:
+      - "8529"
   auth:
     image: auth_base
-    build: ./auth
+    build:
+      args:
+        - WORKSPACE=@out-of-tune/auth-service
     env_file: .env
+    ports:
+      - "4000"
   proxy:
     image: proxy_base
     build: ./server
@@ -42,14 +54,22 @@ services:
       - client
       - apollo
       - share
+    ports:
+      - "${PROXY_HTTP_PORT}:80"
+      - "${PROXY_HTTPS_PORT}:443"
   memcached:
     image: memcached:alpine
+    ports:
+      - "11211"
   share:
-    depends_on:
+    depends_on: 
       - arangodb
     build:
-      context: ./services/share
+      args:
+        - WORKSPACE=@out-of-tune/share-service
     env_file: .env
+    ports:
+      - "4444"
 
 networks:
   default:
