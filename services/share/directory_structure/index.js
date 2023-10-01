@@ -1,4 +1,4 @@
-const fs = require('fs').promises
+import fs from 'fs/promises'
 
 async function ensureDir (dirpath) {
     try {
@@ -12,4 +12,4 @@ async function ensureTypeDirs(root, types) {
     types.map(type => ensureDir(`${root}/${type}`))
 }
 
-module.exports = ensureTypeDirs
+export default ensureTypeDirs

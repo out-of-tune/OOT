@@ -6,6 +6,8 @@ import arangoSection from './src/sections/arangoSection.js'
 import apiSection from './src/sections/apiSection.js'
 import spotifySection from './src/sections/spotifySection.js'
 import generalSection from './src/sections/generalSection.js'
+import shareSection from './src/sections/shareSection.js'
+
 
 
 export class Config {
@@ -13,6 +15,7 @@ export class Config {
     static apollo = apiSection
     static spotify = spotifySection
     static general = generalSection
+    static share = shareSection
 
     static load = (sections: Section|Section[]) => {
         if (!Array.isArray(sections)) sections = [sections]

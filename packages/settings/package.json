@@ -1,6 +1,6 @@
 {
   "name": "@out-of-tune/settings",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "settings helper for out-of-tune services",
   "main": "dist/index.js",
   "type": "module",

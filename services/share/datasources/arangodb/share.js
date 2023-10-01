@@ -1,6 +1,6 @@
-const BaseAPI = require('./base')
+import { BaseAPI } from "./base.js"
 
-class ShareAPI extends BaseAPI {
+export class ShareAPI extends BaseAPI {
     constructor(db) {
         super(db)
         this._collection('Share')
@@ -23,5 +23,3 @@ class ShareAPI extends BaseAPI {
         return await this.set_fields(this.collection, id, fields)
     }
 }
-
-module.exports = ShareAPI

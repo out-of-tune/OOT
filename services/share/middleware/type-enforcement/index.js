@@ -6,4 +6,4 @@ function enforceTypes(types) {
     }
 }
 
-module.exports = enforceTypes
+export default enforceTypes

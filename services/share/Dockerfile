@@ -1,6 +1,4 @@
-FROM node:16
-
-# Create app directory
+FROM node:18
 WORKDIR /usr/src/app
 
 COPY package*.json ./

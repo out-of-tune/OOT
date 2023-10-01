@@ -14,6 +14,7 @@ export class Types {
         return num
     }
     static int: TypeFunction<number> = (raw) => Math.floor(Types.number(raw))
+    static array = <T>(underlying: TypeFunction<T>) => (raw: string): T[] => raw.split(' ').map(underlying)
 }
 
 export class Field<T> {

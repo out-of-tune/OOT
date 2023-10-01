@@ -1,7 +1,7 @@
-const DataLoader = require('dataloader')
-const { aql } = require('arangojs')
+import DataLoader from 'dataloader'
+import { aql } from 'arangojs'
 
-class BaseAPI {
+export class BaseAPI {
     constructor(db) {
         this.db = db
         this._id_loader = new DataLoader(ids => this.get_ids(ids, this.db))
@@ -88,5 +88,3 @@ class BaseAPI {
 
     
 }
-
-module.exports = BaseAPI

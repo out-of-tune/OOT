@@ -1,6 +1,6 @@
-const arangojs = require('arangojs')
-const ShareAPI = require('./share')
-const settings = require('../../settings')
+import arangojs from 'arangojs'
+import { Config } from '@out-of-tune/settings'
+import { ShareAPI } from './share.js'
 
 class ArangoAPI {
     constructor() {
@@ -34,10 +34,10 @@ class ArangoAPI {
 
 const arango = new ArangoAPI()
 arango.connect(
-    `http://${settings.ARANGO_HOST}:${settings.ARANGO_PORT}`, 
-    settings.ARANGO_DB, 
-    settings.ARANGO_USER, 
-    settings.getArangoPassword()
+    `http://${Config.arangodb.host}:${Config.arangodb.port}`, 
+    Config.arangodb.database, 
+    Config.arangodb.user, 
+    Config.arangodb.password
 )
 
-module.exports = arango
+export default arango

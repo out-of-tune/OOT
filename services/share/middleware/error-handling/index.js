@@ -1,7 +1,7 @@
-const handleKnownErrors = require('./handle-known-errors')
-const handleUnknownErrors = require('./handle-unknown-errors')
+import handleKnownErrors from './handle-known-errors.js'
+import handleUnknownErrors from './handle-unknown-errors.js'
 
-module.exports = [
+export default [
     handleKnownErrors,
     handleUnknownErrors
 ]

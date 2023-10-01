@@ -34,8 +34,8 @@ services:
     ports:
       - "11211:11211"
   share:
-    entrypoint: ["/bin/sh", "-c", "npm install && npm run serve"]
+    entrypoint: ["/bin/sh", "-c", "npm ci --workspace=@out-of-tune/share-service && npm run serve --workspace=@out-of-tune/share-service"]
     volumes:
-      - "./services/share:/usr/src/app"
+      - "./:/usr/src/app"
     ports:
       - "4444:4444"
