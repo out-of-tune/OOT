@@ -1,0 +1,21 @@
+version: "3"
+services:
+  apollo:
+    build: ./api
+  client:
+    build:
+      context: ./client
+      args:
+        - PROXY_URI=${PROXY_URI}
+        - BASE_URL=${APP_MOUNT_PATH}
+        - NODE_ENV=${NODE_ENV}
+  auth:
+    build: ./auth
+  proxy:
+    build: ./server
+  share:
+    build: ./services/share
+
+networks:
+  default:
+    driver: bridge

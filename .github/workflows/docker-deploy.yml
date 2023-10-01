@@ -10,6 +10,7 @@ env:
   VERSION: nightly
   APP_MOUNT_PATH: "/app"
   PROXY_URI: "https://d.out-of-tune.org/app"
+  NODE_ENV: "production"
 
 jobs:
   matrix_maker:
@@ -42,7 +43,7 @@ jobs:
       - name: Build the Docker image ${{ matrix.service }}
         run: |
           IMAGE_NAME=${{ matrix.service }}
-          docker compose build $IMAGE_NAME
+          docker compose -f docker-compose.build.yml build $IMAGE_NAME
           docker tag ${{ matrix.service }} ghcr.io/out-of-tune/$IMAGE_NAME:$VERSION 
           docker tag ${{ matrix.service }} ghcr.io/out-of-tune/$IMAGE_NAME:latest
           docker push ghcr.io/out-of-tune/$IMAGE_NAME:$VERSION
