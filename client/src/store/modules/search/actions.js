@@ -214,6 +214,7 @@ async function queryAllNodeTypes(searchString, rootState, dispatch, limit) {
 
   //If no nodes were found in graphql search for a given node type, and the nodetype includes the spotify endpoint, retrieve data from the spotify endpoint
   //Gets all found node types
+  //TODO: reduce list to a set
   const foundTypes = graphQlNodes.map((node) => node.data.label);
   //Gets all node types that haven't been found
   const additionalSpotifyNodeTypes = _.difference(
