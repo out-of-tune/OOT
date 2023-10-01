@@ -1,0 +1,32 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "cicd/add-github-actions" ]
+  pull_request:
+    branches: [ "cicd/add-github-actions" ]
+
+jobs:
+  matrix_maker:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.result }}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Find Dockerimages to build
+      id: set-matrix
+      run: find -name Dockerfile
+    - name: Debug output
+      run: echo "${{ steps.set-matrix.outputs.result }}"
+      
+
+  build:
+    needs: matrix_maker
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: 
+        file: ${{ needs.matrix_maker.outputs.matrix }}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Docker image (${{ matrix.file }})
+      run: docker build ${{ matrix.file }} --file Dockerfile --tag my-image-name:$(date +%s)
