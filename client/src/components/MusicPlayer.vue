@@ -78,17 +78,13 @@
         </button>
       </div>
       <div id="timeSlider" class="sliderBox">
-        <v-slider
-          v-model="currentTime"
-          color="white"
+        <slider
           :min="start"
           :max="end"
-          :hide-details="true"
-          dark
           @change="seekTo"
-          @start="isSeeking = true"
-          @end="isSeeking = false"
-        ></v-slider>
+          :model-value="currentTime"
+          @update:model-value="seekTo"
+        ></slider>
       </div>
     </div>
     <div id="queue">
@@ -129,6 +125,7 @@
 import { mapState, mapActions } from "vuex";
 import logo from "@/assets/logo.png";
 import { searchGraph } from "@/assets/js/graphHelper.js";
+import Slider from "./Slider.vue";
 
 export default {
   data: () => ({
@@ -143,6 +140,9 @@ export default {
       currentArtistName: false,
     },
   }),
+  components: {
+    Slider,
+  },
   computed: {
     ...mapState({
       songUrl: (state) => state.music_player.currentSong.preview_url,
@@ -188,8 +188,9 @@ export default {
         this.currentTime = this.$refs.player.currentTime;
       }
     },
-    seekTo: function () {
-      this.$refs.player.currentTime = this.currentTime;
+    seekTo: function (v) {
+      this.currentTime = v;
+      this.$refs.player.currentTime = v;
     },
     NextSong: function () {
       this.playNextInQueue();
