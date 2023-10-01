@@ -2,9 +2,9 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "cicd/add-github-actions" ]
+    branches: ["cicd/add-github-actions"]
   pull_request:
-    branches: [ "cicd/add-github-actions" ]
+    branches: ["cicd/add-github-actions"]
 
 env:
   VERSION: nightly
@@ -15,22 +15,36 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.files }}
     steps:
-    - uses: actions/checkout@v3
-    - name: Find Dockerimages to build
-      id: set-matrix
-      #run: echo $(find -name Dockerfile | tr '\n' ' ')
-      run: echo 'files=["./server/Dockerfile", "./client/Dockerfile", "./auth/Dockerfile", "./db/arango/Dockerfile", "./services/share/Dockerfile", "./api/Dockerfile"]' >> "$GITHUB_OUTPUT"
-    - name: Debug output
-      run: echo "${{ steps.set-matrix.outputs.files }}"
-      
+      - uses: actions/checkout@v3
+      - name: Find Dockerimages to build
+        id: set-matrix
+        #run: echo $(find -name Dockerfile | tr '\n' ' ')
+        run: echo 'files=["./server/Dockerfile", "./client/Dockerfile", "./auth/Dockerfile", "./db/arango/Dockerfile", "./services/share/Dockerfile", "./api/Dockerfile"]' >> "$GITHUB_OUTPUT"
+      - name: Debug output
+        run: echo "${{ steps.set-matrix.outputs.files }}"
 
   build:
     needs: matrix_maker
     runs-on: ubuntu-latest
     strategy:
-      matrix: 
+      matrix:
         file: ${{ fromJSON(needs.matrix_maker.outputs.matrix) }}
     steps:
-    - uses: actions/checkout@v3
-    - name: Build the Docker image ${{ matrix.file }}
-      run: cd $(dirname ${{ matrix.file }}) && docker build . --file Dockerfile --tag $(basename $(dirname ${{ matrix.file }})):$VERSION
+      - uses: actions/checkout@v3
+      - name: Build the Docker image ${{ matrix.file }}
+        run: cd $(dirname ${{ matrix.file }}) && docker build . --file Dockerfile --tag $(basename $(dirname ${{ matrix.file }})):$VERSION
+
+  test-client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 19.x
+          cache: npm
+      - name: Install and run tests
+        working-directory: ./client
+        run: |
+          npm ci
+          npm run test
