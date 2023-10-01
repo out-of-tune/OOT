@@ -1,16 +1,15 @@
 import { actions } from "../actions";
-global.expect = require("expect");
 import Viva from "vivagraphjs";
 global._ = require("lodash");
 
 import { getAllNodes } from "@/assets/js/graphHelper";
-jest.mock("@/assets/js/graphHelper");
+vi.mock("@/assets/js/graphHelper");
 const { setError, setInfo, setSuccess, setMessage, setSnackColor } = actions;
 
 describe("setError", () => {
   let dispatch;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
   });
   it("sets the snackbar color to error", () => {
     setError({ dispatch }, { message: "123" });
@@ -25,7 +24,7 @@ describe("setError", () => {
 describe("setInfo", () => {
   let dispatch;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
   });
   it("sets the snackbar color to info", () => {
     setInfo({ dispatch }, { message: "123" });
@@ -40,7 +39,7 @@ describe("setInfo", () => {
 describe("setSuccess", () => {
   let dispatch;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
   });
   it("sets the snackbar color to success", () => {
     setSuccess({ dispatch }, { message: "123" });
@@ -55,7 +54,7 @@ describe("setSuccess", () => {
 describe("setMessage", () => {
   let commit;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
   });
   it("sets the snackbar color to error", () => {
     setMessage({ commit }, "123");
@@ -66,7 +65,7 @@ describe("setMessage", () => {
 describe("setMessage", () => {
   let commit;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
   });
   it("sets the snackbar color to error", () => {
     setSnackColor({ commit }, "error");

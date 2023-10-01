@@ -1,5 +1,4 @@
 import { actions, testActions } from "../actions";
-global.expect = require("expect");
 import Viva from "vivagraphjs";
 
 const {
@@ -36,7 +35,7 @@ describe("unpinAllNodes", () => {
   let commit;
   let rootState;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     rootState = {
       mainGraph: {
         graphContainer: {},
@@ -109,7 +108,7 @@ describe("removePinnedStateFromNodeType", () => {
   let commit;
   let rootState;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     rootState = {
       mainGraph: {
         graphContainer: {},
@@ -185,14 +184,14 @@ describe("setConnectedNodesNearby", () => {
   let commit;
   let rootState;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     rootState = {
       mainGraph: {
         graphContainer: {},
         Graph: Viva.Graph.graph(),
         renderState: {
           layout: {
-            isNodePinned: jest.fn((node) => false),
+            isNodePinned: vi.fn((node) => false),
           },
         },
       },
@@ -273,7 +272,7 @@ describe("applyNodeCoordinateSystemLine", () => {
   let rootState;
   let params;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     rootState = {
       selection: {
         selectedNodes: [

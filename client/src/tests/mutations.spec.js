@@ -3,7 +3,6 @@
  */
 
 import { mutations } from "../store/mutations";
-expect = require("expect");
 
 const {
   SET_HOVERED_NODE,

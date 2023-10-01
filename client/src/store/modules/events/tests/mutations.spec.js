@@ -11,7 +11,6 @@ const {
   SET_WAS_PAUSED,
   SET_GRAPH_OVERLAY_MOUSE_DOWN,
 } = mutations;
-global.expect = require("expect");
 
 describe("SET_GROUP_MOVE_ACTIVE", () => {
   let state;

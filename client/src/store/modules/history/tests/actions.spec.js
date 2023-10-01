@@ -1,7 +1,6 @@
 import { actions } from "../actions";
-global.expect = require("expect");
 import { getAllLinks } from "@/assets/js/graphHelper";
-jest.mock("@/assets/js/graphHelper");
+vi.mock("@/assets/js/graphHelper");
 
 const { addChange, undo, redo, addToClickHistory } = actions;
 
@@ -10,7 +9,7 @@ describe("addChange", () => {
   let commit;
   let change;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     change = { data: { nodes: [{ id: 3 }], links: [] }, type: "remove" };
     state = {
       changes: [
@@ -42,8 +41,8 @@ describe("undo", () => {
   let dispatch;
   let rootState;
   beforeEach(() => {
-    commit = jest.fn();
-    dispatch = jest.fn();
+    commit = vi.fn();
+    dispatch = vi.fn();
 
     state = {
       changes: [
@@ -142,8 +141,8 @@ describe("redo", () => {
   let dispatch;
   let rootState;
   beforeEach(() => {
-    commit = jest.fn();
-    dispatch = jest.fn();
+    commit = vi.fn();
+    dispatch = vi.fn();
 
     state = {
       changes: [
@@ -251,7 +250,7 @@ describe("addToClickHistory", () => {
   let rootState;
   let commit;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     rootState = {
       configurations: {
         name: "dummy",

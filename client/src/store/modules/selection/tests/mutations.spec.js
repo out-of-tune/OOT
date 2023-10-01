@@ -1,5 +1,4 @@
 import { mutations } from "../mutations";
-global.expect = require("expect");
 const {
   SET_SELECTED_NODES,
   SET_SELECTION_MODAL_STATE,

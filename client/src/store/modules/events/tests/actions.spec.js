@@ -1,11 +1,10 @@
 import { actions } from "../actions";
-global.expect = require("expect");
-import "babel-polyfill";
+;
 import { JSDOM } from "jsdom";
 import { startMultiSelect } from "@/assets/js/selectHelper";
 import { getNodePosition, getPinnedState } from "@/assets/js/graphHelper";
-jest.mock("@/assets/js/selectHelper");
-jest.mock("@/assets/js/graphHelper");
+vi.mock("@/assets/js/selectHelper");
+vi.mock("@/assets/js/graphHelper");
 
 const dom = new JSDOM();
 global.document = dom.window.document;
@@ -53,8 +52,8 @@ describe("mouseMoveFunctionality", () => {
   let rootState;
   let dispatch;
   beforeEach(() => {
-    commit = jest.fn();
-    dispatch = jest.fn();
+    commit = vi.fn();
+    dispatch = vi.fn();
     rootState = {
       selection: {
         selectedNodes: [{ id: "1" }, { id: "2" }],
@@ -108,7 +107,7 @@ describe("mouseDownFunctionality", () => {
   let commit;
   let rootState;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     rootState = {
       selection: {
         selectedNodes: [{ id: "1" }, { id: "2" }],
@@ -126,7 +125,7 @@ describe("mouseDownFunctionality", () => {
       mainGraph: {
         renderState: {
           Renderer: {
-            getGraphics: jest.fn(),
+            getGraphics: vi.fn(),
           },
           isRendered: true,
         },
@@ -164,7 +163,7 @@ describe("mouseUpFunctionality", () => {
   let commit;
   let rootState;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     rootState = {
       selection: {
         selectedNodes: [{ id: "1" }, { id: "2" }],
@@ -221,7 +220,7 @@ describe("mouseEnterFunctionality", () => {
   let node;
   let rootState;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     node = {
       id: "Artist/1",
       data: {
@@ -245,7 +244,7 @@ describe("mouseEnterFunctionality", () => {
 });
 describe("mouseLeaveFunctionality", () => {
   it("sets tooltip to invisible", () => {
-    const commit = jest.fn();
+    const commit = vi.fn();
     let rootState = {
       appearance: {
         highlight: false,
@@ -264,8 +263,8 @@ describe("mouseClickFunctionality", () => {
   let rootState;
   let clickedNode;
   beforeEach(() => {
-    commit = jest.fn();
-    dispatch = jest.fn();
+    commit = vi.fn();
+    dispatch = vi.fn();
     rootState = {
       activeMode: "expand",
       configurations: {
@@ -408,12 +407,12 @@ describe("changePinStatus", () => {
   let commit;
   let rootState;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     rootState = {
       mainGraph: {
         renderState: {
           layout: {
-            isNodePinned: jest.fn(),
+            isNodePinned: vi.fn(),
           },
         },
       },
@@ -449,8 +448,8 @@ describe("keyUpFunctions", () => {
   let state;
   let e;
   beforeEach(() => {
-    dispatch = jest.fn();
-    commit = jest.fn();
+    dispatch = vi.fn();
+    commit = vi.fn();
     state = {
       groupModeActive: false,
       graphOverlayMouseDown: true,
@@ -540,8 +539,8 @@ describe("keyDownFunctions", () => {
   let state;
   let e;
   beforeEach(() => {
-    dispatch = jest.fn();
-    commit = jest.fn();
+    dispatch = vi.fn();
+    commit = vi.fn();
     state = {
       groupModeActive: false,
       graphOverlayMouseDown: true,
@@ -553,7 +552,7 @@ describe("keyDownFunctions", () => {
         renderState: {
           Renderer: {
             isRendered: false,
-            getGraphics: jest.fn(),
+            getGraphics: vi.fn(),
           },
         },
       },
@@ -614,8 +613,8 @@ describe("globalMouseDownFunctions", () => {
   let state;
   let e;
   beforeEach(() => {
-    dispatch = jest.fn();
-    commit = jest.fn();
+    dispatch = vi.fn();
+    commit = vi.fn();
     state = {
       keysdown: {},
     };
@@ -640,12 +639,12 @@ describe("globalMouseUpFunctions", () => {
   let state;
   let e;
   beforeEach(() => {
-    dispatch = jest.fn();
-    commit = jest.fn();
+    dispatch = vi.fn();
+    commit = vi.fn();
     state = {
       wasPaused: true,
       multiSelectOverlay: {
-        destroy: jest.fn(),
+        destroy: vi.fn(),
       },
       graphOverlayMouseDown: true,
       keysdown: {},
@@ -685,7 +684,7 @@ describe("globalMouseUpFunctions", () => {
 describe("resizeGraphContainer", () => {
   let commit;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
   });
   it("resizes graph container", () => {
     resizeGraphContainer({ commit }, { width: 100, height: 100 });

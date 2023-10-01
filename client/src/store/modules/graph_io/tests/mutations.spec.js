@@ -1,7 +1,6 @@
 import { mutations } from "../mutations";
 
 const { SET_STORED_GRAPH_NAMES, SET_GRAPH_URL } = mutations;
-global.expect = require("expect");
 
 describe("SET_STORED_GRAPH_NAMES", () => {
   let state;

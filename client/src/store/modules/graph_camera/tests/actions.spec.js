@@ -3,8 +3,7 @@
  */
 import { getAllNodes, getNodePosition } from "@/assets/js/graphHelper.js";
 import { actions } from "../actions";
-global.expect = require("expect");
-jest.mock("@/assets/js/graphHelper.js");
+vi.mock("@/assets/js/graphHelper.js");
 
 const {
   moveToNode,
@@ -32,7 +31,7 @@ describe("moveToNode", () => {
       id: "1",
       data: {},
     };
-    let commit = jest.fn();
+    let commit = vi.fn();
     moveToNode({ commit, rootState }, node);
     expect(commit).toHaveBeenCalledWith("MOVE_TO", { x: 10, y: 10 });
   });
@@ -42,15 +41,15 @@ describe("fitGraphToScreen", () => {
   let rootState;
   let dispatch;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
     rootState = {
       mainGraph: {
         renderState: {
           layout: {
-            getGraphRect: jest.fn(),
+            getGraphRect: vi.fn(),
           },
           Renderer: {
-            getGraphics: jest.fn(),
+            getGraphics: vi.fn(),
           },
         },
       },
@@ -72,12 +71,12 @@ describe("fitGraphToSelection", () => {
   let dispatch;
 
   beforeEach(() => {
-    commit = jest.fn();
-    dispatch = jest.fn();
+    commit = vi.fn();
+    dispatch = vi.fn();
     rootState = {
       selection: {
         selectedNodes: {
-          map: jest.fn(),
+          map: vi.fn(),
           length: 2,
         },
       },
@@ -103,12 +102,12 @@ describe("removeNodeLabels", () => {
   let dispatch;
   let rootState;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
     rootState = {
       mainGraph: {
         renderState: {
           Renderer: {
-            getGraphics: jest.fn(),
+            getGraphics: vi.fn(),
           },
         },
       },
@@ -116,13 +115,13 @@ describe("removeNodeLabels", () => {
   });
   it("sets nodeLabels to empty object", () => {
     rootState.mainGraph.renderState.Renderer.getGraphics.mockReturnValue({
-      placeNode: jest.fn(),
+      placeNode: vi.fn(),
     });
     removeNodeLabels({ rootState, dispatch });
     expect(dispatch).toHaveBeenCalledWith("setNodeLabels", {});
   });
   it("deletes placeNode callback", () => {
-    let placeNode = jest.fn();
+    let placeNode = vi.fn();
     rootState.mainGraph.renderState.Renderer.getGraphics.mockReturnValue({
       placeNode,
     });
@@ -133,7 +132,7 @@ describe("removeNodeLabels", () => {
 describe("setNodeLabels", () => {
   let commit;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
   });
   it("commits SET_NODE_LABELS", () => {
     setNodeLabels({ commit }, { id: "123" });
@@ -145,12 +144,12 @@ describe("placeNodeLabels", () => {
   let commit;
   let rootState;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     rootState = {
       mainGraph: {
         renderState: {
           Renderer: {
-            getGraphics: jest.fn(),
+            getGraphics: vi.fn(),
           },
         },
       },
@@ -160,7 +159,7 @@ describe("placeNodeLabels", () => {
     };
   });
   it("doesn't do anything when node label doesn't exist", () => {
-    const transformClientToGraphCoordinates = jest.fn();
+    const transformClientToGraphCoordinates = vi.fn();
     transformClientToGraphCoordinates
       .mockReturnValueOnce({ x: 100, y: 100 })
       .mockReturnValueOnce({ x: 1000, y: 1000 });
@@ -172,7 +171,7 @@ describe("placeNodeLabels", () => {
     expect(commit).not.toHaveBeenCalled();
   });
   it("deletes nodeLabel when it exists", () => {
-    const transformClientToGraphCoordinates = jest.fn();
+    const transformClientToGraphCoordinates = vi.fn();
     transformClientToGraphCoordinates
       .mockReturnValueOnce({ x: 100, y: 100 })
       .mockReturnValueOnce({ x: 1000, y: 1000 });
@@ -191,8 +190,8 @@ describe("placeNodeLabels", () => {
     });
   });
   it("adds label when node is on screen", () => {
-    const transformClientToGraphCoordinates = jest.fn();
-    const transformGraphToClientCoordinates = jest.fn();
+    const transformClientToGraphCoordinates = vi.fn();
+    const transformGraphToClientCoordinates = vi.fn();
     transformClientToGraphCoordinates
       .mockReturnValueOnce({ x: 100, y: 100 })
       .mockReturnValueOnce({ x: 1000, y: 1000 });
@@ -234,7 +233,7 @@ describe("fitGraphToNodes", () => {
   let rootState;
   let commit;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     rootState = {};
     getNodePosition.mockClear();
   });

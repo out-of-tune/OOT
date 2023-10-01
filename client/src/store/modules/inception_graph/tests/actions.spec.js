@@ -1,8 +1,7 @@
 import actions from "../actions";
 import GraphService from "@/store/services/GraphService";
-import "babel-polyfill";
-global.expect = require("expect");
-jest.mock("@/store/services/GraphService");
+;
+vi.mock("@/store/services/GraphService");
 
 const { generateInceptionGraph } = actions;
 
@@ -11,8 +10,8 @@ describe("generateInceptionGraph", () => {
   let dispatch;
   let rootState;
   beforeEach(() => {
-    commit = jest.fn();
-    dispatch = jest.fn();
+    commit = vi.fn();
+    dispatch = vi.fn();
     rootState = {
       authentication: {
       },

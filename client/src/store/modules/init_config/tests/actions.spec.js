@@ -1,12 +1,11 @@
 import actions from "../actions";
-import "babel-polyfill";
-global.expect = require("expect");
+;
 const { initConfiguration } = actions;
 describe("initConfiguration", () => {
   let commit;
   let rootState;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     rootState = {
       schema: {
         nodeTypes: [],

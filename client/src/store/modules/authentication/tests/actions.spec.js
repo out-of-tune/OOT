@@ -4,9 +4,9 @@
 
 import SpotifyTokenService from "@/store/services/SpotifyTokenService";
 import AuthenticationService from "@/store/services/AuthenticationService";
-jest.mock("@/store/services/SpotifyTokenService");
-jest.mock("@/store/services/AuthenticationService");
-jest.mock("@/store/services/BaseService");
+vi.mock("@/store/services/SpotifyTokenService");
+vi.mock("@/store/services/AuthenticationService");
+vi.mock("@/store/services/BaseService");
 
 import { actions } from "../actions";
 
@@ -26,15 +26,15 @@ describe("refreshTokenAfterTimeout", () => {
   let dispatch;
   let state;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
     state = {
       expiryTime: 100,
     };
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
   it("refreshes token after timeout", async () => {
     refreshTokenAfterTimeout({ state, dispatch });
-    jest.advanceTimersByTime(state.expiryTime * 1000);
+    vi.advanceTimersByTime(state.expiryTime * 1000);
     expect(dispatch).toHaveBeenCalledWith("refreshToken");
   });
 });
@@ -43,7 +43,7 @@ describe("setRefreshToken", () => {
   let commit;
   let token;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     token = "1323";
   });
   it("sets the refresh token", () => {
@@ -56,7 +56,7 @@ describe("setExpiryTime", () => {
   let commit;
   let time;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     time = "1323";
   });
   it("sets the refresh token", () => {
@@ -69,7 +69,7 @@ describe("requireAccessToken", () => {
   let commit;
   let rootState;
   beforeEach(() => {
-    (commit = jest.fn()),
+    (commit = vi.fn()),
       (rootState = {
         authentication: {
         },
@@ -90,13 +90,13 @@ describe("requireAccessToken", () => {
 describe("refreshToken", () => {
   let dispatch;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
   });
   it("refreshes the token", async () => {
     let state = {
       refreshToken: "refreshToken",
     };
-    AuthenticationService.refreshToken = jest.fn();
+    AuthenticationService.refreshToken = vi.fn();
     AuthenticationService.refreshToken.mockReturnValue({
       access_token: "newToken",
     });
@@ -108,7 +108,7 @@ describe("refreshToken", () => {
 describe("setLoginState", () => {
   let commit;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
   });
   it("sets the login state", () => {
     setLoginState({ commit }, true);
@@ -120,8 +120,8 @@ describe("setAccessToken", () => {
   let dispatch;
   let commit;
   beforeEach(() => {
-    dispatch = jest.fn();
-    commit = jest.fn();
+    dispatch = vi.fn();
+    commit = vi.fn();
   });
   it("calls SET_ACCESS_TOKEN", async () => {
     setAccessToken({ commit, dispatch }, "12345");
@@ -141,8 +141,8 @@ describe("logout", () => {
   let dispatch;
   let commit;
   beforeEach(() => {
-    dispatch = jest.fn();
-    commit = jest.fn();
+    dispatch = vi.fn();
+    commit = vi.fn();
   });
   it("calls SET_ACCESS_TOKEN", async () => {
     logout({ commit, dispatch });

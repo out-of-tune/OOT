@@ -1,13 +1,12 @@
 import { actions } from "../actions";
-global.expect = require("expect");
 import Viva from "vivagraphjs";
 
 const { collapseAction } = actions;
 
 describe("collapseAction", () => {
   it("removes all connections as specified in configuration", () => {
-    const commit = jest.fn();
-    const dispatch = jest.fn();
+    const commit = vi.fn();
+    const dispatch = vi.fn();
 
     const collapseOptions = [
       {
@@ -122,8 +121,8 @@ describe("collapseAction", () => {
     expect(commit).toHaveBeenNthCalledWith(2, "REMOVE_LINK", linksErg[1]);
   });
   it("removes formerly connected Nodes if they have no connection left", () => {
-    const commit = jest.fn();
-    const dispatch = jest.fn();
+    const commit = vi.fn();
+    const dispatch = vi.fn();
     const collapseOptions = [
       {
         nodeType: "abc",
@@ -263,8 +262,8 @@ describe("collapseAction", () => {
     });
   });
   it("doesn't removes formerly connected Nodes if they have a connection left", () => {
-    const commit = jest.fn();
-    const dispatch = jest.fn();
+    const commit = vi.fn();
+    const dispatch = vi.fn();
     const collapseOptions = [
       {
         nodeType: "abc",
@@ -377,8 +376,8 @@ describe("collapseAction", () => {
     expect(commit).toHaveBeenLastCalledWith("REMOVE_LINK", linksErg[1]);
   });
   it("removes nothing if configuration is set correspondingly", () => {
-    const commit = jest.fn();
-    const dispatch = jest.fn();
+    const commit = vi.fn();
+    const dispatch = vi.fn();
     const collapseOptions = [];
     const rootState = {
       mainGraph: {

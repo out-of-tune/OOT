@@ -1,5 +1,4 @@
 import { actions } from "../actions";
-global.expect = require("expect");
 
 const { initGraph, setGraphContainer } = actions;
 
@@ -7,8 +6,8 @@ describe("initGraph", () => {
   let commit;
   let dispatch;
   beforeEach(() => {
-    commit = jest.fn();
-    dispatch = jest.fn();
+    commit = vi.fn();
+    dispatch = vi.fn();
   });
   it("creates graph", () => {
     initGraph({
@@ -43,7 +42,7 @@ describe("initGraph", () => {
 });
 
 describe("setGraphContainer", () => {
-  let commit = jest.fn();
+  let commit = vi.fn();
   it("calls the right mutation", () => {
     const graphContainer = {
       id: "test",

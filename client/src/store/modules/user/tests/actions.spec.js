@@ -1,7 +1,6 @@
-global.expect = require("expect");
 import SpotifyService from "@/store/services/SpotifyService";
-import "babel-polyfill";
-jest.mock("@/store/services/SpotifyService");
+;
+vi.mock("@/store/services/SpotifyService");
 import { actions } from "../actions";
 
 const { getCurrentUser, deleteCurrentUser } = actions;
@@ -10,14 +9,14 @@ describe("getCurrentUser", () => {
   let commit;
   let rootState;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     rootState = {
       authentication: {
         loginState: true,
         accessToken: "12345",
       },
     };
-    SpotifyService.getCurrentUserProfile = jest.fn();
+    SpotifyService.getCurrentUserProfile = vi.fn();
     SpotifyService.getCurrentUserProfile.mockReturnValue({ id: "userID" });
   });
   it("calls Spotify API", () => {
@@ -39,7 +38,7 @@ describe("deleteCurrentUser", () => {
   let commit;
 
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
   });
   it("deletes current user", () => {
     deleteCurrentUser({ commit });

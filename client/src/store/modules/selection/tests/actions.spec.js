@@ -1,5 +1,4 @@
 import { actions } from "../actions";
-global.expect = require("expect");
 import Viva from "vivagraphjs";
 global._ = require("lodash");
 
@@ -9,7 +8,7 @@ import {
   getAllLinks,
   getNodePosition,
 } from "@/assets/js/graphHelper";
-jest.mock("@/assets/js/graphHelper");
+vi.mock("@/assets/js/graphHelper");
 const {
   markNodes,
   setSelectedNodes,
@@ -40,7 +39,7 @@ describe("markNodes", () => {
   let dispatch;
   let rootState;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
     rootState = {
       searchObject: {
         valid: false,
@@ -178,7 +177,7 @@ describe("markNodes", () => {
 
 describe("setSelectedNodes", () => {
   it("sets the selectedNodes array", () => {
-    let commit = jest.fn();
+    let commit = vi.fn();
     const nodes = [
       { id: "node1", data: { label: "Auftrag" } },
       { id: "node2", data: { label: "Auftrag" } },
@@ -192,7 +191,7 @@ describe("setSelectedNodes", () => {
 });
 
 describe("handleAreaSelected", () => {
-  let dispatch = jest.fn();
+  let dispatch = vi.fn();
   let commit;
   let rootState;
   let graphics;
@@ -202,13 +201,13 @@ describe("handleAreaSelected", () => {
   let nodePos;
   let area;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     rootState = {
       mainGraph: {
         Graph: new Viva.Graph.graph(),
         renderState: {
           Renderer: {
-            getGraphics: jest.fn(),
+            getGraphics: vi.fn(),
           },
         },
       },
@@ -308,8 +307,8 @@ describe("selectionFinished", () => {
   let state;
   let rootState;
   beforeEach(() => {
-    commit = jest.fn();
-    dispatch = jest.fn();
+    commit = vi.fn();
+    dispatch = vi.fn();
     state = {
       selection: {},
     };
@@ -376,11 +375,11 @@ describe("setLinkOpactity", () => {
   let rootState;
   let commit;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
   });
   it("sets link opacity", () => {
-    let getLinkUI = jest.fn();
-    let getGraphics = jest.fn();
+    let getLinkUI = vi.fn();
+    let getGraphics = vi.fn();
     rootState = {
       mainGraph: {
         renderState: {
@@ -407,11 +406,11 @@ describe("setNodeOpactity", () => {
   let rootState;
   let commit;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
   });
   it("sets node opacity", () => {
-    let getNodeUI = jest.fn();
-    let getGraphics = jest.fn();
+    let getNodeUI = vi.fn();
+    let getGraphics = vi.fn();
     rootState = {
       mainGraph: {
         renderState: {
@@ -439,8 +438,8 @@ describe("moveToNextNode", () => {
   let commit;
   let state;
   beforeEach(() => {
-    dispatch = jest.fn();
-    commit = jest.fn();
+    dispatch = vi.fn();
+    commit = vi.fn();
     state = {
       selectedNodeIndex: 0,
       selectedNodes: [{ id: "1" }, { id: "2" }],
@@ -463,8 +462,8 @@ describe("moveToPreviousNode", () => {
   let commit;
   let state;
   beforeEach(() => {
-    dispatch = jest.fn();
-    commit = jest.fn();
+    dispatch = vi.fn();
+    commit = vi.fn();
   });
   it("dispatches moveToNode and sets the new index when a next node exists", () => {
     state = {
@@ -490,8 +489,8 @@ describe("moveToFirstNode", () => {
   let dispatch;
   let state;
   beforeEach(() => {
-    commit = jest.fn();
-    dispatch = jest.fn();
+    commit = vi.fn();
+    dispatch = vi.fn();
     state = {
       selectedNodes: [{ id: "1" }],
     };
@@ -513,8 +512,8 @@ describe("moveToLastNode", () => {
   let dispatch;
   let state;
   beforeEach(() => {
-    commit = jest.fn();
-    dispatch = jest.fn();
+    commit = vi.fn();
+    dispatch = vi.fn();
     state = {
       selectedNodes: [{ id: "1" }, { id: "2" }],
     };
@@ -537,8 +536,8 @@ describe("setEdgesTransparent", () => {
   let state;
   let dispatch;
   beforeEach(() => {
-    commit = jest.fn();
-    dispatch = jest.fn();
+    commit = vi.fn();
+    dispatch = vi.fn();
     rootState = {
       mainGraph: {
         Graph: new Viva.Graph.graph(),
@@ -687,8 +686,8 @@ describe("removeSelectedNodes", () => {
   let commit;
   let dispatch;
   beforeEach(() => {
-    commit = jest.fn();
-    dispatch = jest.fn();
+    commit = vi.fn();
+    dispatch = vi.fn();
   });
   it("sets node opacity", () => {
     state = {
@@ -708,7 +707,7 @@ describe("changeSelectionModalState", () => {
   let commit;
   let state;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     state = {
       modalOpen: false,
     };
@@ -723,7 +722,7 @@ describe("expandSelectedNodes", () => {
   let dispatch;
   let state;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
     state = {
       selectedNodes: [{ id: "1" }],
     };
@@ -752,7 +751,7 @@ describe("collapseSelectedNodes", () => {
   let dispatch;
   let state;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
     state = {
       selectedNodes: [{ id: "1" }],
     };
@@ -770,7 +769,7 @@ describe("updateSelectionUI", () => {
   let dispatch;
   let nodes;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
     nodes = [{ id: "1" }, { id: "2" }];
   });
   it("marks nodes", () => {
@@ -787,7 +786,7 @@ describe("selectNodes", () => {
   let dispatch;
   let nodes;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
     nodes = [{ id: "1" }, { id: "2" }];
   });
   it("selects nodes", () => {
@@ -803,7 +802,7 @@ describe("selectNodes", () => {
 describe("deselect", () => {
   let dispatch;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
   });
   it("deletes sets node selection", () => {
     deselect({ dispatch });
@@ -825,7 +824,7 @@ describe("selectAll", () => {
   let rootState;
   let nodes;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
     rootState = {};
     nodes = [{ id: "1" }, { id: "2" }];
     getAllNodes.mockReturnValue(nodes);
@@ -849,8 +848,8 @@ describe("pinNodes", () => {
   let commit;
   let nodes;
   beforeEach(() => {
-    dispatch = jest.fn();
-    commit = jest.fn();
+    dispatch = vi.fn();
+    commit = vi.fn();
     nodes = [{ id: "1" }, { id: "2" }];
   });
   it("pins nodes", () => {
@@ -869,8 +868,8 @@ describe("unpinNodes", () => {
   let commit;
   let nodes;
   beforeEach(() => {
-    dispatch = jest.fn();
-    commit = jest.fn();
+    dispatch = vi.fn();
+    commit = vi.fn();
     nodes = [{ id: "1" }, { id: "2" }];
   });
   it("unpins nodes", () => {
@@ -889,7 +888,7 @@ describe("invertSelection", () => {
   let rootState;
   let nodes;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
     nodes = [{ id: "1" }, { id: "2" }, { id: "3" }];
     rootState = {
       selection: {
@@ -924,7 +923,7 @@ describe("moveSelection", () => {
   let rootState;
   let nodesWithPositionToMove;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     nodesWithPositionToMove = [
       { node: { id: "1" }, position: { x: 10, y: 10 } },
       { node: { id: "2" }, position: { x: 0, y: 10 } },

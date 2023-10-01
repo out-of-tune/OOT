@@ -3,23 +3,22 @@
  */
 
 import { actions } from "../actions";
-global.expect = require("expect");
-import "babel-polyfill";
+;
 import GraphService from "@/store/services/GraphService";
-jest.mock("@/store/services/GraphService");
+vi.mock("@/store/services/GraphService");
 import _ from "lodash";
 import Viva from "vivagraphjs";
 import SpotifyService from "@/store/services/SpotifyService";
-jest.mock("@/store/services/SpotifyService");
+vi.mock("@/store/services/SpotifyService");
 import searchObjectHelper from "@/assets/js/searchObjectHelper";
-jest.mock("@/assets/js/searchObjectHelper");
+vi.mock("@/assets/js/searchObjectHelper");
 import "@/assets/js/graphQlHelper.js";
-jest.mock("@/assets/js/graphQlHelper.js");
+vi.mock("@/assets/js/graphQlHelper.js");
 import {
   handleGraphqlTokenError,
   handleTokenError,
 } from "@/assets/js/TokenHelper";
-jest.mock("@/assets/js/TokenHelper");
+vi.mock("@/assets/js/TokenHelper");
 
 const {
   generateSearchObject,
@@ -37,7 +36,7 @@ describe("setSearch", () => {
   let input;
   let searchObject;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     input = "Artist: name=John";
     searchObject = { dummy: "object" };
     searchObjectHelper.generateSearchObject.mockReturnValue(searchObject);
@@ -57,8 +56,8 @@ describe("startGraphQlSearch", () => {
   let rootState;
   let dispatch;
   beforeEach(() => {
-    commit = jest.fn();
-    dispatch = jest.fn();
+    commit = vi.fn();
+    dispatch = vi.fn();
     rootState = {
       searchObject: {
         valid: false,
@@ -168,7 +167,7 @@ describe("startGraphQlSearch", () => {
       ],
     };
     handleGraphqlTokenError.mockReturnValue(new Error());
-    window.alert = jest.fn();
+    window.alert = vi.fn();
     await startGraphQlSearch({ commit, rootState, dispatch });
     expect(commit).not.toHaveBeenCalled();
   });
@@ -235,8 +234,8 @@ describe("startSimpleGraphSearch", () => {
   let rootState;
   let commit;
   beforeEach(() => {
-    dispatch = jest.fn();
-    commit = jest.fn();
+    dispatch = vi.fn();
+    commit = vi.fn();
     rootState = {
       authentication: {},
       searchObject: {
@@ -365,7 +364,7 @@ describe("startSimpleGraphSearch", () => {
     });
     handleGraphqlTokenError.mockReset();
     handleTokenError.mockReset();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it("selects nodes of nodeType", async () => {
     await startSimpleGraphSearch(
@@ -588,7 +587,7 @@ describe("startAdvancedGraphSearch", () => {
   let dispatch;
   let rootState;
   beforeEach(() => {
-    dispatch = jest.fn();
+    dispatch = vi.fn();
     searchObjectHelper.validateSearchObject.mockReturnValue(true);
     rootState = {
       searchObject: {
@@ -1068,7 +1067,7 @@ describe("setSearchString", () => {
   let commit;
   let input;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     input = "Artist: name=12";
   });
   it("sets the search string", () => {
@@ -1081,7 +1080,7 @@ describe("setSearchObject", () => {
   let commit;
   let input;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     input = { searchString: "Artist: name=12" };
   });
   it("sets the search string", () => {
@@ -1094,7 +1093,7 @@ describe("setAdvancedOpen", () => {
   let commit;
   let input;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     input = true;
   });
   it("sets the search string", () => {

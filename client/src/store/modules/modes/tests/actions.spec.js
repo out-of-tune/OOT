@@ -1,5 +1,4 @@
 import { actions } from "../actions";
-global.expect = require("expect");
 global._ = require("lodash");
 const { updateGraphModificationConfiguration, setActiveMode } = actions;
 
@@ -7,7 +6,7 @@ describe("updateGraphModificationConfiguration", () => {
   let commit;
   let selectedOptions;
   beforeEach(() => {
-    commit = jest.fn();
+    commit = vi.fn();
     selectedOptions = [
       {
         edgeLabel: "Soup",
@@ -44,7 +43,7 @@ describe("updateGraphModificationConfiguration", () => {
 });
 describe("setActiveMode", () => {
   it("sets the active mode", () => {
-    const commit = jest.fn();
+    const commit = vi.fn();
     const activeMode = "expand";
     setActiveMode(
       {
