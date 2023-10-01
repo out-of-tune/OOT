@@ -1,10 +1,10 @@
 version: '3'
 services:
   apollo:
-    entrypoint: ["/bin/sh", "-c", "npm install && npm run serve"]
+    entrypoint: ["/bin/sh", "-c", "npm ci --workspace=@out-of-tune/api && npm run serve --workspace=@out-of-tune/api"]
     volumes:
-      - "./api:/usr/src/app"
-      - "/dev/null:/usr/src/app/.env"
+      - "./:/usr/src/app"
+      - "/dev/null:/usr/src/app/api/.env"
     ports:
       - "3003:3003"
   client:

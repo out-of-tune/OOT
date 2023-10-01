@@ -1,6 +1,6 @@
 import got from 'got'
 import { InvalidInputError } from '../../../errors/errors.js'
-import { API_PORT } from '../../../helpers/settings.js'
+import { Config } from '@out-of-tune/settings'
 
 type ArtistQuery = {
     id?: string,
@@ -27,7 +27,7 @@ const resolvers = {
                 const res = await dataSources.arango.artist.search(sid, 'sid')
                 if (res.length !== 0) return res
                 try {
-                    const added: any = await got.post(`http://localhost:${API_PORT}/`, {
+                    const added: any = await got.post(`http://localhost:${Config.apollo.port}/`, {
                         json: {
                             query: `
                                 mutation {

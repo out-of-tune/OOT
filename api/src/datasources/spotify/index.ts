@@ -7,13 +7,12 @@ const delay = (time: number) => new Promise(resolve => setTimeout(resolve, time)
 class SpotifyAPI extends RESTDataSource {
     client_id: string;
     client_secret: string;
-    scope: string;
     access_token: string;
-    constructor(options: { cache: KeyValueCache }, client_id: string, client_secret: string, scope: string) {
+
+    constructor(options: { cache: KeyValueCache }, client_id: string, client_secret: string) {
         super(options)
         this.client_id = client_id
         this.client_secret = client_secret
-        this.scope = scope
         this.access_token = ""
     }
     initialize() {/* Apollo calls this with every request */}

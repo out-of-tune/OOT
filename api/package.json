@@ -14,6 +14,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@out-of-tune/settings": "^1.0.0",
     "@apollo/datasource-rest": "^6.0.0",
     "@apollo/server": "^4.7.1",
     "@apollo/server-plugin-response-cache": "^4.1.2",
@@ -26,7 +27,6 @@
     "arangojs": "^6.11.0",
     "bcrypt": "^5.1.0",
     "dataloader": "^1.4.0",
-    "dotenv": "^8.1.0",
     "got": "^13.0.0",
     "js-yaml": "^3.13.1",
     "jsonwebtoken": "^8.5.1",
