@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v3
     - name: Find Dockerimages to build
       id: set-matrix
-      run: find -name Dockerfile >> "$GITHUB_OUTPUT"
+      run: echo $(find -name Dockerfile | tr '\n' ' ')
     - name: Debug output
       run: echo "${{ steps.set-matrix.outputs }}"
       
@@ -25,8 +25,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix: 
-        file: ${{ needs.matrix_maker.outputs.matrix }}
+        #file: ${{ needs.matrix_maker.outputs.matrix }}
+        file: ["./server/Dockerfile", "./client/Dockerfile", "./auth/Dockerfile", "./db/arango/Dockerfile", "./services/share/Dockerfile", "./api/Dockerfile"]
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image (${{ matrix.file }})
-      run: docker build ${{ matrix.file }} --file Dockerfile --tag my-image-name:$(date +%s)
+      run: docker build $(dirname ${{ matrix.file }}) --file Dockerfile --tag $(basename $(dirname ${{ matrix.file }})):$(date +%s)
