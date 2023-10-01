@@ -1,0 +1,82 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: ["cicd/add-github-actions"]
+  pull_request:
+    branches: ["cicd/add-github-actions"]
+
+env:
+  VERSION: nightly
+  APP_MOUNT_PATH: "/app"
+  PROXY_URI: "https://d.out-of-tune.org/app"
+  NODE_ENV: "production"
+
+jobs:
+  matrix_maker:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.services }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Find Dockerimages to build
+        id: set-matrix
+        #run: echo $(find -name Dockerfile | tr '\n' ' ')
+        run: echo 'services=["client", "apollo", "auth", "share", "proxy"]' >> "$GITHUB_OUTPUT"
+      - name: Debug output
+        run: echo "${{ steps.set-matrix.outputs.services }}"
+
+  build:
+    needs: matrix_maker
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: ${{ fromJSON(needs.matrix_maker.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build the Docker image ${{ matrix.service }}
+        run: |
+          IMAGE_NAME=${{ matrix.service }}
+          docker compose -f docker-compose.build.yml build $IMAGE_NAME
+          docker tag oot-${{ matrix.service }} ghcr.io/out-of-tune/$IMAGE_NAME:$VERSION
+          docker tag oot-${{ matrix.service }} ghcr.io/out-of-tune/$IMAGE_NAME:latest
+          docker push ghcr.io/out-of-tune/$IMAGE_NAME:$VERSION
+          docker push ghcr.io/out-of-tune/$IMAGE_NAME:latest
+
+  test-client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 19.x
+          cache: npm
+      - name: Install and run tests
+        working-directory: ./client
+        run: |
+          NODE_ENV=development
+          npm ci
+          npm run test
+
+  test-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 19.x
+          cache: npm
+      - name: Install and run tests
+        working-directory: ./api
+        run: |
+          NODE_ENV=development
+          npm ci
+          npm run test
