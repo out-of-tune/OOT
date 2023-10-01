@@ -15,23 +15,27 @@
     <CurrentSongInfo />
     <div class="player">
       <div class="controls">
+        <button class="icon-btn" id="rewindButton" v-on:click="PrevSong">
+          <v-icon name="md-skipprevious" />
+        </button>
+
         <button
-          id="rewindButton"
-          small
-          min-width="1px"
-          color="#f14e14"
-          v-on:click="PrevSong"
+          class="icon-btn"
+          id="playButton"
+          color="#da6a1d"
+          v-on:click="StartStop"
         >
-          <v-icon icon="mdi-skip-previous" />
+          <v-icon v-if="!isPlaying" name="md-playarrow" />
+          <v-icon v-if="isPlaying" name="md-pause" />
         </button>
 
-        <button id="playButton" color="#da6a1d" v-on:click="StartStop">
-          <v-icon v-if="!isPlaying" icon="mdi-play" />
-          <v-icon v-if="isPlaying" icon="mdi-pause" />
-        </button>
-
-        <button id="forwardButton" color="#f14e14" v-on:click="NextSong">
-          <v-icon icon="mdi-skip-next" />
+        <button
+          class="icon-btn"
+          id="forwardButton"
+          color="#f14e14"
+          v-on:click="NextSong"
+        >
+          <v-icon name="md-skipnext" />
         </button>
       </div>
       <div id="timeSlider" class="sliderBox">
@@ -45,7 +49,7 @@
     </div>
 
     <div class="volume">
-      <v-icon>mdi-volume-minus</v-icon>
+      <v-icon name="md-volumedown" />
       <Slider
         class="volumeslider"
         :model-value="volumePercent"
@@ -53,7 +57,7 @@
         min="0"
         max="100"
       ></Slider>
-      <v-icon>mdi-volume-plus</v-icon>
+      <v-icon name="md-volumeup" />
     </div>
   </div>
 </template>
@@ -155,6 +159,11 @@ export default {
 }
 .sliderBox {
   width: 100%;
+}
+
+.controls {
+  display: flex;
+  gap: 0.3rem;
 }
 
 @keyframes marquee {

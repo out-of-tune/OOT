@@ -233,4 +233,24 @@ a {
   background: linear-gradient(180deg, #f2994a 0%, rgb(240, 131, 35) 100%);
   color: white;
 }
+
+.icon-btn {
+  background: none;
+  border: 1px solid #2d9cdb;
+  border-radius: 5px;
+  padding: 3px;
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+  color: white;
+}
+
+.icon-btn:active {
+  background: #2d9cdb;
+}
+
+.icon-btn:hover {
+  background: linear-gradient(180deg, #2d9cdb 0%, #56ccf2 100%);
+  color: black;
+}
 </style>
