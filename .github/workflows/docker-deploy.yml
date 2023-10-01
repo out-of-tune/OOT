@@ -8,6 +8,7 @@ on:
 
 env:
   VERSION: nightly
+  BASE_URL: "/app"
 
 jobs:
   matrix_maker:
@@ -41,7 +42,9 @@ jobs:
         run: |
           cd $(dirname ${{ matrix.file }})
           IMAGE_NAME=$(basename $(dirname ${{ matrix.file }}))
-          docker build . --file Dockerfile -t ghcr.io/out-of-tune/$IMAGE_NAME:$VERSION -t ghcr.io/out-of-tune/$IMAGE_NAME:latest
+          docker compose build ${{ matrix.file }}
+          docker tag ${{ matrix.file }} ghcr.io/out-of-tune/$IMAGE_NAME:$VERSION 
+          docker tag ${{ matrix.file }} ghcr.io/out-of-tune/$IMAGE_NAME:latest
           docker push ghcr.io/out-of-tune/$IMAGE_NAME:$VERSION
 
   test-client:
