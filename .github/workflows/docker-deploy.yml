@@ -29,5 +29,11 @@ jobs:
         file: ${{ fromJSON(needs.matrix_maker.outputs.matrix) }}
     steps:
     - uses: actions/checkout@v3
+    - name: Generate docker image tag
+      id: docker-tag
+      run: echo "tag=$(basename $(dirname ${{ matrix.file }}))" >> "$GITHUB_OUTPUT"
+    - name: Generate docker image path
+      id: docker-path
+      run: echo "path=$(dirname ${{ matrix.file }})" >> "$GITHUB_OUTPUT"
     - name: Build the Docker image (${{ matrix.file }})
-      run: docker build $(dirname ${{ matrix.file }}) --file Dockerfile --tag $(basename $(dirname ${{ matrix.file }})):$(date +%s)
+      run: docker build ${{ steps.docker-path.outputs.path }} --file Dockerfile --tag ${{ steps.docker-tag.outputs.tag}}:$(date +%s)
