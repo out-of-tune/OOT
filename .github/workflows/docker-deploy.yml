@@ -22,7 +22,7 @@ jobs:
       - name: Find Dockerimages to build
         id: set-matrix
         #run: echo $(find -name Dockerfile | tr '\n' ' ')
-        run: echo 'services=["client", "apollo", "auth", "share"]' >> "$GITHUB_OUTPUT"
+        run: echo 'services=["client", "apollo", "auth", "share", "proxy"]' >> "$GITHUB_OUTPUT"
       - name: Debug output
         run: echo "${{ steps.set-matrix.outputs.services }}"
 
