@@ -8,28 +8,29 @@ on:
 
 env:
   VERSION: nightly
-  BASE_URL: "/app"
+  APP_MOUNT_PATH: "/app"
+  PROXY_URI: "https://d.out-of-tune.org/app"
 
 jobs:
   matrix_maker:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.files }}
+      matrix: ${{ steps.set-matrix.outputs.services }}
     steps:
       - uses: actions/checkout@v3
       - name: Find Dockerimages to build
         id: set-matrix
         #run: echo $(find -name Dockerfile | tr '\n' ' ')
-        run: echo 'files=["./server/Dockerfile", "./client/Dockerfile", "./auth/Dockerfile", "./db/arango/Dockerfile", "./services/share/Dockerfile", "./api/Dockerfile"]' >> "$GITHUB_OUTPUT"
+        run: echo 'services=["client", "apollo", "auth", "share"]' >> "$GITHUB_OUTPUT"
       - name: Debug output
-        run: echo "${{ steps.set-matrix.outputs.files }}"
+        run: echo "${{ steps.set-matrix.outputs.services }}"
 
   build:
     needs: matrix_maker
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        file: ${{ fromJSON(needs.matrix_maker.outputs.matrix) }}
+        service: ${{ fromJSON(needs.matrix_maker.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v3
       - name: Login to GitHub Container Registry
@@ -38,13 +39,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build the Docker image ${{ matrix.file }}
+      - name: Build the Docker image ${{ matrix.service }}
         run: |
-          cd $(dirname ${{ matrix.file }})
-          IMAGE_NAME=$(basename $(dirname ${{ matrix.file }}))
-          docker compose build ${{ matrix.file }}
-          docker tag ${{ matrix.file }} ghcr.io/out-of-tune/$IMAGE_NAME:$VERSION 
-          docker tag ${{ matrix.file }} ghcr.io/out-of-tune/$IMAGE_NAME:latest
+          IMAGE_NAME=${{ matrix.service }}
+          docker compose build $IMAGE_NAME
+          docker tag ${{ matrix.service }} ghcr.io/out-of-tune/$IMAGE_NAME:$VERSION 
+          docker tag ${{ matrix.service }} ghcr.io/out-of-tune/$IMAGE_NAME:latest
           docker push ghcr.io/out-of-tune/$IMAGE_NAME:$VERSION
 
   test-client:
