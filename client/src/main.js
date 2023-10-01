@@ -8,25 +8,27 @@ import "vue3-tour/dist/vue3-tour.css";
 
 import { OhVueIcon, addIcons } from "oh-vue-icons";
 import {
-  FaFlag,
-  RiZhihuFill,
   MdPlayarrow,
   MdPause,
   MdSkipnext,
   MdSkipprevious,
   MdVolumedown,
   MdVolumeup,
+  MdInfooutline,
+  MdQueuemusic,
+  MdAdd,
 } from "oh-vue-icons/icons";
 
 addIcons(
-  FaFlag,
-  RiZhihuFill,
   MdPlayarrow,
   MdPause,
   MdSkipnext,
   MdSkipprevious,
   MdVolumedown,
   MdVolumeup,
+  MdInfooutline,
+  MdQueuemusic,
+  MdAdd,
 );
 
 const app = createApp(App);

@@ -31,7 +31,6 @@
     <selectionModal></selectionModal>
     <feedbackModal></feedbackModal>
     <shareModal></shareModal>
-    <!-- TODO: fix intro tour -->
     <IntroTour></IntroTour>
     <div class="bottom">
       <InfoToggles></InfoToggles>

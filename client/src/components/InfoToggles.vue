@@ -1,18 +1,18 @@
 <template>
   <div class="info">
     <button
-      class="toggle"
+      class="toggle icon-btn"
       :class="{ activated: nodeInfoDisplay }"
       @click="setNodeInfoVisibility(!nodeInfoDisplay)"
     >
-      <v-icon icon="mdi-information" />
+      <v-icon name="md-infooutline" />
     </button>
     <button
-      class="toggle"
+      class="toggle icon-btn"
       :class="{ activated: queueDisplay }"
       @click="setQueueVisibility(!queueDisplay)"
     >
-      <v-icon icon="mdi-playlist-music" />
+      <v-icon name="md-queuemusic" />
     </button>
   </div>
 </template>

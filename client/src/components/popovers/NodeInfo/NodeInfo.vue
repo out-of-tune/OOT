@@ -102,8 +102,7 @@
             <v-icon
               id="playArrow"
               @click="setSong(track, node.data.images)"
-              color="white"
-              icon="mdi-play"
+              name="md-playarrow"
             />
             <div id="songName" @click="setSong(track, node.data.images)">
               <span class="innerText" v-if="track.name.length > 25">
@@ -119,7 +118,7 @@
               id="addToQueueButton"
               @click="addSongToQueue({ ...track, images: node.data.images })"
             >
-              <v-icon color="white" icon="mdi-plus" />
+              <v-icon name="md-add" />
             </button>
           </li>
         </ul>
@@ -156,7 +155,7 @@
   </div>
 </template>
 <script>
-import { mapState, mapActions } from "vuex";
+import { mapActions } from "vuex";
 import logo from "@/assets/logo.png";
 import _ from "lodash";
 
