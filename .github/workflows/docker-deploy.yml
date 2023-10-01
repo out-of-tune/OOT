@@ -10,15 +10,15 @@ jobs:
   matrix_maker:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.result }}
+      matrix: ${{ steps.set-matrix.outputs.files }}
     steps:
     - uses: actions/checkout@v3
     - name: Find Dockerimages to build
       id: set-matrix
       #run: echo $(find -name Dockerfile | tr '\n' ' ')
-      run: echo '["./server/Dockerfile", "./client/Dockerfile", "./auth/Dockerfile", "./db/arango/Dockerfile", "./services/share/Dockerfile", "./api/Dockerfile"]'
+      run: echo 'files=["./server/Dockerfile", "./client/Dockerfile", "./auth/Dockerfile", "./db/arango/Dockerfile", "./services/share/Dockerfile", "./api/Dockerfile"]' >> "$GITHUB_OUTPUT"
     - name: Debug output
-      run: echo "${{ steps.set-matrix.outputs.result }}"
+      run: echo "${{ steps.set-matrix.outputs.files }}"
       
 
   build:
