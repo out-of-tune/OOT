@@ -81,7 +81,6 @@
         <slider
           :min="start"
           :max="end"
-          @change="seekTo"
           :model-value="currentTime"
           @update:model-value="seekTo"
         ></slider>
@@ -109,14 +108,15 @@
     </div>
 
     <div class="volume">
-      <v-icon>mdi-volume-plus</v-icon>
-      <input
-        type="number"
-        v-model="volumePercent"
+      <v-icon>mdi-volume-minus</v-icon>
+      <Slider
+        class="volumeslider"
+        :model-value="volumePercent"
+        @update:model-value="setVolume"
         min="0"
         max="100"
-        @change="setVolume"
-      />
+      ></Slider>
+      <v-icon>mdi-volume-plus</v-icon>
     </div>
   </div>
 </template>
@@ -180,8 +180,9 @@ export default {
       this.start = this.$refs.player.seekable.start(0);
       this.end = this.$refs.player.seekable.end(0);
     },
-    setVolume: function () {
-      this.$refs.player.volume = this.volumePercent / 100.0;
+    setVolume: function (v) {
+      this.volumePercent = v;
+      this.$refs.player.volume = v / 100.0;
     },
     setTime: function () {
       if (!this.isSeeking) {
@@ -321,6 +322,7 @@ input {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 0.3rem;
 }
 .sliderBox {
   width: 100%;
@@ -333,5 +335,15 @@ input {
   100% {
     transform: translate(-50%, 0);
   }
+}
+
+.volume {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.volumeslider {
+  width: 100px;
 }
 </style>

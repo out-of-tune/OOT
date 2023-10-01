@@ -31,12 +31,6 @@ const handleClick = (e) => {
   padding-bottom: 0.3rem;
 }
 
-.handle {
-  width: 1rem;
-  height: 1rem;
-  background-color: #1dcdda;
-}
-
 .progress {
   background-color: #ff9b00;
   height: 0.3rem;
