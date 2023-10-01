@@ -6,8 +6,8 @@
   "private": true,
   "scripts": {
     "test": "node --experimental-vm-modules --harmony node_modules/.bin/jest",
-    "compile": "npm run codegen && tsc && cp schema/schema.graphql dist/schema/",
-    "start": "npm run compile && node ./dist/src/index.js",
+    "postinstall": "npm run codegen && tsc && cp schema/schema.graphql dist/schema/",
+    "start": "node ./dist/src/index.js",
     "codegen": "graphql-codegen --config src/codegen.ts",
     "serve": "npm run codegen && nodemon src/index.ts"
   },
