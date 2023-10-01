@@ -1,5 +1,5 @@
 import SpotifyService from "@/store/services/SpotifyService";
-;
+
 vi.mock("@/store/services/SpotifyService");
 import { actions } from "../actions";
 

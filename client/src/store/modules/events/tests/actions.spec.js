@@ -1,5 +1,4 @@
 import { actions } from "../actions";
-;
 import { JSDOM } from "jsdom";
 import { startMultiSelect } from "@/assets/js/selectHelper";
 import { getNodePosition, getPinnedState } from "@/assets/js/graphHelper";

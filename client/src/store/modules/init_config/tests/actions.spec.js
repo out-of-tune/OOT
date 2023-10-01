@@ -1,5 +1,5 @@
 import actions from "../actions";
-;
+
 const { initConfiguration } = actions;
 describe("initConfiguration", () => {
   let commit;

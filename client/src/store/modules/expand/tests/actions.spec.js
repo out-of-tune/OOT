@@ -1,5 +1,4 @@
 import { actions } from "../actions";
-;
 import Viva from "vivagraphjs";
 import GraphService from "@/store/services/GraphService";
 import SpotifyService from "@/store/services/SpotifyService";

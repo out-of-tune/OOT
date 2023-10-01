@@ -1,6 +1,6 @@
 import actions from "../actions";
 import GraphService from "@/store/services/GraphService";
-;
+
 vi.mock("@/store/services/GraphService");
 
 const { generateInceptionGraph } = actions;
