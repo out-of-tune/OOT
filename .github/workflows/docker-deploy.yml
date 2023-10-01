@@ -32,7 +32,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Build the Docker image ${{ matrix.file }}
-        run: cd $(dirname ${{ matrix.file }}) && docker build . --file Dockerfile --tag $(basename $(dirname ${{ matrix.file }})):$VERSION
+        run: |
+          cd $(dirname ${{ matrix.file }})
+          TAG=$(basename $(dirname ${{ matrix.file }})):$VERSION
+          docker build . --file Dockerfile --tag $TAG
+          docker image save $TAG
 
   test-client:
     runs-on: ubuntu-latest
