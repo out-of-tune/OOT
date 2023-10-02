@@ -1,4 +1,4 @@
-name: Pipeline for merge into master
+name: Pipeline for Merge into Release
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 jobs:
   test:
     uses: ./.github/workflows/tests.yml
-  deploy-nightly:
+  deploy-release:
     needs: test
     uses: ./.github/workflows/docker-deploy.yml
     with:
