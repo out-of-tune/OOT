@@ -1,0 +1,14 @@
+name: Pipeline for Merge into Release
+
+on:
+  push:
+    branches: [mock_release]
+
+jobs:
+  test:
+    uses: ./.github/workflows/tests.yml
+  deploy-release:
+    needs: test
+    uses: ./.github/workflows/docker-deploy.yml
+    with:
+      version: latest
