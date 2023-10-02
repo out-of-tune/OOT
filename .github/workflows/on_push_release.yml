@@ -2,7 +2,7 @@ name: Pipeline for merge into master
 
 on:
   push:
-    branches: [master]
+    branches: [release]
 
 jobs:
   test:
@@ -10,4 +10,4 @@ jobs:
   deploy-nightly:
     uses: ./.github/workflows/docker-deploy.yml
     with:
-      version: nightly
+      version: latest
