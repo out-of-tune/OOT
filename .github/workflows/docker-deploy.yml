@@ -67,4 +67,4 @@ jobs:
         uses: camargo/delete-untagged-action@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          package_name: ${{ matrix.service }}
+          package-name: ${{ matrix.service }}
