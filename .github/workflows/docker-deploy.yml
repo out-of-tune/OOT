@@ -1,13 +1,19 @@
-name: Docker Image CI
+name: Build and Deploy Docker Images
 
 on:
-  push:
-    branches: ["cicd/add-github-actions"]
-  pull_request:
-    branches: ["cicd/add-github-actions"]
+  workflow_call:
+    inputs:
+      version:
+        description: 'docker-image version to push'
+        required: true
+        type: string
+      latest:
+        description: 'whether to also tag and push the images as :latest'
+        default: false
+        type: boolean
+        required: false
 
 env:
-  VERSION: nightly
   APP_MOUNT_PATH: "/app"
   PROXY_URI: "https://d.out-of-tune.org/app"
   NODE_ENV: "production"
@@ -41,42 +47,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build the Docker image ${{ matrix.service }}
-        run: |
-          IMAGE_NAME=${{ matrix.service }}
-          docker compose -f docker-compose.build.yml build $IMAGE_NAME
-          docker tag oot-${{ matrix.service }} ghcr.io/out-of-tune/$IMAGE_NAME:$VERSION
-          docker tag oot-${{ matrix.service }} ghcr.io/out-of-tune/$IMAGE_NAME:latest
-          docker push ghcr.io/out-of-tune/$IMAGE_NAME:$VERSION
-          docker push ghcr.io/out-of-tune/$IMAGE_NAME:latest
+        run: docker compose -f docker-compose.build.yml build ${{ matrix.service }}
 
-  test-client:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 19.x
-          cache: npm
-      - name: Install and run tests
-        working-directory: ./client
-        run: |
-          NODE_ENV=development
-          npm ci
-          npm run test
+      - name: Tag ${{ matrix.service }}:${{ inputs.version }}
+        run: docker tag oot-${{ matrix.service }} ghcr.io/out-of-tune/${{ matrix.service }}:${{ inputs.version }}
+      - name: Push ${{ matrix.service }}:${{ inputs.version }}
+        run: docker push ghcr.io/out-of-tune/${{ matrix.service }}:${{ inputs.version }}
 
-  test-api:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 19.x
-          cache: npm
-      - name: Install and run tests
-        working-directory: ./api
-        run: |
-          NODE_ENV=development
-          npm ci
-          npm run test
+      - if: ${{ inputs.latest }}
+        name: Tag ${{ matrix.service }}:latest
+        run: docker tag oot-${{ matrix.service }} ghcr.io/out-of-tune/${{ matrix.service }}:latest
+      - if: ${{ inputs.latest }}
+        name: Push ${{ matrix.service }}:latest
+        run: docker push ghcr.io/out-of-tune/${{ matrix.service }}:latest

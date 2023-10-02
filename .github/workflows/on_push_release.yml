@@ -1,0 +1,14 @@
+name: Pipeline for merge into master
+
+on:
+  push:
+    branches: [mock_release]
+
+jobs:
+  test:
+    uses: ./.github/workflows/tests.yml
+  deploy-nightly:
+    needs: test
+    uses: ./.github/workflows/docker-deploy.yml
+    with:
+      version: latest

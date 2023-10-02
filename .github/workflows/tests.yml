@@ -1,0 +1,37 @@
+name: Unit Tests
+
+on:
+  workflow_call:
+
+jobs:
+  test-client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 19.x
+          cache: npm
+      - name: Install and run tests
+        working-directory: ./client
+        run: |
+          NODE_ENV=development
+          npm ci
+          npm run test
+
+  test-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 19.x
+          cache: npm
+      - name: Install and run tests
+        working-directory: ./api
+        run: |
+          NODE_ENV=development
+          npm ci
+          npm run test
