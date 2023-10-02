@@ -1,0 +1,16 @@
+name: Pipeline for merge into master
+
+env:
+  VERSION: nightly
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  test:
+    uses: ./.github/workflows/tests.yml
+  deploy-nightly:
+    uses: ./.github/workflows/docker-deploy.yml
+    with:
+      version: nightly
