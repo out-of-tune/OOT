@@ -62,13 +62,9 @@ jobs:
       - if: ${{ inputs.latest }}
         name: Push ${{ matrix.service }}:latest
         run: docker push ghcr.io/out-of-tune/${{ matrix.service }}:latest
-  cleanup:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      packages: write
-    steps:
+
       - name: Delete Untagged Packages
         uses: camargo/delete-untagged-action@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          package_name: ${{ matrix.service }}
