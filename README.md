@@ -57,3 +57,5 @@ Now you can start the service by running:
 ```
 docker-compose up --build
 ```
+
+Further documentation about out of tune (e.g. about the architecture) can be found in [/docs](https://github.com/out-of-tune/OOT/tree/master/docs).
