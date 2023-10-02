@@ -8,6 +8,7 @@ jobs:
   test:
     uses: ./.github/workflows/tests.yml
   deploy-nightly:
+    needs: test
     uses: ./.github/workflows/docker-deploy.yml
     with:
       version: latest
