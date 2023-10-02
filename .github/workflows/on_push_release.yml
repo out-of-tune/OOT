@@ -2,7 +2,7 @@ name: Pipeline for merge into master
 
 on:
   push:
-    branches: [release]
+    branches: [mock_release]
 
 jobs:
   test:
