@@ -1,0 +1,38 @@
+version: "3"
+services:
+  smee:
+    image: node:18
+    volumes:
+      - ..:/app
+    command: bash -c "cd /app && npm ci && npm test" 
+    environment:
+      - SMEE_URL=$SMEE_URL
+      - WEBHOOKS_URL=http://webhooks:3004/github/webhook
+    healthcheck:
+      test: "ps aux | grep -v grep | grep -c bin/smee"
+      interval: 5s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+      start_interval: 1s
+  webhooks:
+    image: node:18
+    environment:
+      - WEBHOOKS_PORT=3004
+      - GITHUB_SECRET=$GITHUB_SECRET
+      - NODE_ENV=development
+    volumes:
+      - ..:/app
+    command: bash -c "cd /app && npm start"
+    ports:
+      - 3004:3004
+    healthcheck:
+      test: "curl -f localhost:3004/status"
+      interval: 5s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+      start_interval: 1s
+    depends_on:
+      smee:
+        condition: service_healthy
