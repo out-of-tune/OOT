@@ -1,4 +1,4 @@
-name: Pipeline for merge into master
+name: Pipeline for Merge into Release
 
 on:
   push:
