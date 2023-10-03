@@ -17,7 +17,7 @@ jobs:
       - name: Run Test Webhooks Suite
         run: |
           cd attic/webhooks/testing
-          docker compose up -d
+          docker compose up
       - name: Wait for Service
         run: curl --connect-timeout 10 --retry 10 --retry-max-time 60 'http://localhost:3004/status'
       - name: Invoke Test Deployment Hook
