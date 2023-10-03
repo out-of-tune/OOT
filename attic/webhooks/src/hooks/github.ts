@@ -30,7 +30,7 @@ const deployHook: HookHandler = (_) => {
 }
 
 const testHook: HookHandler = (_) => {
-  const file = `${__dirname}/testing/success`
+  const file = `${process.cwd()}/testing/success`
   fs.writeFile(file, '')
   console.log(`Test Event was called: Successful (${file})`)
 }
@@ -43,7 +43,7 @@ const hookMap: {[k: string]: HookHandler} = {
 
 export const githubRouter = express.Router()
 
-githubRouter.post('/webhook', express.json({type: 'application/json'}), (request, response) => {
+githubRouter.post('/webhook', (request, response) => {
   if (!verifySignature(request)) return response.status(401).send("Unauthorized")
 
   response.status(202).send('Accepted')
