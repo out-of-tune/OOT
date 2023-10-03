@@ -29,6 +29,7 @@ jobs:
           webhook_secret: ${{ env.GITHUB_SECRET }}
           verbose: true
           event_name: test
+          data: '{ "spaces": 2 }'
       - name: Wait for Test Success File to be Created
         run: |
           cd attic/webhooks/testing

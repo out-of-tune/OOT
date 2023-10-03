@@ -11,11 +11,16 @@ type HookHandler = (request: express.Request) => void
 
 const verifySignature = (req: express.Request) => {
   const signatureHeader = req.headers["x-hub-signature-256"]
-  if ( !signatureHeader || Array.isArray(signatureHeader)) return false
-
+  if ( !signatureHeader || Array.isArray(signatureHeader)) {
+    console.log('[Authentication] No header provided (X-Hub-Signature-256)')
+    return false
+  }
+  const spaces = req.body?.data?.spaces
+  const formatted = JSON.stringify(req.body, null, spaces)
+  console.log(formatted, formatted.length, spaces)
   const signature = crypto
     .createHmac("sha256", githubSecret)
-    .update(JSON.stringify(req.body))
+    .update(formatted)
     .digest("hex")
   const trusted = Buffer.from(`sha256=${signature}`, 'ascii')
   const untrusted =  Buffer.from(signatureHeader, 'ascii')
