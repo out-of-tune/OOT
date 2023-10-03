@@ -19,7 +19,7 @@ jobs:
           cd attic/webhooks/testing
           docker compose up -d
       - name: Wait for Service
-        run: curl --connect-timeout 10 --retry 10 --retry-max-time 60 'http://localhost:3004/status'
+        run: curl --retry-all-errors --connect-timeout 10 --retry 10 --retry-max-time 60 'http://localhost:3004/status'
       - name: Invoke Test Deployment Hook
         uses: distributhor/workflow-webhook@v3
         env:
