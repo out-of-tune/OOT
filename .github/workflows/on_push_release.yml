@@ -12,3 +12,13 @@ jobs:
     uses: ./.github/workflows/docker-deploy.yml
     with:
       version: latest
+  restart-services:
+    needs: deploy-release
+    steps:
+      - name: Invoke Deployment Hook
+        uses: distributhor/workflow-webhook@v3
+        env:
+          webhook_url: https://d.out-of-tune.org/hooks/webhooks/github
+          webhook_secret: ${{ secrets.WEBHOOK_SECRET }}
+          event_name: deploy
+          data: '{ "spaces": 2 }'
