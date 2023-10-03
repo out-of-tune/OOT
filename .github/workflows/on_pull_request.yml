@@ -17,7 +17,7 @@ jobs:
       - name: Run Test Webhooks Suite
         run: |
           cd attic/webhooks/testing
-          docker compose up
+          docker compose up -d
       - name: Wait for Service
         run: curl --connect-timeout 10 --retry 10 --retry-max-time 60 'http://localhost:3004/status'
       - name: Invoke Test Deployment Hook
@@ -33,3 +33,6 @@ jobs:
         run: |
           cd attic/webhooks/testing
           docker compose down
+      - name: Dump docker logs on failure
+        if: failure()
+        uses: jwalton/gh-docker-logs@v2
