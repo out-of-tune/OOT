@@ -11,6 +11,13 @@ jobs:
     env:
       GITHUB_SECRET: abcd
     steps:
+      - name: Invoke Test Deployment Hook
+        uses: distributhor/workflow-webhook@v3
+        env:
+          webhook_url: https://smee.io/4uBbSLOYZEi1PH6
+          webhook_secret: test
+          verbose: true
+          event_name: test
       - uses: actions/checkout@v3
       - name: Get Redirect URL
         run: |
