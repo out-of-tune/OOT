@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Get Redirect URL
-        run: echo "SMEE_URL=$(attic/webhooks/testing/get_url)" >> "$GITHUB_ENV"
+        run: echo "SMEE_URL=$(attic/webhooks/testing/get_url.sh)" >> "$GITHUB_ENV"
       - name: Run Test Webhooks Suite
         run: |
           cd attic/webhooks/testing
