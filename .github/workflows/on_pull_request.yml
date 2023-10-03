@@ -13,9 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Get Redirect URL
-        run: |
-          echo "SMEE_URL=$(attic/webhooks/testing/get_url.sh)" >> "$GITHUB_ENV"
-          echo ${{ env.SMEE_URL }}
+        run: echo "SMEE_URL=$(attic/webhooks/testing/get_url.sh)" >> "$GITHUB_ENV"
       - name: Run Test Webhooks Suite
         run: |
           cd attic/webhooks/testing
@@ -24,8 +22,6 @@ jobs:
         run: curl --retry-all-errors --connect-timeout 10 --retry 10 --retry-max-time 60 'http://localhost:3004/status'
       - name: Dump docker logs on failure
         uses: jwalton/gh-docker-logs@v2
-      - name: Sleep for 30 seconds
-        run: sleep 30s
       - name: Invoke Test Deployment Hook
         uses: distributhor/workflow-webhook@v3
         env:

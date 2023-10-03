@@ -20,6 +20,7 @@ services:
     environment:
       - WEBHOOKS_PORT=3004
       - GITHUB_SECRET=$GITHUB_SECRET
+      - NODE_ENV=development
     volumes:
       - ..:/app
     command: bash -c "cd /app && npm start"

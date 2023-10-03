@@ -3,6 +3,7 @@ import * as crypto from "crypto"
 import { githubSecret } from '../settings.js'
 import { spawnChild } from '../child.js'
 import fs from 'fs/promises'
+import { JSONParser } from '../customJsonParser.js'
 
 
 type HookHandler = (request: express.Request) => void
@@ -42,7 +43,7 @@ const hookMap: {[k: string]: HookHandler} = {
 }
 
 export const githubRouter = express.Router()
-githubRouter.use(express.json())
+githubRouter.use(JSONParser)
 
 githubRouter.post('/webhook', (request, response) => {
   if (!verifySignature(request)) return response.status(401).send("Unauthorized")
@@ -54,5 +55,3 @@ githubRouter.post('/webhook', (request, response) => {
   else if (githubEvent in hookMap) hookMap[githubEvent](request)
   else console.warn(`Unhandled event: ${githubEvent}`)
 })
-
-
