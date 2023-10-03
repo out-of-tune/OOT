@@ -20,6 +20,8 @@ jobs:
           docker compose up -d
       - name: Wait for Service
         run: curl --retry-all-errors --connect-timeout 10 --retry 10 --retry-max-time 60 'http://localhost:3004/status'
+      - name: Sleep for 30 seconds
+        run: sleep 30s
       - name: Invoke Test Deployment Hook
         uses: distributhor/workflow-webhook@v3
         env:
