@@ -30,8 +30,9 @@ const deployHook: HookHandler = (_) => {
 }
 
 const testHook: HookHandler = (_) => {
-  fs.writeFile('testing/success', '')
-  console.log("Test Event was called: Successful")
+  const file = `${__dirname}/testing/success`
+  fs.writeFile(file, '')
+  console.log(`Test Event was called: Successful (${file})`)
 }
 
 const hookMap: {[k: string]: HookHandler} = {
@@ -51,7 +52,6 @@ githubRouter.post('/webhook', express.json({type: 'application/json'}), (request
   if (Array.isArray(githubEvent)) console.warn(`Unsupported array of events: [${githubEvent}]`)
   else if (githubEvent in hookMap) hookMap[githubEvent](request)
   else console.warn(`Unhandled event: ${githubEvent}`)
-
 })
 
 
