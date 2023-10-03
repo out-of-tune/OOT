@@ -34,10 +34,8 @@ const testHook: HookHandler = (_) => {
   console.log("Test Event was called: Successful")
 }
 
-const standardHookMap: {[k: string]: HookHandler} = {
-  ping: pingHook
-}
-const customHookMap: {[k: string]: HookHandler} = {
+const hookMap: {[k: string]: HookHandler} = {
+  ping: pingHook,
   deploy: deployHook,
   test: testHook
 }
@@ -51,18 +49,9 @@ githubRouter.post('/webhook', express.json({type: 'application/json'}), (request
   const githubEvent = request.headers['x-github-event']
 
   if (Array.isArray(githubEvent)) console.warn(`Unsupported array of events: [${githubEvent}]`)
-  else if (githubEvent in standardHookMap) standardHookMap[githubEvent](request)
-  else if (githubEvent !== undefined) console.warn(`Unhandled event: ${githubEvent}`)
-  else {
-    try {
-      const data = request.body
-      const event = data.event
-      if (event in customHookMap) customHookMap[event](request)
-      else console.warn(`Unhandled custom event: ${event}`)
-    } catch (error) {
-      console.warn(`Unknown request: ${request}\nError: ${error}`)
-    }
-  }
+  else if (githubEvent in hookMap) hookMap[githubEvent](request)
+  else console.warn(`Unhandled event: ${githubEvent}`)
+
 })
 
 

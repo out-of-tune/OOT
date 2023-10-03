@@ -26,6 +26,7 @@ jobs:
           webhook_url: ${{ env.SMEE_URL }}
           webhook_secret: ${{ env.GITHUB_SECRET }}
           verbose: true
+          event_name: test
       - name: Wait for Test Success File to be Created
         run: |
           cd attic/webhooks/testing
