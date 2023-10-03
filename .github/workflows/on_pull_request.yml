@@ -6,3 +6,30 @@ on:
 jobs:
   test:
     uses: ./.github/workflows/tests.yml
+  test-webhooks:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_SECRET: abcd
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get Redirect URL
+        run: echo "SMEE_URL=$(attic/webhooks/testing/get_url)" >> "$GITHUB_ENV"
+      - name: Run Test Webhooks Suite
+        run: |
+          cd attic/webhooks/testing
+          docker compose up -d
+      - name: Wait for Service
+        run: curl --connect-timeout 10 --retry 10 --retry-max-time 60 'http://localhost:3004/status'
+      - name: Invoke Test Deployment Hook
+        uses: distributhor/workflow-webhook@v3
+        env:
+          webhook_url: ${{ env.SMEE_URL }}
+          webhook_secret: ${{ env.GITHUB_SECRET }}
+      - name: Wait for Test Success File to be Created
+        run: |
+          cd attic/webhooks/testing
+          ./check_test.sh
+      - name: Shutting Down Test Webhooks Suite
+        run: |
+          cd attic/webhooks/testing
+          docker compose down
