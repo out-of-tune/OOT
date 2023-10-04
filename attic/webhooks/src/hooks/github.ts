@@ -50,7 +50,7 @@ const hookMap: {[k: string]: HookHandler} = {
 export const githubRouter = express.Router()
 githubRouter.use(JSONParser)
 
-githubRouter.post('/webhook', (request, response) => {
+githubRouter.post('/', (request, response) => {
   if (!verifySignature(request)) return response.status(401).send("Unauthorized")
 
   response.status(202).send('Accepted')
