@@ -14,6 +14,7 @@ jobs:
       version: latest
   restart-services:
     needs: deploy-release
+    runs-on: ubuntu-latest
     steps:
       - name: Check for Webhooks Server Status
         run: curl -f https://d.out-of-tune.org/oot/webhook/status
