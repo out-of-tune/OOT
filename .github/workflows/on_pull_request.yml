@@ -1,0 +1,8 @@
+name: Pipeline for Pull Requests
+
+on:
+  pull_request:
+
+jobs:
+  test:
+    uses: ./.github/workflows/tests.yml

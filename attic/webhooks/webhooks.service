@@ -1,0 +1,14 @@
+[Unit]
+Description=Webhook Service for out of tune webhooks
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/oot/attic/webhooks
+EnvironmentFile=/opt/oot/attic/webhooks/.env
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node dist/app.js
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

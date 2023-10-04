@@ -1,0 +1,71 @@
+name: Unit Tests
+
+on:
+  workflow_call:
+
+jobs:
+  test-client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 19.x
+          cache: npm
+      - name: Install and run tests
+        working-directory: ./client
+        run: |
+          NODE_ENV=development
+          npm ci
+          npm run test
+
+  test-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 19.x
+          cache: npm
+      - name: Install and run tests
+        working-directory: ./api
+        run: |
+          NODE_ENV=development
+          npm ci
+          npm run test
+
+  test-server-webhooks:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_SECRET: abcd
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get Redirect URL
+        run: echo "SMEE_URL=$(attic/webhooks/testing/get_url.sh)" >> "$GITHUB_ENV"
+      - name: Run Test Webhooks Suite
+        run: |
+          cd attic/webhooks/testing
+          docker compose up -d
+      - name: Wait for Service
+        run: curl --retry-all-errors --connect-timeout 10 --retry 10 --retry-max-time 60 'http://localhost:3004/status'
+      - name: Invoke Test Deployment Hook
+        uses: distributhor/workflow-webhook@v3
+        env:
+          webhook_url: ${{ env.SMEE_URL }}
+          webhook_secret: ${{ env.GITHUB_SECRET }}
+          verbose: true
+          event_name: test
+          data: '{ "spaces": 2 }'
+      - name: Wait for Test Success File to be Created
+        run: |
+          cd attic/webhooks/testing
+          ./check_test.sh
+      - name: Shutting Down Test Webhooks Suite
+        run: |
+          cd attic/webhooks/testing
+          docker compose down
+      - name: Dump docker logs on failure
+        if: failure()
+        uses: jwalton/gh-docker-logs@v2
