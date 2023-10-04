@@ -50,13 +50,13 @@ const hookMap: {[k: string]: HookHandler} = {
 export const githubRouter = express.Router()
 githubRouter.use(JSONParser)
 
-githubRouter.post('/webhook', (request, response) => {
+githubRouter.post('/', (request, response) => {
   if (!verifySignature(request)) return response.status(401).send("Unauthorized")
 
   response.status(202).send('Accepted')
   const githubEvent = request.headers['x-github-event']
 
   if (Array.isArray(githubEvent)) console.warn(`Unsupported array of events: [${githubEvent}]`)
-  else if (githubEvent in hookMap) hookMap[githubEvent](request)
+  else if (githubEvent && githubEvent in hookMap) hookMap[githubEvent](request)
   else console.warn(`Unhandled event: ${githubEvent}`)
 })
