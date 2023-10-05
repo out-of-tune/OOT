@@ -1,7 +1,7 @@
 <template>
   <Popper placement="top">
     <button id="io-button" class="container tooltip">
-      <v-icon class="icon" color="white" icon="mdi-content-save" />
+      <v-icon class="icon" color="white" name="md-save" />
       <span class="tooltiptext">SAVE/LOAD</span>
     </button>
     <template #content>
@@ -10,30 +10,16 @@
           <h2 id="menu-header">SAVE / LOAD</h2>
 
           <div class="nav-buttons">
-            <button
-              id="configurationTab"
-              class="tabButton"
-              :class="{ active: configuration }"
-              color="#da6a1d"
-              @click="configuration = true"
-            >
+            <button id="configurationTab" class="tabButton" :class="{ active: configuration }" color="#da6a1d"
+              @click="configuration = true">
               Configuration
             </button>
-            <button
-              class="tabButton"
-              id="graphTab"
-              :class="{ active: !configuration }"
-              color="#0d676d"
-              @click="configuration = false"
-            >
+            <button class="tabButton" id="graphTab" :class="{ active: !configuration }" color="#0d676d"
+              @click="configuration = false">
               Graph
             </button>
           </div>
-          <div
-            v-if="configuration"
-            id="loadSaveConfiguration"
-            class="loadSaveActions"
-          >
+          <div v-if="configuration" id="loadSaveConfiguration" class="loadSaveActions">
             <LoadSaveConfigurationOption></LoadSaveConfigurationOption>
           </div>
           <div v-else id="loadSaveGraph" class="loadSaveActions">
@@ -69,6 +55,7 @@ export default {
   position: relative;
   display: inline-block;
 }
+
 .tooltip:hover .tooltiptext {
   visibility: visible;
 }
@@ -148,21 +135,26 @@ export default {
   background: linear-gradient(180deg, #2d9cdb 0%, #56ccf2 100%);
   color: white;
 }
+
 .loadSaveActions {
   display: grid;
 }
+
 #spacer {
   margin: 1rem;
 }
+
 .tabButton {
   color: white;
   border: 2px solid #ffffff;
   margin-left: 0;
   margin-right: 0;
 }
+
 #graphTab {
   margin-left: 2px;
 }
+
 .active {
   transition: 0.2s;
   background-color: #424242 !important;

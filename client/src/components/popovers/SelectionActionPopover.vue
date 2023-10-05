@@ -1,7 +1,7 @@
 <template>
   <Popper>
     <button id="selection-button" class="container action tooltip">
-      <v-icon class="icon" color="white" icon="mdi-select-all" />
+      <v-icon class="icon" color="white" name="md-selectall" />
       <span class="tooltiptext">SELECTION</span>
     </button>
     <template #content>
@@ -16,16 +16,10 @@
                 <button class="btn" @click="expand">Expand</button>
 
                 <button class="btn" @click="remove">Remove</button>
-                <button dark class="btn" @click="pin(selectedNodes)">
+                <button class="btn" @click="pin(selectedNodes)">
                   Pin
                 </button>
-                <button
-                  dark
-                  small
-                  outline
-                  class="btn"
-                  @click="unpin(selectedNodes)"
-                >
+                <button class="btn" @click="unpin(selectedNodes)">
                   Unpin
                 </button>
                 <button class="btn" @click="invert">Invert</button>
@@ -118,6 +112,7 @@ export default defineComponent({
   position: relative;
   display: inline-block;
 }
+
 .tooltip:hover .tooltiptext {
   visibility: visible;
 }

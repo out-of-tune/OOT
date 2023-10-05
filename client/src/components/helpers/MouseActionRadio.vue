@@ -1,36 +1,18 @@
 <template>
   <form action="" id="MouseActionRadio">
     <label id="expand-button" class="container tooltip" for="expand">
-      <input
-        type="radio"
-        id="expand"
-        v-model="activeMode"
-        value="expand"
-        v-on:change="setActiveMode(activeMode)"
-      />
-      <v-icon class="icon" color="white" icon="mdi-circle-expand" />
+      <input type="radio" id="expand" v-model="activeMode" value="expand" v-on:change="setActiveMode(activeMode)" />
+      <v-icon class="icon" color="white" name="md-add" />
       <span class="tooltiptext">EXPAND</span>
     </label>
     <label id="collapse-button" class="container tooltip" for="collapse">
-      <input
-        type="radio"
-        id="collapse"
-        v-model="activeMode"
-        value="collapse"
-        v-on:change="setActiveMode(activeMode)"
-      />
-      <v-icon class="icon" color="white" icon="mdi-minus-circle-outline" />
+      <input type="radio" id="collapse" v-model="activeMode" value="collapse" v-on:change="setActiveMode(activeMode)" />
+      <v-icon class="icon" color="white" name="md-remove" />
       <span class="tooltiptext">COLLAPSE</span>
     </label>
     <label id="explore-button" class="container tooltip" for="explore">
-      <input
-        type="radio"
-        id="explore"
-        v-model="activeMode"
-        value="explore"
-        v-on:change="setActiveMode(activeMode)"
-      />
-      <v-icon class="icon" color="white" icon="mdi-music-note" />
+      <input type="radio" id="explore" v-model="activeMode" value="explore" v-on:change="setActiveMode(activeMode)" />
+      <v-icon class="icon" color="white" name="md-musicnote" />
       <span class="tooltiptext">EXPLORE</span>
     </label>
   </form>
@@ -53,6 +35,7 @@ export default {
   position: relative;
   display: inline-block;
 }
+
 .tooltip:hover .tooltiptext {
   visibility: visible;
 }
@@ -97,15 +80,15 @@ export default {
   align-items: center;
 }
 
-[type="radio"]:checked + .icon {
+[type="radio"]:checked+.icon {
   background-color: #1dcddaff;
 }
 
-[type="radio"]:hover + .icon {
+[type="radio"]:hover+.icon {
   background-color: #1dcdda66;
 }
 
-[type="radio"] + .icon {
+[type="radio"]+.icon {
   background-color: #da6a1dff;
   cursor: pointer;
   width: 30px;

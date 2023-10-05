@@ -3,22 +3,18 @@
     <MouseActionRadio></MouseActionRadio>
     <div class="action">
       <button id="undo-button" class="container tooltip" @click="undoAction">
-        <v-icon class="icon" color="white" icon="mdi-undo" />
+        <v-icon class="icon" color="white" name="md-undo" />
         <span class="tooltiptext">UNDO</span>
       </button>
       <button id="redo-button" class="container tooltip" @click="redoAction">
-        <v-icon class="icon" color="white" icon="mdi-redo" />
+        <v-icon class="icon" color="white" name="md-redo" />
         <span class="tooltiptext">REDO</span>
       </button>
     </div>
     <SelectionPopover></SelectionPopover>
     <div>
-      <button
-        id="playlists-button"
-        class="container tooltip action"
-        @click="switchPlaylistLoader"
-      >
-        <v-icon class="icon" color="white" icon="mdi-playlist-plus" />
+      <button id="playlists-button" class="container tooltip action" @click="switchPlaylistLoader">
+        <v-icon class="icon" color="white" name="md-playlistplay" />
         <span class="tooltiptext">PLAYLISTS</span>
       </button>
     </div>
@@ -27,34 +23,26 @@
 
     <router-link to="/settings" target="_blank" @click="trackSettings">
       <button class="container action tooltip" id="settings-button">
-        <v-icon class="icon" color="white" icon="mdi-cog-outline" />
-        <span class="tooltiptext">SETTINGS</span>
+        <v-icon class="icon" color="white" name="md-settings" />
+        <span class=" tooltiptext">SETTINGS</span>
       </button>
     </router-link>
 
     <router-link to="/help" target="_blank">
       <button id="help-button" class="container action tooltip">
-        <v-icon class="icon" color="white" icon="mdi-help" />
+        <v-icon class="icon" color="white" name="md-helpoutline" />
         <span class="tooltiptext">HELP</span>
       </button>
     </router-link>
     <div>
-      <button
-        id="feedback-button"
-        class="container tooltip action"
-        @click="openFeedbackModal"
-      >
-        <v-icon class="icon" color="white" icon="mdi-message-alert" />
+      <button id="feedback-button" class="container tooltip action" @click="openFeedbackModal">
+        <v-icon class="icon" color="white" name="md-feedback" />
         <span class="tooltiptext">FEEDBACK</span>
       </button>
     </div>
     <div>
-      <button
-        id="share-button"
-        class="container tooltip action"
-        @click="openShareModal"
-      >
-        <v-icon class="icon" color="white" icon="mdi-share" />
+      <button id="share-button" class="container tooltip action" @click="openShareModal">
+        <v-icon class="icon" color="white" name="md-share" />
         <span class="tooltiptext">SHARE</span>
       </button>
     </div>
@@ -88,7 +76,7 @@ export default {
       this.changePlaylistLoaderState(true);
       //this.changePlaylistChooserState(true);
     },
-    trackSettings() {},
+    trackSettings() { },
     undoAction() {
       this.undo();
     },
@@ -133,6 +121,7 @@ export default {
   position: relative;
   display: inline-block;
 }
+
 .tooltip:hover .tooltiptext {
   visibility: visible;
 }
