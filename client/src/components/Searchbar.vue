@@ -1,53 +1,29 @@
 <template>
   <div id="searchContainer">
     <div v-if="advanced" id="advanced">
-      <ul
-        ref="autocomplete"
-        id="autocomplete"
-        v-if="getMatchingData().length > 0 && inputIsFocused"
-      >
-        <li
-          v-for="data in getMatchingData()"
-          @mousedown="addOnClick(data)"
-          v-bind:key="data"
-        >
+      <ul ref="autocomplete" id="autocomplete" v-if="getMatchingData().length > 0 && inputIsFocused">
+        <li v-for="data in getMatchingData()" @mousedown="addOnClick(data)" v-bind:key="data">
           {{ data }}
         </li>
       </ul>
       <div class="input" id="advancedInput">
         <div class="search" @focusout="changeVisibility" @keydown="selectEvent">
-          <v-icon
-            class="searchIcon"
-            slot="append"
-            @click="startAdvancedSearch()"
-            icon="mdi-magnify"
-          />
-          <input
-            class="searchfield"
-            type="text"
-            @focus="inputIsFocused = true"
-            v-bind:class="{ validString: valid, invalidString: !valid }"
-            ref="searchInput"
-            v-model="searchString"
-            @input="addCharacterInput(searchString)"
-          />
+          <v-icon class="searchIcon" slot="append" @click="startAdvancedSearch()" name="md-search" />
+          <input class="searchfield" type="text" @focus="inputIsFocused = true"
+            v-bind:class="{ validString: valid, invalidString: !valid }" ref="searchInput" v-model="searchString"
+            @input="addCharacterInput(searchString)" />
         </div>
       </div>
     </div>
     <div v-else id="simple">
       <div class="input" id="simpleInput" @keydown="simpleSearchEvents">
         <div class="search">
-          <v-icon
-            class="searchIcon"
-            slot="append"
-            @click="
-              startSimpleSearch({
-                nodeType: selectedNode,
-                searchString: simpleSearchString,
-              })
-            "
-            icon="mdi-magnify"
-          />
+          <v-icon class="searchIcon" slot="append" @click="
+            startSimpleSearch({
+              nodeType: selectedNode,
+              searchString: simpleSearchString,
+            })
+            " name="md-search" />
           <input class="searchfield" type="text" v-model="simpleSearchString" />
         </div>
       </div>
@@ -262,77 +238,82 @@ export default {
 </script>
 <style scoped>
 #searchContainer {
-  font-family: "Roboto", sans-serif;
-  width: 100%;
   display: flex;
   gap: 1rem;
-  justify-items: center;
-  align-content: center;
   align-items: center;
 }
+
 #advanced {
   display: flex;
   align-items: center;
 }
+
 #simple {
   display: flex;
+  gap: 1rem;
   align-items: center;
 }
-#heading {
-  grid-area: heading;
-  text-align: center;
-  justify-self: right;
-}
+
 .input {
   display: flex;
-  min-width: 300px;
   gap: 1rem;
 }
+
 button {
   border: 1px solid white;
 }
+
 #autocomplete {
   list-style: none;
   text-align: left;
   cursor: pointer;
   background-color: white;
   color: black;
-  max-height: 30vh;
+  max-height: 60vh;
   overflow-y: auto;
   position: absolute;
   border: none;
   z-index: 10;
   top: 3rem;
 }
+
 li {
   padding: 1rem;
 }
+
 li:hover {
   background-color: #f0f0f0;
 }
+
 ul {
   padding: 0;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
 }
+
 .validString {
   color: green !important;
 }
+
 .invalidString {
-  color: red !important ;
+  color: red !important;
 }
+
 .selected {
   color: #da6a1d;
 }
+
 .searchIcon:hover {
   color: #da6a1d;
 }
+
 .searchfield {
   padding: 0.25rem;
   margin: 0;
   background-color: #434343;
   color: white;
 }
+
 .search {
   display: flex;
   align-items: center;

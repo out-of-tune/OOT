@@ -17,6 +17,18 @@ import {
   MdInfooutline,
   MdQueuemusic,
   MdAdd,
+  MdUndo,
+  MdRedo,
+  MdPlaylistplay,
+  MdSelectall,
+  MdSave,
+  MdSettings,
+  MdHelpoutline,
+  MdFeedback,
+  MdShare,
+  MdRemove,
+  MdMusicnote,
+  MdSearch,
 } from "oh-vue-icons/icons";
 
 addIcons(
@@ -29,6 +41,18 @@ addIcons(
   MdInfooutline,
   MdQueuemusic,
   MdAdd,
+  MdUndo,
+  MdRedo,
+  MdPlaylistplay,
+  MdSelectall,
+  MdSave,
+  MdSettings,
+  MdHelpoutline,
+  MdFeedback,
+  MdShare,
+  MdRemove,
+  MdMusicnote,
+  MdSearch,
 );
 
 const app = createApp(App);

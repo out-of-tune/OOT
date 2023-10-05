@@ -2,28 +2,21 @@
   <div id="app">
     <snackbar />
     <div class="topbar">
-      <Searchbar
-        v-if="['Graph', 'Settings'].indexOf($route.name) > -1"
-      ></Searchbar>
+      <Searchbar v-if="['Graph', 'Settings'].indexOf($route.name) > -1"></Searchbar>
       <div v-if="loggedIn">
         {{ $store.state.playlists.currentPlaylist.name }}
       </div>
-      <div class="login" v-if="['Graph', 'Settings'].indexOf($route.name) > -1">
-        <button class="btn" v-if="!loggedIn" id="login" v-on:click="loginUser">
-          login
-        </button>
-        <div v-if="loggedIn" class="username">
-          <b>{{ $store.state.user.me.display_name }}</b>
-        </div>
-        <button
-          v-if="loggedIn"
-          id="logout"
-          color="#ffffff"
-          v-on:click="logoutUser"
-        >
-          logout
-        </button>
+    </div>
+    <div class="login" v-if="['Graph', 'Settings'].indexOf($route.name) > -1">
+      <button class="btn" v-if="!loggedIn" id="login" v-on:click="loginUser">
+        login
+      </button>
+      <div v-if="loggedIn" class="username">
+        <b>{{ $store.state.user.me.display_name }}</b>
       </div>
+      <button v-if="loggedIn" id="logout" color="#ffffff" v-on:click="logoutUser">
+        logout
+      </button>
     </div>
     <router-view></router-view>
     <PlaylistLoader></PlaylistLoader>
@@ -34,10 +27,7 @@
     <IntroTour></IntroTour>
     <div class="bottom">
       <InfoToggles></InfoToggles>
-      <MusicPlayer
-        class="musicPlayer"
-        v-if="['Graph'].indexOf($route.name) > -1"
-      ></MusicPlayer>
+      <MusicPlayer class="musicPlayer" v-if="['Graph'].indexOf($route.name) > -1"></MusicPlayer>
     </div>
 
     <Toolbar v-if="['Graph'].indexOf($route.name) > -1"></Toolbar>
@@ -141,6 +131,10 @@ export default {
 </script>
 
 <style>
+body {
+  margin: 0;
+}
+
 #navDrawer {
   background-color: #212121;
   border-right: 2px solid #da6a1d !important;
@@ -175,28 +169,31 @@ a {
 }
 
 .topbar {
+  position: fixed;
   background-color: #252525;
+  gap: 1rem;
   color: white;
   display: flex;
-  height: 64px;
-  align-items: center;
-  padding-right: 35px;
-  padding-left: 35px;
-  grid-gap: 0.5rem;
-  position: fixed;
+  padding: 1rem;
   z-index: 2;
-  width: 100vw;
 }
 
 .login {
-  justify-self: right;
+  background-color: #252525;
+  padding: 0.5rem;
+  border-radius: 4px;
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  height: 30px;
+  z-index: 2;
   display: flex;
   align-items: center;
-  align-content: center;
-  justify-items: center;
+
 }
 
 .btn {
+  color: white;
   background: #313131;
   border: 1px solid #2d9cdb;
   box-sizing: border-box;
@@ -210,6 +207,7 @@ a {
 .btn:active {
   background: #2d9cdb;
 }
+
 .btn:hover {
   background: linear-gradient(180deg, #2d9cdb 0%, #56ccf2 100%);
   color: white;

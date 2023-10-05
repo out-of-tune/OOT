@@ -10,26 +10,13 @@
     <NodeInfo v-if="nodeInfoDisplay" class="nodeInfo"></NodeInfo>
     <QueueDisplay v-if="queueDisplay" class="queueDisplay"></QueueDisplay>
     <div class="iconContainer">
-      <v-icon
-        v-if="!isRendered"
-        size="24px"
-        id="pauseIcon"
-        color="white"
-        icon="mdi-pause"
-      />
-      <v-icon
-        v-if="pendingRequestCount > 0"
-        size="24px"
-        id="loadingIndicator"
-        :color="
-          pendingRequestCount > 100
-            ? 'red'
-            : pendingRequestCount > 10
+      <v-icon v-if="!isRendered" size="24px" id="pauseIcon" color="white" icon="mdi-pause" />
+      <v-icon v-if="pendingRequestCount > 0" size="24px" id="loadingIndicator" :color="pendingRequestCount > 100
+          ? 'red'
+          : pendingRequestCount > 10
             ? 'yellow'
             : 'green'
-        "
-        icon="mdi-timer-sand-empty"
-      />
+        " icon="mdi-timer-sand-empty" />
       <b style="color: red" v-if="pendingRequestCount > 100">{{
         pendingRequestCount
       }}</b>
@@ -42,7 +29,7 @@
 <script>
 import { defineAsyncComponent } from "vue";
 import { mapActions, mapState } from "vuex";
-import NodeInfo from "@/components/popovers/NodeInfo/NodeInfo";
+import NodeInfo from "@/components/popovers/NodeInfo/NodeInfo.vue";
 const QueueDisplay = defineAsyncComponent(() =>
   import("@/components/popovers/QueueDisplay.vue"),
 );
@@ -87,11 +74,11 @@ export default {
       );
       this.isPinned =
         this.$store.state.mainGraph.hoveredNode.id != 0 &&
-        this.$store.state.mainGraph.hoveredNode
+          this.$store.state.mainGraph.hoveredNode
           ? getPinnedState(
-              this.$store.state,
-              this.$store.state.mainGraph.hoveredNode,
-            )
+            this.$store.state,
+            this.$store.state.mainGraph.hoveredNode,
+          )
           : false;
       return this.getConfiguredHoveredNodeData(this.hoveredNode, configuration);
     },
