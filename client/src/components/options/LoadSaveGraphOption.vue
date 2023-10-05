@@ -2,36 +2,17 @@
   <div class="loadSave">
     <div class="storeActions">
       <div id="autocomplete">
-        <v-autocomplete
-          v-model="loadName"
-          label="graphs"
-          :items="graphNames"
-        ></v-autocomplete>
+        <!-- TODO: create autocomplete -->
+        <input type="text" v-model="loadName" label="graphs" :items="graphNames" />
       </div>
-      <input
-        id="loadInput"
-        ref="loadInput"
-        style="display: none"
-        type="file"
-        @change="previewFiles"
-      />
-      <v-icon
-        id="delete"
-        @click="deleteGraph()"
-        class="icon"
-        color="black"
-        icon="mdi-delete-outline"
-      />
-      <button
-        id="load"
-        class="actionButton"
-        @click="loadFromIndexedDb(loadName)"
-      >
+      <input id="loadInput" ref="loadInput" style="display: none" type="file" @change="previewFiles" />
+      <v-icon id="delete" @click="deleteGraph()" class="icon" color="black" icon="mdi-delete-outline" />
+      <button id="load" class="actionButton" @click="loadFromIndexedDb(loadName)">
         Load
       </button>
     </div>
     <div>
-      <v-text-field v-model="saveName" placeholder="graph name"></v-text-field>
+      <input type="text" v-model="saveName" placeholder="graph name" />
       <a id="download" ref="downloadButton" v-show="false"></a>
       <button v-on:click="saveGraph">Download</button>
       <button class="confirmButton" @click="saveGraphToIndexedDb(saveName)">
@@ -124,20 +105,25 @@ export default {
 #load {
   grid-area: storage;
 }
+
 #delete {
   grid-area: delete;
   align-self: center;
   padding-left: 25%;
 }
+
 .confirmButton {
   float: right;
 }
+
 #autocomplete {
   grid-area: input;
 }
+
 #upload {
   margin: 0;
 }
+
 .storeActions {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -145,9 +131,11 @@ export default {
     "input input input delete"
     ". . storage storage";
 }
+
 .actionButton {
   margin: 0 !important;
 }
+
 .icon {
   margin: 0;
   padding: 0;

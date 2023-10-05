@@ -2,45 +2,18 @@
   <div class="loadSave">
     <div class="storeActions">
       <div id="autocomplete">
-        <v-autocomplete
-          v-model="loadName"
-          label="configurations"
-          :items="configurationNames"
-        ></v-autocomplete>
+        <!-- TODO: create autocomplete -->
+        <input type="text" v-model="loadName" label="configurations" :items="configurationNames" />
       </div>
-      <input
-        id="loadInput"
-        ref="loadInput"
-        type="file"
-        @change="previewFiles"
-        style="display: none"
-      />
-      <v-icon
-        id="delete"
-        @click="deleteConfiguration()"
-        class="icon"
-        color="black"
-        icon="mdi-delete-outline"
-      />
-      <button
-        id="load"
-        class="actionButton"
-        @click="loadConfigurationFromIndexedDb(loadName)"
-      >
+      <input id="loadInput" ref="loadInput" type="file" @change="previewFiles" style="display: none" />
+      <v-icon id="delete" @click="deleteConfiguration()" class="icon" color="black" icon="mdi-delete-outline" />
+      <button id="load" class="actionButton" @click="loadConfigurationFromIndexedDb(loadName)">
         Load
       </button>
     </div>
     <div>
-      <v-text-field
-        v-model="saveName"
-        placeholder="configuration name"
-      ></v-text-field>
-      <a
-        id="download"
-        ref="downloadButton"
-        v-show="false"
-        @click="trackDownload"
-      ></a>
+      <input type="text" v-model="saveName" placeholder="configuration name" />
+      <a id="download" ref="downloadButton" v-show="false" @click="trackDownload"></a>
       <button v-on:click="saveConfiguration">Download</button>
       <button class="confirmButton" v-on:click="storeConfig(saveName)">
         Save
@@ -112,7 +85,7 @@ export default {
     loadFromIndexedDb(loadName) {
       this.loadConfigurationFromIndexedDb(loadName);
     },
-    trackDownload() {},
+    trackDownload() { },
     storeConfig(saveName) {
       this.storeConfiguration(saveName);
     },
@@ -140,23 +113,29 @@ export default {
   grid-template-rows: 1fr 1fr 2rem;
   grid-gap: 0.5rem;
 }
+
 .confirmButton {
   float: right;
 }
+
 #load {
   grid-area: storage;
 }
+
 #delete {
   grid-area: delete;
   align-self: center;
   padding-left: 25%;
 }
+
 #autocomplete {
   grid-area: input;
 }
+
 #upload {
   margin: 0;
 }
+
 .storeActions {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 30px;
@@ -164,6 +143,7 @@ export default {
     "input input input delete"
     ". . storage storage";
 }
+
 .actionButton {
   margin: 0 !important;
 }
