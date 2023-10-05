@@ -1,11 +1,11 @@
 <template>
-  <v-snackbar v-model="show" :color="color" :timeout="10000">
+  <div v-if="show">
     {{ message }}
-    <button flat @click="retryExpand" v-if="message === 'expand failed'">
+    <button class="btn" @click="retryExpand" v-if="message === 'expand failed'">
       Retry
     </button>
-    <button flat color="orange" @click="show = false">Close</button>
-  </v-snackbar>
+    <button class="btn" @click="show = false">Close</button>
+  </div>
 </template>
 
 <script>
