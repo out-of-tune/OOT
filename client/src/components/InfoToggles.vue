@@ -38,8 +38,11 @@ export default {
   padding: 0.5rem;
   border-radius: 4px;
   display: flex;
+  height: fit-content;
   gap: 0.5rem;
   width: fit-content;
+  display: flex;
+  align-items: center;
 }
 .toggle {
   background-color: #da6a1d;

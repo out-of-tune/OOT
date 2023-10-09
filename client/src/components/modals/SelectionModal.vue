@@ -5,10 +5,9 @@
       <!-- Modal content -->
       <div class="modal-content">
         <v-icon
-          dark
           @click="changeSelectionModalState"
           class="close"
-          icon="mdi-close"
+          name="md-close"
         />
         <div class="playlist-box">
           <div>

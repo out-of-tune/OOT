@@ -29,6 +29,13 @@ import {
   MdRemove,
   MdMusicnote,
   MdSearch,
+  MdClose,
+  MdPlaylistremove,
+  MdPlaylistadd,
+  MdFlashlighton,
+  RiLoader4Fill,
+  RiLoaderFill,
+  MdDelete,
 } from "oh-vue-icons/icons";
 
 addIcons(
@@ -53,6 +60,13 @@ addIcons(
   MdRemove,
   MdMusicnote,
   MdSearch,
+  MdClose,
+  MdPlaylistremove,
+  MdPlaylistadd,
+  MdFlashlighton,
+  RiLoader4Fill,
+  RiLoaderFill,
+  MdDelete,
 );
 
 const app = createApp(App);

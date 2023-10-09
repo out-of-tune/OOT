@@ -5,7 +5,7 @@
         id="close-icon"
         @click="closeWindow"
         size="1.5rem"
-        icon="mdi-close"
+        name="md-close"
       />
     </div>
     <span id="nodeLabel" v-if="node">{{ node.data.label }}</span>
@@ -44,7 +44,7 @@
               id="playArrow"
               @click="setSong(track, track.album.images)"
               color="white"
-              icon="mdi-play"
+              name="md-playarrow"
             />
             <div id="songName" @click="setSong(track, track.album.images)">
               <span class="innerText" v-if="track.name.length > 25">
@@ -59,8 +59,9 @@
             <button
               id="addToQueueButton"
               @click="addSongToQueue({ ...track, images: node.data.images })"
+              title="add song to queue"
             >
-              <v-icon color="white" icon="mdi-plus" />
+              <v-icon name="md-add" />
             </button>
           </li>
         </ul>
@@ -181,6 +182,7 @@ export default {
       "addToQueue",
       "setNodeInfoVisibility",
       "fitGraphToNodes",
+      "setSuccess",
     ]),
     setSong: function (track, images) {
       this.playSong({ ...track, images });
@@ -197,6 +199,7 @@ export default {
     trackSpotifyVisit() {},
     addSongToQueue(song) {
       this.addToQueue(song);
+      dispatch("setSuccess", "Added song to queue.");
     },
   },
 };

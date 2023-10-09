@@ -1,48 +1,48 @@
 <template>
-    <div class="currentSongInfo">
-      <img :src="coverUrl" class="cover" id="image" />
-      <div class="songInfoText">
-        <p
-          ref="currentSongName"
-          class="currentSongName"
-          @click="findNodesInGraph('song', [currentSong.id])"
-        >
-          <div
-            :class="{
-              innerText: overflows.currentSongName,
-              innerTextShort: !overflows.currentSongName,
-            }"
-          >
-            {{ currentSong.name
-            }}<span id="textExtension" v-if="overflows.currentSongName">{{
-              currentSong.name
-            }}</span>
-          </div>
-        </p>
+  <div class="currentSongInfo">
+    <img :src="coverUrl" class="cover" id="image" />
+    <div class="songInfoText">
+      <div
+        ref="currentSongName"
+        class="currentSongName"
+        @click="findNodesInGraph('song', [currentSong.id])"
+      >
         <div
-          class="currentArtistName"
-          ref="currentArtistName"
-          @click="
-            findNodesInGraph(
-              'artist',
-              currentSong.artists.map((artist) => artist.id),
-            )
-          "
+          :class="{
+            innerText: overflows.currentSongName,
+            innerTextShort: !overflows.currentSongName,
+          }"
         >
-          <div
-            :class="{
-              innerText: overflows.currentArtistName,
-              innerTextShort: !overflows.currentArtistName,
-            }"
-          >
-            {{ getArtists()
-            }}<span id="textExtension" v-if="overflows.currentArtistName">{{
-              getArtists()
-            }}</span>
-          </div>
+          {{ currentSong.name
+          }}<span id="textExtension" v-if="overflows.currentSongName">{{
+            currentSong.name
+          }}</span>
+        </div>
+      </div>
+      <div
+        class="currentArtistName"
+        ref="currentArtistName"
+        @click="
+          findNodesInGraph(
+            'artist',
+            currentSong.artists.map((artist) => artist.id),
+          )
+        "
+      >
+        <div
+          :class="{
+            innerText: overflows.currentArtistName,
+            innerTextShort: !overflows.currentArtistName,
+          }"
+        >
+          {{ getArtists()
+          }}<span id="textExtension" v-if="overflows.currentArtistName">{{
+            getArtists()
+          }}</span>
         </div>
       </div>
     </div>
+  </div>
 </template>
 
 <script>
@@ -51,7 +51,7 @@ import { searchGraph } from "@/assets/js/graphHelper.js";
 import { mapActions } from "vuex";
 
 export default {
-  data: ()=> ({
+  data: () => ({
     overflows: {
       currentSongName: false,
       currentArtistName: false,
@@ -61,7 +61,7 @@ export default {
     currentSong: {
       get() {
         return this.$store.state.music_player.currentSong;
-      }
+      },
     },
     coverUrl() {
       if (this.currentSong.images.length > 0)
@@ -70,9 +70,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions([
-      "fitGraphToNodes",
-    ]),
+    ...mapActions(["fitGraphToNodes"]),
     getArtists: function () {
       return this.currentSong.artists
         ? this.currentSong.artists.map((artist) => artist.name).join(", ")
@@ -117,10 +115,9 @@ export default {
       });
     },
   },
-}
+};
 </script>
 <style scoped>
-
 @media screen and (min-width: 600px) {
   .currentSongInfo {
     width: 200px;
@@ -158,7 +155,6 @@ export default {
 .currentArtistName:hover .innerText {
   animation: marquee 6s linear infinite;
 }
-
 
 .cover {
   height: 3rem;

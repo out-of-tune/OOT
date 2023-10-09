@@ -2,7 +2,11 @@
   <div>
     <div v-if="open" id="feedbackModal" class="modal">
       <div class="card">
-        <v-icon @click="changeFeedbackModalState" class="close" icon="mdi-close" />
+        <v-icon
+          @click="changeFeedbackModalState"
+          class="close"
+          name="md-close"
+        />
         <!-- TODO: add validation -->
         <form class="form">
           <label for="message">Mail:</label>

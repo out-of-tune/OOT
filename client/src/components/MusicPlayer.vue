@@ -128,8 +128,7 @@ export default {
   background-color: rgb(37, 37, 37);
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
   border-radius: 5px;
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
+  padding: 0.5rem;
   display: flex;
   gap: 1rem;
   align-items: center;

@@ -4,26 +4,29 @@
       <span id="label">queue</span>
       <div id="queueIcons">
         <v-icon
-          id="delete-icon"
+          id="play-icon"
           v-if="loginState"
           @click="play"
           size="1.5rem"
-          color="white"
-          icon="mdi-playlist-play"
+          color="green"
+          title="play this queue on Spotify"
+          name="md-playlistplay"
         />
         <v-icon
           id="delete-icon"
           @click="clearQueue"
           size="1.5rem"
           color="white"
-          icon="mdi-delete"
+          name="md-playlistremove"
+          title="clear queue"
         />
         <v-icon
           id="close-icon"
           @click="closeWindow"
           size="1.5rem"
           color="white"
-          icon="mdi-close"
+          title="close window"
+          name="md-close"
         />
       </div>
       <div id="spacer"></div>
@@ -33,14 +36,14 @@
       <template #item="{ element, index }">
         <li class="song" @click="playSong(index)">
           <button @click="removeFromQueue(index)">
-            <v-icon color="white" icon="mdi-minus" />
+            <v-icon color="white" name="md-remove" />
           </button>
           <div :class="{ bold: index === queueIndex }">{{ element.name }}</div>
           <button
             v-if="loginState"
             @click="addSongToCurrentPlaylist(element.uri)"
           >
-            <v-icon color="white" icon="mdi-playlist-plus" />
+            <v-icon color="green" name="md-playlistadd" />
           </button>
         </li>
       </template>

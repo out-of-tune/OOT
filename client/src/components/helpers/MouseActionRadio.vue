@@ -1,20 +1,44 @@
 <template>
   <form action="" id="MouseActionRadio">
-    <label id="expand-button" class="container tooltip" for="expand">
-      <input type="radio" id="expand" v-model="activeMode" value="expand" v-on:change="setActiveMode(activeMode)" />
-      <v-icon class="icon" color="white" name="md-add" />
-      <span class="tooltiptext">EXPAND</span>
-    </label>
-    <label id="collapse-button" class="container tooltip" for="collapse">
-      <input type="radio" id="collapse" v-model="activeMode" value="collapse" v-on:change="setActiveMode(activeMode)" />
-      <v-icon class="icon" color="white" name="md-remove" />
-      <span class="tooltiptext">COLLAPSE</span>
-    </label>
-    <label id="explore-button" class="container tooltip" for="explore">
-      <input type="radio" id="explore" v-model="activeMode" value="explore" v-on:change="setActiveMode(activeMode)" />
-      <v-icon class="icon" color="white" name="md-musicnote" />
-      <span class="tooltiptext">EXPLORE</span>
-    </label>
+    <button class="icon-btn clickthrough tooltip">
+      <label id="expand-button" for="expand">
+        <input
+          type="radio"
+          id="expand"
+          v-model="activeMode"
+          value="expand"
+          v-on:change="setActiveMode(activeMode)"
+        />
+        <v-icon class="icon" color="white" name="md-add" />
+        <span class="tooltiptext">EXPAND</span>
+      </label>
+    </button>
+    <button class="icon-btn clickthrough tooltip">
+      <label id="collapse-button" for="collapse">
+        <input
+          type="radio"
+          id="collapse"
+          v-model="activeMode"
+          value="collapse"
+          v-on:change="setActiveMode(activeMode)"
+        />
+        <v-icon class="icon" color="white" name="md-remove" />
+        <span class="tooltiptext">COLLAPSE</span>
+      </label>
+    </button>
+    <button class="icon-btn clickthrough tooltip">
+      <label id="explore-button" for="explore">
+        <input
+          type="radio"
+          id="explore"
+          v-model="activeMode"
+          value="explore"
+          v-on:change="setActiveMode(activeMode)"
+        />
+        <v-icon class="icon" color="white" name="md-musicnote" />
+        <span class="tooltiptext">EXPLORE</span>
+      </label>
+    </button>
   </form>
 </template>
 <script>
@@ -31,39 +55,14 @@ export default {
 };
 </script>
 <style scoped>
-.tooltip {
-  position: relative;
-  display: inline-block;
-}
-
-.tooltip:hover .tooltiptext {
-  visibility: visible;
-}
-
-/* Tooltip text */
-.tooltip .tooltiptext {
-  visibility: hidden;
-  color: #fff;
-  text-align: center;
-  padding: 0.5rem;
-  background-color: #0d676d;
-
-  /* Position the tooltip text - see examples below! */
-  position: absolute;
-  z-index: 1;
-  top: -1px;
-  right: 110%;
-}
-
 #MouseActionRadio {
-  display: inline;
-  /* grid-template-columns: 1fr; */
-  /* margin-top: 1rem; */
+  display: flex;
+  gap: 0.5rem;
+  flex-direction: column;
 }
 
 [type="radio"] {
   position: absolute;
-  top: 7px;
   opacity: 0;
   width: 0;
   height: 0;
@@ -71,27 +70,20 @@ export default {
   margin: 0;
 }
 
-.container {
-  padding: 0;
-  height: 30px;
-  width: 30px;
-  display: flex;
-  align-content: center;
-  align-items: center;
+[type="radio"]:checked + .icon {
+  background: #2d9cdb;
 }
 
-[type="radio"]:checked+.icon {
-  background-color: #1dcddaff;
+[type="radio"]:hover + .icon {
+  background: linear-gradient(180deg, #2d9cdb 0%, #56ccf2 100%);
 }
 
-[type="radio"]:hover+.icon {
-  background-color: #1dcdda66;
+.clickthrough {
+  pointer-events: none;
 }
 
-[type="radio"]+.icon {
-  background-color: #da6a1dff;
+.clickthrough label {
+  pointer-events: auto;
   cursor: pointer;
-  width: 30px;
-  height: 30px;
 }
 </style>

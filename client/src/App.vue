@@ -2,7 +2,9 @@
   <div id="app">
     <snackbar />
     <div class="topbar">
-      <Searchbar v-if="['Graph', 'Settings'].indexOf($route.name) > -1"></Searchbar>
+      <Searchbar
+        v-if="['Graph', 'Settings'].indexOf($route.name) > -1"
+      ></Searchbar>
       <div v-if="loggedIn">
         {{ $store.state.playlists.currentPlaylist.name }}
       </div>
@@ -14,7 +16,12 @@
       <div v-if="loggedIn" class="username">
         <b>{{ $store.state.user.me.display_name }}</b>
       </div>
-      <button v-if="loggedIn" id="logout" color="#ffffff" v-on:click="logoutUser">
+      <button
+        v-if="loggedIn"
+        id="logout"
+        color="#ffffff"
+        v-on:click="logoutUser"
+      >
         logout
       </button>
     </div>
@@ -25,9 +32,9 @@
     <feedbackModal></feedbackModal>
     <shareModal></shareModal>
     <IntroTour></IntroTour>
-    <div class="bottom">
+    <div v-if="['Graph'].indexOf($route.name) > -1" class="bottom">
       <InfoToggles></InfoToggles>
-      <MusicPlayer class="musicPlayer" v-if="['Graph'].indexOf($route.name) > -1"></MusicPlayer>
+      <MusicPlayer class="musicPlayer"></MusicPlayer>
     </div>
 
     <Toolbar v-if="['Graph'].indexOf($route.name) > -1"></Toolbar>
@@ -48,7 +55,9 @@ const PlaylistChooser = defineAsyncComponent(() =>
   import("@/components/modals/PlaylistChooser.vue"),
 );
 
-const snackbar = defineAsyncComponent(() => import("./components/Snackbar.vue"));
+const snackbar = defineAsyncComponent(() =>
+  import("./components/Snackbar.vue"),
+);
 import Searchbar from "./components/Searchbar.vue";
 const selectionModal = defineAsyncComponent(() =>
   import("@/components/modals/SelectionModal.vue"),
@@ -160,6 +169,7 @@ body {
   display: flex;
   width: 100%;
   justify-content: center;
+  align-items: center;
   gap: 1rem;
 }
 
@@ -189,7 +199,6 @@ a {
   z-index: 2;
   display: flex;
   align-items: center;
-
 }
 
 .btn {
@@ -236,8 +245,8 @@ a {
   border: 1px solid #2d9cdb;
   border-radius: 5px;
   padding: 3px;
-  width: 2rem;
-  height: 2rem;
+  width: 30px;
+  height: 30px;
   cursor: pointer;
   color: white;
 }
