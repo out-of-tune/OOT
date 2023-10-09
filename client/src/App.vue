@@ -13,15 +13,10 @@
       <button class="btn" v-if="!loggedIn" id="login" v-on:click="loginUser">
         login
       </button>
-      <div v-if="loggedIn" class="username">
+      <div v-if="loggedIn">
         <b>{{ $store.state.user.me.display_name }}</b>
       </div>
-      <button
-        v-if="loggedIn"
-        id="logout"
-        color="#ffffff"
-        v-on:click="logoutUser"
-      >
+      <button v-if="loggedIn" id="logout" v-on:click="logoutUser" class="btn">
         logout
       </button>
     </div>
@@ -203,6 +198,8 @@ a {
   z-index: 2;
   display: flex;
   align-items: center;
+  color: white;
+  gap: 1rem;
 }
 
 .btn {
