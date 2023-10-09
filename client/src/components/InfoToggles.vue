@@ -44,20 +44,10 @@ export default {
   display: flex;
   align-items: center;
 }
-.toggle {
-  background-color: #da6a1d;
-  color: white;
-}
-.toggle:hover {
-  background-color: #1dcdda66;
-}
 .toggle.activated:hover {
-  background-color: #1dcdda66;
+  background-color: #2d9cdb;
 }
 .toggle.activated {
-  background-color: #1dcddaff;
-}
-#queueButton.activated {
-  background-color: #1dcddaff;
+  background-color: #2d9cdb;
 }
 </style>

@@ -35,7 +35,7 @@
     <draggable :list="queue" @change="onMove" v-if="queue.length > 0">
       <template #item="{ element, index }">
         <li class="song" @click="playSong(index)">
-          <button @click="removeFromQueue(index)">
+          <button class="icon-btn" @click="removeFromQueue(index)">
             <v-icon color="white" name="md-remove" />
           </button>
           <div :class="{ bold: index === queueIndex }">{{ element.name }}</div>
@@ -109,12 +109,14 @@ export default {
 
 <style scoped>
 li {
-  display: grid;
-  grid-template-columns: 30px 1fr 30px;
+  display: flex;
   margin-bottom: 0.5rem;
 }
 .song {
   cursor: pointer;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
 }
 .bold {
   font-weight: bold;

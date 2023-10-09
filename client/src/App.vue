@@ -171,6 +171,11 @@ body {
   justify-content: center;
   align-items: center;
   gap: 1rem;
+  pointer-events: none;
+}
+
+.bottom * {
+  pointer-events: auto;
 }
 
 a {
@@ -180,11 +185,10 @@ a {
 
 .topbar {
   position: fixed;
-  background-color: #252525;
   gap: 1rem;
   color: white;
   display: flex;
-  padding: 1rem;
+  padding: 0.5rem;
   z-index: 2;
 }
 
@@ -193,8 +197,8 @@ a {
   padding: 0.5rem;
   border-radius: 4px;
   position: fixed;
-  top: 1rem;
-  right: 1rem;
+  top: 0.5rem;
+  right: 0.5rem;
   height: 30px;
   z-index: 2;
   display: flex;
@@ -258,5 +262,21 @@ a {
 .icon-btn:hover {
   background: linear-gradient(180deg, #2d9cdb 0%, #56ccf2 100%);
   color: black;
+}
+
+select {
+  background: #404040;
+  color: white;
+  border: 1px solid #f2994a;
+  border-radius: 5px;
+  padding: 0.25rem;
+}
+
+input {
+  background: #404040;
+  color: white;
+  border: 1px solid #f2994a;
+  border-radius: 5px;
+  padding: 0.25rem;
 }
 </style>

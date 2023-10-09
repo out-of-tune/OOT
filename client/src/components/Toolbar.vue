@@ -115,11 +115,9 @@ export default {
 #toolbar {
   margin-top: 10%;
   margin-right: 0.5rem;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
   width: 30px;
   right: 0px;
-  z-index: 1;
+  z-index: 3;
   background-color: #302c29;
   position: fixed;
   color: white;
@@ -127,6 +125,7 @@ export default {
   gap: 0.5rem;
   flex-direction: column;
   border-radius: 5px;
+  padding: 0.25rem;
 }
 
 .tooltip {
@@ -144,7 +143,6 @@ export default {
   color: #fff;
   text-align: center;
   padding: 0.5rem;
-  background-color: #0d676d;
 
   /* Position the tooltip text - see examples below! */
   position: absolute;

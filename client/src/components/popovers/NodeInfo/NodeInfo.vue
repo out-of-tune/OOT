@@ -46,7 +46,7 @@
               color="white"
               name="md-playarrow"
             />
-            <div id="songName" @click="setSong(track, track.album.images)">
+            <div class="songName" @click="setSong(track, track.album.images)">
               <span class="innerText" v-if="track.name.length > 25">
                 {{ track.name }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{
                   track.name
@@ -57,7 +57,7 @@
               </span>
             </div>
             <button
-              id="addToQueueButton"
+              class="icon-btn"
               @click="addSongToQueue({ ...track, images: node.data.images })"
               title="add song to queue"
             >
@@ -116,7 +116,7 @@
               </span>
             </div>
             <button
-              id="addToQueueButton"
+              class="icon-btn"
               @click="addSongToQueue({ ...track, images: node.data.images })"
             >
               <v-icon name="md-add" />
@@ -263,20 +263,26 @@ li {
 .nodeName:hover .innerText {
   color: #da6a1d;
 }
-
-#songName .innerText {
+.songName {
+  grid-area: songInfo;
+  width: 12rem;
+  overflow: hidden;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.songName .innerText {
   transition: 0.5s;
   display: inline-block;
 }
-#songName:hover .innerText {
+.songName:hover .innerText {
   color: #1dcddaff;
   animation: marquee 8s linear infinite;
 }
-#songName .innerTextShort {
+.songName .innerTextShort {
   transition: 0.5s;
   display: inline-block;
 }
-#songName:hover .innerTextShort {
+.songName:hover .innerTextShort {
   color: #1dcddaff;
 }
 a {
@@ -288,13 +294,6 @@ a {
 }
 #addToQueueButton {
   grid-area: addToQueue;
-}
-#songName {
-  grid-area: songInfo;
-  width: 12rem;
-  overflow: hidden;
-  white-space: nowrap;
-  cursor: pointer;
 }
 .noPreview {
   color: grey;

@@ -1,35 +1,59 @@
 <template>
   <div id="searchContainer">
     <div v-if="advanced" id="advanced">
-      <ul ref="autocomplete" id="autocomplete" v-if="getMatchingData().length > 0 && inputIsFocused">
-        <li v-for="data in getMatchingData()" @mousedown="addOnClick(data)" v-bind:key="data">
+      <ul
+        ref="autocomplete"
+        id="autocomplete"
+        v-if="getMatchingData().length > 0 && inputIsFocused"
+      >
+        <li
+          v-for="data in getMatchingData()"
+          @mousedown="addOnClick(data)"
+          v-bind:key="data"
+        >
           {{ data }}
         </li>
       </ul>
       <div class="input" id="advancedInput">
         <div class="search" @focusout="changeVisibility" @keydown="selectEvent">
-          <v-icon class="searchIcon" slot="append" @click="startAdvancedSearch()" name="md-search" />
-          <input class="searchfield" type="text" @focus="inputIsFocused = true"
-            v-bind:class="{ validString: valid, invalidString: !valid }" ref="searchInput" v-model="searchString"
-            @input="addCharacterInput(searchString)" />
+          <v-icon
+            class="searchIcon"
+            slot="append"
+            @click="startAdvancedSearch()"
+            name="md-search"
+          />
+          <input
+            class="searchfield"
+            type="text"
+            @focus="inputIsFocused = true"
+            v-bind:class="{ validString: valid, invalidString: !valid }"
+            ref="searchInput"
+            v-model="searchString"
+            @input="addCharacterInput(searchString)"
+          />
         </div>
       </div>
     </div>
     <div v-else id="simple">
       <div class="input" id="simpleInput" @keydown="simpleSearchEvents">
         <div class="search">
-          <v-icon class="searchIcon" slot="append" @click="
-            startSimpleSearch({
-              nodeType: selectedNode,
-              searchString: simpleSearchString,
-            })
-            " name="md-search" />
+          <v-icon
+            class="searchIcon"
+            slot="append"
+            @click="
+              startSimpleSearch({
+                nodeType: selectedNode,
+                searchString: simpleSearchString,
+              })
+            "
+            name="md-search"
+          />
           <input class="searchfield" type="text" v-model="simpleSearchString" />
         </div>
       </div>
       <NodetypeSelect v-model="selectedNode" label="nodeType"></NodetypeSelect>
     </div>
-    <select @change="changeSearchMode" class="select">
+    <select @change="changeSearchMode">
       <option>Search Spotify</option>
       <option>Search Graph</option>
     </select>
@@ -241,6 +265,9 @@ export default {
   display: flex;
   gap: 1rem;
   align-items: center;
+  border-radius: 4px;
+  background-color: #252525;
+  padding: 0.5rem;
 }
 
 #advanced {
