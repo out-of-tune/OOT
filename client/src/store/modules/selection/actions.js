@@ -6,7 +6,7 @@ import {
 } from "@/assets/js/graphHelper";
 import { handleTokenError } from "@/assets/js/TokenHelper.js";
 import SpotifyService from "@/store/services/SpotifyService";
-import fp from "lodash/fp"
+import fp from "lodash/fp";
 import Flatbush from "flatbush";
 import _ from "lodash";
 
@@ -296,6 +296,16 @@ const addSelectedSongsToQueue = async ({
   );
 };
 
+const addSelectedSongsToPlaylist = async ({ state, dispatch }) => {
+  const selectedSongNodes = state.selectedNodes.filter(
+    (node) => node.data.label === "song",
+  );
+  dispatch(
+    "addSongsToPlaylist",
+    selectedSongNodes.map((node) => node.data),
+  );
+};
+
 const pinNodes = ({ commit, dispatch }, nodes) => {
   nodes.forEach((node) => {
     commit("PIN_NODE", node);
@@ -366,5 +376,6 @@ export const actions = {
   unpinNodes,
   invertSelection,
   moveSelection,
+  addSelectedSongsToPlaylist,
 };
 export default actions;

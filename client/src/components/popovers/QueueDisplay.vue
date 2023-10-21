@@ -48,7 +48,7 @@
           <button
             v-if="loginState"
             class="btn add-to-playlist"
-            @click="addSongToCurrentPlaylist(element.uri)"
+            @click="addSongToCurrentPlaylist(index)"
           >
             <v-icon name="md-playlistadd" />
           </button>
@@ -75,6 +75,9 @@ export default {
       "setQueue",
       "playOnSpotify",
     ]),
+    ...mapState({
+      queue: (state) => state.queue,
+    }),
     closeWindow: function () {
       this.setQueueVisibility(false);
     },
@@ -93,8 +96,10 @@ export default {
     playSong(index) {
       this.playAtIndexInQueue(index);
     },
-    addSongToCurrentPlaylist(uri) {
-      this.addSongToPlaylist(uri);
+    addSongToCurrentPlaylist(index) {
+      const song = this.queue[index];
+      console.log(song);
+      this.addSongToPlaylist(song);
     },
   },
   computed: {

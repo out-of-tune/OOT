@@ -36,22 +36,32 @@ const setCurrentPlaylist = ({ commit }, playlist) => {
   commit("SET_CURRENT_PLAYLIST", playlist);
 };
 
-const addSongToPlaylist = async ({ dispatch }, songUri) => {
-  dispatch("addSongsToPlaylist", [songUri]);
+const addSongToPlaylist = async ({ dispatch }, song) => {
+  dispatch("addSongsToPlaylist", [song]);
 };
 
-const addSongsToPlaylist = async ({ dispatch, rootState, state }, songUris) => {
+const printSongList = (songs) => {
+  console.log(songs);
+  const str = songs.reduce((previous, current, index) => {
+    if (index === songs.length - 1) {
+      return previous + "'" + current.name + "'";
+    }
+    return previous + "''" + current.name + "' , ";
+  }, "");
+  return str;
+};
+
+const addSongsToPlaylist = async ({ dispatch, rootState, state }, songs) => {
   const token = rootState.authentication.accessToken;
   const playlistId = state.currentPlaylist.id;
+  console.log(songs);
+  const songUris = songs.map((song) => song.uri);
   if (token) {
     if (playlistId) {
       await SpotifyService.addSongsToPlaylist(token, playlistId, songUris);
       dispatch(
-        "setMessage",
-        "Added " +
-          (songUris.length == 1 ? "song" : songUris.length + " songs") +
-          " to " +
-          state.currentPlaylist.name,
+        "setSuccess",
+        "Added " + printSongList(songs) + " to " + state.currentPlaylist.name,
       );
     } else {
       dispatch("setError", new Error("no playlist is chosen"));

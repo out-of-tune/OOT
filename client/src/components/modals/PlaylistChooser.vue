@@ -60,9 +60,11 @@ export default {
       "login",
     ]),
     async addToPlaylist() {
-      const songs = this.selectedNodes
-        .filter((node) => node.data.label === "song")
-        .map((node) => node.data.uri);
+      const songs = this.selectedNodes.filter(
+        (node) => node.data.label === "song",
+      );
+      console.log(this.selectedNodes);
+      console.log(songs);
       await this.addSongsToPlaylist(songs);
       this.changePlaylistChooserState(false);
     },

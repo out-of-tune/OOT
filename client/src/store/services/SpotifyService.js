@@ -124,9 +124,9 @@ class SpotifyService {
     return this.getFromAPI(`tracks/`, token, { ids: sidsString });
   }
 
-  addSongToPlaylist(token, playlistId, songUri) {
+  addSongToPlaylist(token, playlistId, song) {
     return this.sendToAPI(`playlists/${playlistId}/tracks`, token, {
-      uris: [songUri],
+      uris: [song.uri],
     });
   }
   async addSongsToPlaylist(token, playlistId, songUris) {

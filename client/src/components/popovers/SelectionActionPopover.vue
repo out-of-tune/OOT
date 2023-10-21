@@ -21,7 +21,7 @@
                 <button class="btn" @click="invert">Invert</button>
                 <button class="btn" @click="sortNodes">sort</button>
                 <button class="btn" @click="addToQueue">Add to queue</button>
-                <button class="btn" @click="openPlaylistChooser">
+                <button class="btn" @click="addSelectedSongsToPlaylist">
                   Add to playlist
                 </button>
               </div>
@@ -58,6 +58,7 @@ export default defineComponent({
       "unpinNodes",
       "invertSelection",
       "applyNodeCoordinateSystemLine",
+      "addSelectedSongsToPlaylist",
     ]),
     collapse() {
       this.collapseSelectedNodes();
@@ -86,6 +87,9 @@ export default defineComponent({
     },
     addToQueue() {
       this.addSelectedSongsToQueue();
+    },
+    addToPlaylist() {
+      this.addSelectedSongsToPlaylist();
     },
     showItems() {
       this.changeSelectionModalState();
