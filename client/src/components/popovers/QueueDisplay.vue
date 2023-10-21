@@ -34,16 +34,23 @@
 
     <draggable :list="queue" @change="onMove" v-if="queue.length > 0">
       <template #item="{ element, index }">
-        <li class="song" @click="playSong(index)">
+        <li
+          class="song"
+          :class="{ playing: index === queueIndex }"
+          @click="playSong(index)"
+        >
           <button class="icon-btn" @click="removeFromQueue(index)">
             <v-icon color="white" name="md-remove" />
           </button>
-          <div :class="{ bold: index === queueIndex }">{{ element.name }}</div>
+          <div>
+            {{ element.name }}
+          </div>
           <button
             v-if="loginState"
+            class="btn add-to-playlist"
             @click="addSongToCurrentPlaylist(element.uri)"
           >
-            <v-icon color="green" name="md-playlistadd" />
+            <v-icon name="md-playlistadd" />
           </button>
         </li>
       </template>
@@ -111,6 +118,18 @@ export default {
 li {
   display: flex;
   margin-bottom: 0.5rem;
+  justify-content: space-between;
+  padding: 0.3rem;
+  padding-left: 0.5rem;
+  padding-left: 0.5rem;
+  border-radius: 5px;
+}
+li:hover {
+  outline: 1px solid #2d9cdb;
+  color: white;
+}
+.playing {
+  background-color: #2d9cdb69;
 }
 .song {
   cursor: pointer;
@@ -157,5 +176,12 @@ li {
 #queueIcons {
   float: right;
   justify-self: center;
+}
+.add-to-playlist {
+  width: 2rem;
+  color: #baffae;
+}
+.add-to-playlist:hover {
+  color: white;
 }
 </style>
