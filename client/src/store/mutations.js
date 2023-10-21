@@ -313,6 +313,10 @@ const SET_NODEINFO_VISIBILITY = (state, visible) => {
   state.visibleItems.nodeInfo = visible;
 };
 
+const SET_ADD_TO_QUEUE_NOTIFICATION_VISIBILITY = (state, visible) => {
+  state.visibleItems.addToQueueNotification = visible;
+};
+
 export const mutations = {
   SET_GRAPHCONTAINER,
   SET_CURRENTNODE,
@@ -359,5 +363,6 @@ export const mutations = {
   RESIZE_GRAPH,
   SET_QUEUE_VISIBILITY,
   SET_NODEINFO_VISIBILITY,
+  SET_ADD_TO_QUEUE_NOTIFICATION_VISIBILITY,
 };
 export default mutations;

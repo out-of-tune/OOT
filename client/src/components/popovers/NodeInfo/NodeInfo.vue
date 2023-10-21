@@ -199,7 +199,6 @@ export default {
     trackSpotifyVisit() {},
     addSongToQueue(song) {
       this.addToQueue(song);
-      dispatch("setSuccess", "Added song to queue.");
     },
   },
 };

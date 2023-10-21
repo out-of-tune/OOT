@@ -12,6 +12,9 @@
       :class="{ activated: queueDisplay }"
       @click="setQueueVisibility(!queueDisplay)"
     >
+      <label class="plus-one" :class="{ hidden: !addToQueueNotification }"
+        >+1</label
+      >
       <v-icon name="md-queuemusic" />
     </button>
   </div>
@@ -21,12 +24,18 @@ import { mapState, mapActions } from "vuex";
 
 export default {
   methods: {
-    ...mapActions(["setQueueVisibility", "setNodeInfoVisibility"]),
+    ...mapActions([
+      "setQueueVisibility",
+      "setNodeInfoVisibility",
+      "setAddToQueueNotifaction",
+    ]),
   },
   computed: {
     ...mapState({
       nodeInfoDisplay: (state) => state.visibleItems.nodeInfo,
       queueDisplay: (state) => state.visibleItems.queueDisplay,
+      addToQueueNotification: (state) =>
+        state.visibleItems.addToQueueNotification,
     }),
   },
 };
@@ -49,5 +58,15 @@ export default {
 }
 .toggle.activated {
   background-color: #2d9cdb;
+}
+.plus-one {
+  background-color: #2d9cdb;
+  padding: 0.2rem;
+  position: absolute;
+  top: -1rem;
+  border-radius: 4px;
+}
+.hidden {
+  visibility: hidden;
 }
 </style>
