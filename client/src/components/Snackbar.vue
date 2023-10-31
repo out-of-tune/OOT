@@ -5,6 +5,7 @@
       Retry
     </button>
     <button class="btn snackbar-close" @click="show = false">Close</button>
+    <div class="timer"></div>
   </div>
 </template>
 
@@ -39,6 +40,9 @@ export default {
           this.message = this.$store.state.snackbar.message;
 
           this.setMessage("");
+          setTimeout(() => {
+            this.show = false;
+          }, 5000);
         }
       },
     );
@@ -72,5 +76,26 @@ export default {
 }
 .snackbar-close {
   align-self: end;
+}
+
+/* The animation code */
+@keyframes shrink {
+  to {
+    width: 0;
+  }
+}
+.timer {
+  background-color: #2d9cdb;
+  border-radius: 2px;
+  height: 2px;
+  width: 60%;
+  animation-name: shrink;
+  animation-duration: 5s;
+  position: absolute;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  margin: auto;
 }
 </style>
