@@ -11,6 +11,7 @@
           color="green"
           title="play this queue on Spotify"
           name="md-playlistplay"
+          class="clickable"
         />
         <v-icon
           id="delete-icon"
@@ -19,6 +20,7 @@
           color="white"
           name="md-playlistremove"
           title="clear queue"
+          class="clickable"
         />
         <v-icon
           id="close-icon"
@@ -27,6 +29,7 @@
           color="white"
           title="close window"
           name="md-close"
+          class="clickable"
         />
       </div>
       <div id="spacer"></div>
@@ -181,6 +184,7 @@ li:hover {
 #queueIcons {
   float: right;
   justify-self: center;
+  gap: 1rem;
 }
 .add-to-playlist {
   width: 2rem;
@@ -188,5 +192,11 @@ li:hover {
 }
 .add-to-playlist:hover {
   color: white;
+}
+.clickable {
+  cursor: pointer;
+}
+.clickable:hover {
+  color: #2d9cdb;
 }
 </style>
