@@ -105,7 +105,8 @@ const setAddToQueueNotifaction = ({ commit }, visible) => {
   commit("SET_ADD_TO_QUEUE_NOTIFICATION_VISIBILITY", visible);
 };
 
-const playOnSpotify = ({ rootState }, uris) => {
+const playOnSpotify = ({ rootState, dispatch }, uris) => {
+  dispatch("setMessage", "Trying to play queue on Spotify");
   if (rootState.authentication.loginState) {
     SpotifyService.play(rootState.authentication.accessToken, uris);
   }
