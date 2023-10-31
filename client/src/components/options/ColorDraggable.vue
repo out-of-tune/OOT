@@ -8,9 +8,7 @@
             <div
               class="color"
               :style="{ background: formatColor(element.color) }"
-            >
-              {{ element.color }}
-            </div>
+            ></div>
             <div class="text">{{ getRuleString(element) }}</div>
             <div class="close" @click="removeAt(index)">x</div>
           </li>
@@ -79,11 +77,6 @@ export default {
   margin-top: 35px;
 }
 
-.ghost {
-  opacity: 0.5;
-  background: #c8ebfb;
-}
-
 .item {
   list-style-type: none;
   display: grid;
@@ -114,9 +107,5 @@ export default {
 
 .close:hover {
   background-color: grey;
-}
-
-h3 {
-  color: white;
 }
 </style>

@@ -2,8 +2,6 @@
   <div id="settings">
     <div class="nav-buttons">
       <button
-        small
-        dark
         color="#da6a1d"
         class="btn"
         id="open"
@@ -12,8 +10,6 @@
         Node Configuration
       </button>
       <button
-        small
-        dark
         color="#0d676d"
         class="btn"
         id="configOpen"
@@ -22,7 +18,6 @@
         Edge Configuration
       </button>
       <button
-        small
         color="#1dcdda"
         class="btn"
         id="open"
@@ -88,7 +83,7 @@
       </div>
       <!-- <div class="settingsCard">
         <div class="settingsCardTitle">Performance Mode</div>
-        <v-switch color="#da6a1d" class="settingsSwitch" v-model="showTour" dark></v-switch>
+        <v-switch color="#da6a1d" class="settingsSwitch" v-model="showTour"></v-switch>
         <div class="settingsCardText">Disables labels on zoom, highlighting of edges in selection, </div>
       </div> -->
     </div>

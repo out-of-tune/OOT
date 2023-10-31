@@ -1,32 +1,20 @@
 <template>
   <div>
-    <!-- The Modal -->
     <div v-if="open" id="feedbackModal" class="modal">
-      <!-- Modal content -->
       <div class="card">
         <v-icon
           @click="changeFeedbackModalState"
           class="close"
-          icon="mdi-close"
+          name="md-close"
         />
-        <v-form class="form" action="" v-model="valid">
+        <!-- TODO: add validation -->
+        <form class="form">
           <label for="message">Mail:</label>
-          <v-text-field
-            dark
-            id="mail"
-            v-model="mail"
-            :rules="emailRules"
-            color="#da6a1dff"
-          ></v-text-field>
+          <input type="text" id="mail" v-model="mail" :rules="emailRules" />
           <label for="message">Feedback:</label>
-          <v-textarea
-            dark
-            id="message"
-            v-model="feedback"
-            color="#da6a1dff"
-          ></v-textarea>
-          <button dark color="#da6a1dff" @click="sendBetaFeedback">SEND</button>
-        </v-form>
+          <input type="text" id="message" v-model="feedback" />
+          <button class="btn" @click="sendBetaFeedback">SEND</button>
+        </form>
       </div>
     </div>
   </div>
@@ -71,19 +59,27 @@ export default {
 <style scoped>
 /* The Modal (background) */
 .modal {
-  display: block; /* Hidden by default */
-  position: fixed; /* Stay in place */
-  z-index: 100; /* Sit on top */
-  padding-top: 10%; /* Location of the box */
+  display: block;
+  /* Hidden by default */
+  position: fixed;
+  /* Stay in place */
+  z-index: 100;
+  /* Sit on top */
+  padding-top: 10%;
+  /* Location of the box */
   padding-left: 10%;
   padding-right: 10%;
   left: 0;
   top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
+  width: 100%;
+  /* Full width */
+  height: 100%;
+  /* Full height */
   overflow: auto;
-  background-color: rgb(0, 0, 0); /* Fallback color */
-  background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+  background-color: rgb(0, 0, 0);
+  /* Fallback color */
+  background-color: rgba(0, 0, 0, 0.4);
+  /* Black w/ opacity */
 }
 
 .card {
@@ -99,6 +95,7 @@ export default {
   margin: 1rem;
   overflow-y: auto;
 }
+
 .close {
   grid-area: actions;
   position: sticky;

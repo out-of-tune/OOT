@@ -5,10 +5,9 @@
       <!-- Modal content -->
       <div class="card">
         <v-icon
-          dark
           @click="changePlaylistLoaderState(false)"
           class="close"
-          icon="mdi-close"
+          name="md-close"
         />
         <div class="playlist-box" v-if="loggedIn">
           <div>
@@ -58,7 +57,6 @@
               class="btn"
               v-if="!loggedIn"
               id="login"
-              outline
               color="#ffffff"
               v-on:click="loginUser"
             >
@@ -136,16 +134,24 @@ export default {
   display: block; /* Hidden by default */
   position: fixed; /* Stay in place */
   z-index: 100; /* Sit on top */
-  padding-top: 10%; /* Location of the box */
-  padding-left: 10%;
-  padding-right: 10%;
   left: 0;
   top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
   overflow: auto;
   background-color: rgb(0, 0, 0); /* Fallback color */
   background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+
+  width: 100vw; /* Full width */
+  height: 100vh; /* Full height */
+}
+
+@media screen and (min-width: 500px) {
+  .modal {
+    padding-top: 10vh; /* Location of the box */
+    padding-left: 10vw;
+    padding-right: 10vw;
+    width: 80vw; /* Full width */
+    height: 80vh; /* Full height */
+  }
 }
 
 .card {

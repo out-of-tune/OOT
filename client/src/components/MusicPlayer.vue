@@ -12,123 +12,60 @@
     >
       Your browser does not support the audio element.
     </audio>
-    <div class="currentSongInfo">
-      <v-img :src="coverUrl" aspect-ratio="1" class="cover" id="image"> </v-img>
-      <div class="songInfoText">
-        <h3
-          ref="currentSongName"
-          class="currentSongName"
-          @click="findNodesInGraph('song', [currentSong.id])"
-        >
-          <div
-            :class="{
-              innerText: overflows.currentSongName,
-              innerTextShort: !overflows.currentSongName,
-            }"
-          >
-            {{ currentSong.name
-            }}<span id="textExtension" v-if="overflows.currentSongName">{{
-              currentSong.name
-            }}</span>
-          </div>
-        </h3>
-        <div
-          class="currentArtistName"
-          ref="currentArtistName"
-          @click="
-            findNodesInGraph(
-              'artist',
-              currentSong.artists.map((artist) => artist.id),
-            )
-          "
-        >
-          <div
-            :class="{
-              innerText: overflows.currentArtistName,
-              innerTextShort: !overflows.currentArtistName,
-            }"
-          >
-            {{ getArtists()
-            }}<span id="textExtension" v-if="overflows.currentArtistName">{{
-              getArtists()
-            }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
+    <CurrentSongInfo />
     <div class="player">
       <div class="controls">
+        <button class="icon-btn" id="rewindButton" v-on:click="PrevSong">
+          <v-icon name="md-skipprevious" />
+        </button>
+
         <button
-          id="rewindButton"
-          small
-          min-width="1px"
-          color="#f14e14"
-          v-on:click="PrevSong"
+          class="icon-btn"
+          id="playButton"
+          color="#da6a1d"
+          v-on:click="StartStop"
         >
-          <v-icon icon="mdi-skip-previous" />
+          <v-icon v-if="!isPlaying" name="md-playarrow" />
+          <v-icon v-if="isPlaying" name="md-pause" />
         </button>
 
-        <button id="playButton" color="#da6a1d" v-on:click="StartStop">
-          <v-icon v-if="!isPlaying" icon="mdi-play" />
-          <v-icon v-if="isPlaying" icon="mdi-pause" />
-        </button>
-
-        <button id="forwardButton" color="#f14e14" v-on:click="NextSong">
-          <v-icon icon="mdi-skip-next" />
+        <button
+          class="icon-btn"
+          id="forwardButton"
+          color="#f14e14"
+          v-on:click="NextSong"
+        >
+          <v-icon name="md-skipnext" />
         </button>
       </div>
       <div id="timeSlider" class="sliderBox">
-        <v-slider
-          v-model="currentTime"
-          color="white"
+        <slider
           :min="start"
           :max="end"
-          :hide-details="true"
-          dark
-          @change="seekTo"
-          @start="isSeeking = true"
-          @end="isSeeking = false"
-        ></v-slider>
-      </div>
-    </div>
-    <div id="queue">
-      <div id="buttons">
-        <button
-          id="queueButton"
-          small
-          :class="{ activated: queueDisplay }"
-          @click="setQueueVisibility(!queueDisplay)"
-        >
-          <v-icon icon="mdi-playlist-music" />
-        </button>
-        <button
-          id="infoButton"
-          small
-          :class="{ activated: nodeInfoDisplay }"
-          @click="setNodeInfoVisibility(!nodeInfoDisplay)"
-        >
-          <v-icon icon="mdi-information" />
-        </button>
+          :model-value="currentTime"
+          @update:model-value="seekTo"
+        ></slider>
       </div>
     </div>
 
     <div class="volume">
-      <v-icon>mdi-volume-plus</v-icon>
-      <input
-        type="number"
-        v-model="volumePercent"
+      <v-icon name="md-volumedown" />
+      <Slider
+        class="volumeslider"
+        :model-value="volumePercent"
+        @update:model-value="setVolume"
         min="0"
         max="100"
-        @change="setVolume"
-      />
+      ></Slider>
+      <v-icon name="md-volumeup" />
     </div>
   </div>
 </template>
 
 <script>
 import { mapState, mapActions } from "vuex";
-import logo from "@/assets/logo.png";
-import { searchGraph } from "@/assets/js/graphHelper.js";
+import Slider from "./Slider.vue";
+import CurrentSongInfo from "./CurrentSongInfo.vue";
 
 export default {
   data: () => ({
@@ -138,37 +75,18 @@ export default {
     start: 0,
     end: 2,
     isSeeking: false,
-    overflows: {
-      currentSongName: false,
-      currentArtistName: false,
-    },
   }),
+  components: {
+    Slider,
+    CurrentSongInfo,
+  },
   computed: {
     ...mapState({
       songUrl: (state) => state.music_player.currentSong.preview_url,
-      queueDisplay: (state) => state.visibleItems.queueDisplay,
-      nodeInfoDisplay: (state) => state.visibleItems.nodeInfo,
     }),
-    currentSong: {
-      get() {
-        return this.$store.state.music_player.currentSong;
-      },
-      set(value) {},
-    },
-    coverUrl() {
-      if (this.currentSong.images.length > 0)
-        return this.currentSong.images[0].url;
-      else return logo;
-    },
   },
   methods: {
-    ...mapActions([
-      "playNextInQueue",
-      "playPreviousInQueue",
-      "setQueueVisibility",
-      "setNodeInfoVisibility",
-      "fitGraphToNodes",
-    ]),
+    ...mapActions(["playNextInQueue", "playPreviousInQueue"]),
     StartStop: function () {
       if (this.isPlaying) {
         this.$refs.player.pause();
@@ -180,16 +98,18 @@ export default {
       this.start = this.$refs.player.seekable.start(0);
       this.end = this.$refs.player.seekable.end(0);
     },
-    setVolume: function () {
-      this.$refs.player.volume = this.volumePercent / 100.0;
+    setVolume: function (v) {
+      this.volumePercent = v;
+      this.$refs.player.volume = v / 100.0;
     },
     setTime: function () {
       if (!this.isSeeking) {
         this.currentTime = this.$refs.player.currentTime;
       }
     },
-    seekTo: function () {
-      this.$refs.player.currentTime = this.currentTime;
+    seekTo: function (v) {
+      this.currentTime = v;
+      this.$refs.player.currentTime = v;
     },
     NextSong: function () {
       this.playNextInQueue();
@@ -197,51 +117,8 @@ export default {
     PrevSong: function () {
       this.playPreviousInQueue();
     },
-    getArtists: function () {
-      return this.currentSong.artists
-        ? this.currentSong.artists.map((artist) => artist.name).join(", ")
-        : "";
-    },
-    checkOverflow: function (reference) {
-      return (
-        (reference ? reference.scrollWidth : null) >
-        (reference ? reference.offsetWidth : null)
-      );
-    },
-    findNodesInGraph: function (type, sids) {
-      const rootState = this.$store.state;
-      const result = sids.flatMap((sid) => {
-        return searchGraph(
-          {
-            nodeType: type,
-            valid: true,
-            errors: [],
-            attributes: [
-              { attributeData: sid, attributeSearch: "sid", operator: "=" },
-            ],
-          },
-          rootState,
-        );
-      });
-      this.fitGraphToNodes(result);
-    },
   },
   mounted: function () {},
-  watch: {
-    currentSong: function () {
-      this.overflows.currentSongName = false;
-      this.overflows.currentArtistName = false;
-
-      this.$nextTick(function () {
-        this.overflows.currentSongName = this.checkOverflow(
-          this.$refs.currentSongName,
-        );
-        this.overflows.currentArtistName = this.checkOverflow(
-          this.$refs.currentArtistName,
-        );
-      });
-    },
-  },
 };
 </script>
 
@@ -251,78 +128,41 @@ export default {
   background-color: rgb(37, 37, 37);
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
   border-radius: 5px;
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-
-  margin-left: 25%;
-  margin-bottom: 2%;
-  width: 50%;
-
+  padding: 0.5rem;
   display: flex;
   gap: 1rem;
   align-items: center;
   justify-content: center;
 }
-.cover {
-  height: 3rem;
-  width: 3rem;
-  object-fit: contain;
-}
-.currentSongInfo {
-  display: flex;
-  cursor: pointer;
-  gap: 0.5rem;
-  align-items: center;
-}
 
-.currentSongInfo .songInfoText {
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-#queueButton {
-  background-color: #da6a1dff;
-}
-#queueButton:hover {
-  background-color: #1dcdda66;
-}
-#infoButton {
-  background-color: #da6a1dff;
-}
-#infoButton:hover {
-  background-color: #1dcdda66;
-}
-#infoButton .activated {
-  background-color: #1dcddaff;
-}
-#queueButton .activated {
-  background-color: #1dcddaff;
-}
-.currentSongName {
-  overflow: hidden;
-}
-.currentArtistName {
-  overflow: hidden;
-}
-.currentSongName:hover .innerText {
-  animation: marquee 12s linear infinite;
-}
-.currentArtistName:hover .innerText {
-  animation: marquee 12s linear infinite;
-}
-input {
-  color: white;
+@media screen and (max-width: 500px) {
+  .card {
+    flex-direction: column;
+    flex-shrink: 2;
+  }
+  .player {
+    width: 100%;
+  }
+  .currentSongInfo {
+    width: 100%;
+  }
 }
 
 .player {
-  width: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 0.3rem;
+  min-width: 75px;
+  flex-grow: 1;
 }
 .sliderBox {
   width: 100%;
+}
+
+.controls {
+  display: flex;
+  gap: 0.3rem;
 }
 
 @keyframes marquee {
@@ -332,5 +172,15 @@ input {
   100% {
     transform: translate(-50%, 0);
   }
+}
+
+.volume {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.volumeslider {
+  width: 100px;
 }
 </style>

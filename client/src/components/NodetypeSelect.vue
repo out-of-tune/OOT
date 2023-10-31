@@ -1,11 +1,14 @@
 <template>
   <div>
     <select
-      class="select"
       :value="modelValue"
       @input="$emit('update:modelValue', $event.target.value)"
     >
-      <option class="option" v-for="option in getSimpleSearchNodeTypes()" :key="option">
+      <option
+        class="option"
+        v-for="option in getSimpleSearchNodeTypes()"
+        :key="option"
+      >
         {{ option }}
       </option>
     </select>
@@ -28,10 +31,4 @@ function getSimpleSearchNodeTypes() {
 }
 </script>
 
-<style>
-.select {
-  border: 1px solid #fff;
-  padding: 0.25rem;
-  background-color: #ababab;
-}
-</style>
+<style></style>

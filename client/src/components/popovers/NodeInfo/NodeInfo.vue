@@ -1,27 +1,23 @@
 <template>
   <div class="card">
     <div class="close">
-      <span id="nodeLabel" v-if="node">{{ node.data.label }}</span>
       <v-icon
         id="close-icon"
         @click="closeWindow"
         size="1.5rem"
-        color="white"
-        icon="mdi-close"
+        name="md-close"
       />
     </div>
+    <span id="nodeLabel" v-if="node">{{ node.data.label }}</span>
     <div class="content">
       <div v-if="!node.data.label">
-        <v-img :src="logo" aspect-ratio="1" class="cover" id="image"> </v-img>
+        <img :src="logo" aspect-ratio="1" class="image" />
       </div>
       <div v-if="node.data.label === 'artist'">
-        <v-img
+        <img
           :src="node.data.images ? node.data.images[0] : logo"
-          aspect-ratio="1"
-          class="cover"
-          id="image"
-        >
-        </v-img>
+          class="image"
+        />
         <h2 class="nodeName">
           <a
             class="innerText"
@@ -48,9 +44,9 @@
               id="playArrow"
               @click="setSong(track, track.album.images)"
               color="white"
-              icon="mdi-play"
+              name="md-playarrow"
             />
-            <div id="songName" @click="setSong(track, track.album.images)">
+            <div class="songName" @click="setSong(track, track.album.images)">
               <span class="innerText" v-if="track.name.length > 25">
                 {{ track.name }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{
                   track.name
@@ -61,17 +57,17 @@
               </span>
             </div>
             <button
-              id="addToQueueButton"
+              class="icon-btn"
               @click="addSongToQueue({ ...track, images: node.data.images })"
+              title="add song to queue"
             >
-              <v-icon color="white" icon="mdi-plus" />
+              <v-icon name="md-add" />
             </button>
           </li>
         </ul>
       </div>
       <div v-if="node.data.label === 'genre'">
-        <v-img :src="logo" aspect-ratio="1" class="cover" id="image"> </v-img>
-
+        <img :src="logo" class="image" />
         <h2 id="genreName">
           <a @click="fitGraphToNodes([node])" class="innerText">{{
             node.data.name
@@ -79,13 +75,10 @@
         </h2>
       </div>
       <div v-if="node.data.label === 'album'">
-        <v-img
+        <img
           :src="node.data.images ? node.data.images[0].url : logo"
-          aspect-ratio="1"
-          class="cover"
-          id="image"
-        >
-        </v-img>
+          class="image"
+        />
         <h2 class="nodeName">
           <a class="innerText" @click="fitGraphToNodes([node])">{{
             node.data.name
@@ -97,7 +90,6 @@
           target="_blank"
           >Visit on Spotify</a
         >
-
         <h3>release date</h3>
         <div>{{ node.data.release_date }}</div>
         <h3>total tracks</h3>
@@ -111,8 +103,7 @@
             <v-icon
               id="playArrow"
               @click="setSong(track, node.data.images)"
-              color="white"
-              icon="mdi-play"
+              name="md-playarrow"
             />
             <div id="songName" @click="setSong(track, node.data.images)">
               <span class="innerText" v-if="track.name.length > 25">
@@ -125,23 +116,20 @@
               </span>
             </div>
             <button
-              id="addToQueueButton"
+              class="icon-btn"
               @click="addSongToQueue({ ...track, images: node.data.images })"
             >
-              <v-icon color="white" icon="mdi-plus" />
+              <v-icon name="md-add" />
             </button>
           </li>
         </ul>
       </div>
       <div v-if="node.data.label === 'song'">
-        <v-img
-          v-if="node.data.images"
-          :src="node.data.images[0].url"
-          aspect-ratio="1"
-          class="cover"
-          id="image"
-        >
-        </v-img>
+        <img
+          v-if="node.data.album && node.data.album.images"
+          :src="node.data.album.images[0].url"
+          class="image"
+        />
         <h2 class="nodeName">
           <a @click="fitGraphToNodes([node])" class="innerText">{{
             node.data.name
@@ -153,7 +141,6 @@
           target="_blank"
           >Visit on Spotify</a
         >
-
         <h3>Duration:</h3>
         {{ new Date(node.data.duration_ms).toISOString().slice(11, -5) }}
         <div v-if="node.data.album">
@@ -169,30 +156,23 @@
   </div>
 </template>
 <script>
-import { mapState, mapActions } from "vuex";
+import { mapActions } from "vuex";
 import logo from "@/assets/logo.png";
+import _ from "lodash";
 
 export default {
   data: () => ({
     logo: logo,
   }),
   computed: {
-    ...mapState({
-      node: (state) => state.mainGraph.currentNode,
-    }),
+    node() {
+      let node = _.cloneDeep(this.$store.state.mainGraph.currentNode);
+      return node;
+    },
     artistUrl() {
       return this.node.data.label === "artist"
         ? "https://open.spotify.com/artist/" + this.node.data.sid
         : "";
-    },
-    node: {
-      get() {
-        this.$nextTick(function () {
-          this.isOverflowing = this.checkOverflow(this.$refs.currentNode);
-        });
-        return this.$store.state.mainGraph.currentNode;
-      },
-      set(value) {},
     },
   },
   methods: {
@@ -202,6 +182,7 @@ export default {
       "addToQueue",
       "setNodeInfoVisibility",
       "fitGraphToNodes",
+      "setSuccess",
     ]),
     setSong: function (track, images) {
       this.playSong({ ...track, images });
@@ -225,51 +206,30 @@ export default {
 <style scoped>
 .card {
   color: white;
-  border: 2px solid white;
   background-color: rgb(37, 37, 37);
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
   transition: 0.3s;
   border-radius: 5px;
-  padding-left: 1rem;
-  padding-right: 1rem;
+  padding: 1rem;
 
   margin: 0.5rem;
   width: 20rem;
   overflow-y: auto;
-  height: 40%;
-  display: grid;
-  grid-template-rows: 3rem 1fr;
-  grid-template-columns: 1fr;
-  grid-template-areas:
-    "actions"
-    "content";
+  height: 25rem;
+  display: flex;
+  flex-direction: column;
 }
 .close {
-  grid-area: actions;
-  position: sticky;
-  top: 0;
-  padding-top: 1rem;
-  padding-bottom: 0.5rem;
-
-  background-color: #252525;
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
 }
 #close-icon {
   cursor: pointer;
-  float: right;
-  border-radius: 2px 0 0 0;
-  box-shadow: -1px -1px -13px -6px rgba(0, 0, 0, 1);
 }
 #nodeLabel {
   text-transform: uppercase;
   font-weight: bold;
-}
-.content {
-  width: 100%;
-  grid-area: content;
-}
-#image {
-  margin-bottom: 5px;
-  z-index: -1;
 }
 ul {
   list-style-type: none;
@@ -302,20 +262,26 @@ li {
 .nodeName:hover .innerText {
   color: #da6a1d;
 }
-
-#songName .innerText {
+.songName {
+  grid-area: songInfo;
+  width: 12rem;
+  overflow: hidden;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.songName .innerText {
   transition: 0.5s;
   display: inline-block;
 }
-#songName:hover .innerText {
+.songName:hover .innerText {
   color: #1dcddaff;
   animation: marquee 8s linear infinite;
 }
-#songName .innerTextShort {
+.songName .innerTextShort {
   transition: 0.5s;
   display: inline-block;
 }
-#songName:hover .innerTextShort {
+.songName:hover .innerTextShort {
   color: #1dcddaff;
 }
 a {
@@ -327,13 +293,6 @@ a {
 }
 #addToQueueButton {
   grid-area: addToQueue;
-}
-#songName {
-  grid-area: songInfo;
-  width: 12rem;
-  overflow: hidden;
-  white-space: nowrap;
-  cursor: pointer;
 }
 .noPreview {
   color: grey;
@@ -356,5 +315,10 @@ a {
   100% {
     transform: translate(-50%, 0);
   }
+}
+
+.image {
+  object-fit: cover;
+  width: 100%;
 }
 </style>

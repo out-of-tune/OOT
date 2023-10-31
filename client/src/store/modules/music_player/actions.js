@@ -38,7 +38,9 @@ const playSong = ({ dispatch, state }, song) => {
   dispatch("playAtIndexInQueue", currentQueuePosition);
 };
 
-const addToQueue = ({ commit }, song) => {
+const addToQueue = ({ commit, dispatch }, song) => {
+  dispatch("setAddToQueueNotifaction", true);
+  setTimeout(() => dispatch("setAddToQueueNotifaction", false), 500);
   commit("ADD_TO_QUEUE", song);
 };
 
@@ -99,7 +101,12 @@ const setNodeInfoVisibility = ({ commit }, visible) => {
   commit("SET_NODEINFO_VISIBILITY", visible);
 };
 
-const playOnSpotify = ({ rootState }, uris) => {
+const setAddToQueueNotifaction = ({ commit }, visible) => {
+  commit("SET_ADD_TO_QUEUE_NOTIFICATION_VISIBILITY", visible);
+};
+
+const playOnSpotify = ({ rootState, dispatch }, uris) => {
+  dispatch("setMessage", "Trying to play queue on Spotify");
   if (rootState.authentication.loginState) {
     SpotifyService.play(rootState.authentication.accessToken, uris);
   }
@@ -121,6 +128,7 @@ export const actions = {
   setNodeInfoVisibility,
   setQueue,
   playOnSpotify,
+  setAddToQueueNotifaction,
 };
 
 export default actions;

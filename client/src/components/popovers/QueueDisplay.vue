@@ -4,26 +4,32 @@
       <span id="label">queue</span>
       <div id="queueIcons">
         <v-icon
-          id="delete-icon"
+          id="play-icon"
           v-if="loginState"
           @click="play"
           size="1.5rem"
-          color="white"
-          icon="mdi-playlist-play"
+          color="green"
+          title="play this queue on Spotify"
+          name="md-playlistplay"
+          class="clickable"
         />
         <v-icon
           id="delete-icon"
           @click="clearQueue"
           size="1.5rem"
           color="white"
-          icon="mdi-delete"
+          name="md-playlistremove"
+          title="clear queue"
+          class="clickable"
         />
         <v-icon
           id="close-icon"
           @click="closeWindow"
           size="1.5rem"
           color="white"
-          icon="mdi-close"
+          title="close window"
+          name="md-close"
+          class="clickable"
         />
       </div>
       <div id="spacer"></div>
@@ -31,16 +37,23 @@
 
     <draggable :list="queue" @change="onMove" v-if="queue.length > 0">
       <template #item="{ element, index }">
-        <li class="song" @click="playSong(index)">
-          <button @click="removeFromQueue(index)">
-            <v-icon color="white" icon="mdi-minus" />
+        <li
+          class="song"
+          :class="{ playing: index === queueIndex }"
+          @click="playSong(index)"
+        >
+          <button class="icon-btn" @click="removeFromQueue(index)">
+            <v-icon color="white" name="md-remove" />
           </button>
-          <div :class="{ bold: index === queueIndex }">{{ element.name }}</div>
+          <div>
+            {{ element.name }}
+          </div>
           <button
             v-if="loginState"
-            @click="addSongToCurrentPlaylist(element.uri)"
+            class="btn add-to-playlist"
+            @click="addSongToCurrentPlaylist(index)"
           >
-            <v-icon color="white" icon="mdi-playlist-plus" />
+            <v-icon name="md-playlistadd" />
           </button>
         </li>
       </template>
@@ -65,6 +78,9 @@ export default {
       "setQueue",
       "playOnSpotify",
     ]),
+    ...mapState({
+      queue: (state) => state.queue,
+    }),
     closeWindow: function () {
       this.setQueueVisibility(false);
     },
@@ -83,8 +99,10 @@ export default {
     playSong(index) {
       this.playAtIndexInQueue(index);
     },
-    addSongToCurrentPlaylist(uri) {
-      this.addSongToPlaylist(uri);
+    addSongToCurrentPlaylist(index) {
+      const song = this.queue[index];
+      console.log(song);
+      this.addSongToPlaylist(song);
     },
   },
   computed: {
@@ -106,12 +124,26 @@ export default {
 
 <style scoped>
 li {
-  display: grid;
-  grid-template-columns: 30px 1fr 30px;
+  display: flex;
   margin-bottom: 0.5rem;
+  justify-content: space-between;
+  padding: 0.3rem;
+  padding-left: 0.5rem;
+  padding-left: 0.5rem;
+  border-radius: 5px;
+}
+li:hover {
+  outline: 1px solid #2d9cdb;
+  color: white;
+}
+.playing {
+  background-color: #2d9cdb69;
 }
 .song {
   cursor: pointer;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
 }
 .bold {
   font-weight: bold;
@@ -152,5 +184,19 @@ li {
 #queueIcons {
   float: right;
   justify-self: center;
+  gap: 1rem;
+}
+.add-to-playlist {
+  width: 2rem;
+  color: #baffae;
+}
+.add-to-playlist:hover {
+  color: white;
+}
+.clickable {
+  cursor: pointer;
+}
+.clickable:hover {
+  color: #2d9cdb;
 }
 </style>

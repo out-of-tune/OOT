@@ -2,61 +2,26 @@ import axios from "axios";
 
 class AuthenticationService {
   constructor() {
-    this.api = `${import.meta.env.VITE_PROXY_URI}/auth`;
-  }
-  getFromAPI(url, params = null, headers = {}) {
-    let config = {};
-    if (params) {
-      config.params = params;
-    }
-    config.headers = {
-      "Content-Type": "application/json",
-      ...headers,
-    };
-    return new Promise((resolve, reject) => {
-      axios
-        .get(this.api + url, config)
-        .then((response) => {
-          resolve(response.data);
-        })
-        .catch((error) => {
-          reject(error);
-        });
+    this.api = `${import.meta.env.VITE_PROXY_URI}`;
+    this.http = axios.create({
+      baseURL: this.api,
+      timeout: 3000,
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
   }
 
-  post(url, params = null, headers = {}) {
-    let config = {};
-    if (params) {
-      config.params = params;
-    }
-    config.headers = {
-      "Content-Type": "application/json",
-      ...headers,
-    };
-    return new Promise((resolve, reject) => {
-      axios
-        .post(this.api + url, {}, config)
-        .then((response) => {
-          resolve(response.data);
-        })
-        .catch((error) => {
-          reject(error);
-        });
+  async get_oauth2_login_page() {
+    const result = await this.http.get("/auth/oauth2/spotify");
+    return result.data;
+  }
+
+  async refreshToken(refreshToken) {
+    const result = await this.http.get("/auth/oauth2/spotify/refresh", {
+      params: { refresh_token: refreshToken },
     });
-  }
-
-  get_oauth2_login_page(url = "/oauth2/spotify") {
-    const result = this.getFromAPI(url);
-    return result;
-  }
-
-  login(url, headers = {}) {
-    const result = this.post(url, null, headers);
-    return result;
-  }
-  refreshToken(refreshToken, url = `/oauth2/spotify`) {
-    return this.getFromAPI(`${url}/refresh`, { refresh_token: refreshToken });
+    return result.data;
   }
 }
 export default new AuthenticationService();

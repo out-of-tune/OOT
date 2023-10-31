@@ -3,15 +3,17 @@ import axios from "axios";
 export default class BaseService {
   constructor() {
     this.api = `${import.meta.env.VITE_PROXY_URI}`;
+    console.log(this.api);
   }
   post(url, params = null, headers = {}) {
     let config = {
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Accept-Encoding": "gzip",
-            ...headers,
-          },
-        };
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Accept-Encoding": "gzip",
+        ...headers,
+        params,
+      },
+    };
     return new Promise((resolve, reject) => {
       axios
         .post(this.api + url, params, config)
@@ -25,12 +27,12 @@ export default class BaseService {
   }
   get(url, params = null, headers = {}) {
     let config = {
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            ...headers,
-          },
-          params,
-        };
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        ...headers,
+      },
+      params,
+    };
     return new Promise((resolve, reject) => {
       axios
         .get(this.api + url, config)

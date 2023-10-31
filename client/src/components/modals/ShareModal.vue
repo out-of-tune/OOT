@@ -2,7 +2,7 @@
   <div>
     <div v-if="open" id="shareModal" class="modal">
       <div class="card">
-        <v-icon @click="changeShareModalState" class="close" icon="mdi-close" />
+        <v-icon @click="changeShareModalState" class="close" name="md-close" />
         <div class="content">
           <button class="right" @click="generateShareLink('graph')">
             share graph
@@ -17,7 +17,7 @@
             ref="shareLink"
             :value="shareLink"
           />
-          <button class="left" dark @click="copy">copy to clipboard</button>
+          <button class="left" @click="copy">copy to clipboard</button>
         </div>
       </div>
     </div>

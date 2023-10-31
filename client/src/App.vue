@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <div id="app">
     <snackbar />
     <div class="topbar">
       <Searchbar
@@ -8,22 +8,17 @@
       <div v-if="loggedIn">
         {{ $store.state.playlists.currentPlaylist.name }}
       </div>
-      <div class="login" v-if="['Graph', 'Settings'].indexOf($route.name) > -1">
-        <button class="btn" v-if="!loggedIn" id="login" v-on:click="loginUser">
-          login
-        </button>
-        <div v-if="loggedIn" class="username">
-          <b>{{ $store.state.user.me.display_name }}</b>
-        </div>
-        <button
-          v-if="loggedIn"
-          id="logout"
-          color="#ffffff"
-          v-on:click="logoutUser"
-        >
-          logout
-        </button>
+    </div>
+    <div class="login" v-if="['Graph', 'Settings'].indexOf($route.name) > -1">
+      <button class="btn" v-if="!loggedIn" id="login" v-on:click="loginUser">
+        login
+      </button>
+      <div v-if="loggedIn">
+        <b>{{ $store.state.user.me.display_name }}</b>
       </div>
+      <button v-if="loggedIn" id="logout" v-on:click="logoutUser" class="btn">
+        logout
+      </button>
     </div>
     <router-view></router-view>
     <PlaylistLoader></PlaylistLoader>
@@ -31,22 +26,22 @@
     <selectionModal></selectionModal>
     <feedbackModal></feedbackModal>
     <shareModal></shareModal>
-    <!-- TODO: fix intro tour -->
-    <!-- <IntroTour v-if="['Graph'].indexOf($route.name) > -1"></IntroTour> -->
-    <MusicPlayer
-      class="musicPlayer"
-      v-if="['Graph'].indexOf($route.name) > -1"
-    ></MusicPlayer>
+    <IntroTour></IntroTour>
+    <div v-if="['Graph'].indexOf($route.name) > -1" class="bottom">
+      <InfoToggles></InfoToggles>
+      <MusicPlayer class="musicPlayer"></MusicPlayer>
+    </div>
 
     <Toolbar v-if="['Graph'].indexOf($route.name) > -1"></Toolbar>
-  </v-app>
+  </div>
 </template>
 
 <script>
 import { defineAsyncComponent } from "vue";
 import { mapActions, mapState } from "vuex";
 import Toolbar from "./components/Toolbar.vue";
-import IntroTour from "@/components/helpers/IntroTour.vue";
+import IntroTour from "./components/helpers/IntroTour.vue";
+import InfoToggles from "./components/InfoToggles.vue";
 
 const PlaylistLoader = defineAsyncComponent(() =>
   import("@/components/modals/PlaylistLoader.vue"),
@@ -55,7 +50,9 @@ const PlaylistChooser = defineAsyncComponent(() =>
   import("@/components/modals/PlaylistChooser.vue"),
 );
 
-const snackbar = defineAsyncComponent(() => import("./components/Snackbar.vue"));
+const snackbar = defineAsyncComponent(() =>
+  import("./components/Snackbar.vue"),
+);
 import Searchbar from "./components/Searchbar.vue";
 const selectionModal = defineAsyncComponent(() =>
   import("@/components/modals/SelectionModal.vue"),
@@ -81,6 +78,8 @@ export default {
     MusicPlayer,
     feedbackModal,
     shareModal,
+    IntroTour,
+    InfoToggles,
   },
   data: () => ({
     drawer: null,
@@ -136,17 +135,42 @@ export default {
 </script>
 
 <style>
+body {
+  margin: 0;
+}
+
 #navDrawer {
   background-color: #212121;
   border-right: 2px solid #da6a1d !important;
 }
 
 .musicPlayer {
+  color: white;
+  flex-grow: 1;
+  max-width: 800px;
+}
+
+@media screen and (max-width: 500px) {
+  .bottom {
+    flex-direction: column;
+  }
+}
+
+.bottom {
   position: absolute;
   z-index: 2;
-  bottom: 0px;
+  bottom: 1rem;
   left: 0px;
-  color: white;
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  pointer-events: none;
+}
+
+.bottom * {
+  pointer-events: auto;
 }
 
 a {
@@ -155,28 +179,31 @@ a {
 }
 
 .topbar {
-  background-color: #252525;
+  position: fixed;
+  gap: 1rem;
   color: white;
   display: flex;
-  height: 64px;
-  align-items: center;
-  padding-right: 35px;
-  padding-left: 35px;
-  grid-gap: 0.5rem;
-  position: fixed;
+  padding: 0.5rem;
   z-index: 2;
-  width: 100vw;
 }
 
 .login {
-  justify-self: right;
+  background-color: #252525;
+  padding: 0.5rem;
+  border-radius: 4px;
+  position: fixed;
+  top: 0.5rem;
+  right: 0.5rem;
+  height: 30px;
+  z-index: 2;
   display: flex;
   align-items: center;
-  align-content: center;
-  justify-items: center;
+  color: white;
+  gap: 1rem;
 }
 
 .btn {
+  color: white;
   background: #313131;
   border: 1px solid #2d9cdb;
   box-sizing: border-box;
@@ -190,6 +217,7 @@ a {
 .btn:active {
   background: #2d9cdb;
 }
+
 .btn:hover {
   background: linear-gradient(180deg, #2d9cdb 0%, #56ccf2 100%);
   color: white;
@@ -211,5 +239,41 @@ a {
 .btn-orange:hover {
   background: linear-gradient(180deg, #f2994a 0%, rgb(240, 131, 35) 100%);
   color: white;
+}
+
+.icon-btn {
+  background: none;
+  border: 1px solid #2d9cdb;
+  border-radius: 5px;
+  padding: 3px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  color: white;
+}
+
+.icon-btn:active {
+  background: #2d9cdb;
+}
+
+.icon-btn:hover {
+  background: linear-gradient(180deg, #2d9cdb 0%, #56ccf2 100%);
+  color: black;
+}
+
+select {
+  background: #404040;
+  color: white;
+  border: 1px solid #f2994a;
+  border-radius: 5px;
+  padding: 0.25rem;
+}
+
+input {
+  background: #404040;
+  color: white;
+  border: 1px solid #f2994a;
+  border-radius: 5px;
+  padding: 0.25rem;
 }
 </style>

@@ -1,29 +1,25 @@
 <template>
   <Popper placement="top">
-    <button class="container tooltip">
-      <v-icon class="icon" color="white" icon="mdi-content-save" />
+    <button class="icon-btn tooltip">
+      <v-icon class="icon" color="white" name="md-save" />
       <span class="tooltiptext">SAVE/LOAD</span>
     </button>
     <template #content>
       <div>
         <div class="menu">
-          <h2 id="menu-header">SAVE / LOAD</h2>
+          <h2>SAVE / LOAD</h2>
 
           <div class="nav-buttons">
             <button
-              id="configurationTab"
-              class="tabButton"
+              class="btn tabButton"
               :class="{ active: configuration }"
-              color="#da6a1d"
               @click="configuration = true"
             >
               Configuration
             </button>
             <button
-              class="tabButton"
-              id="graphTab"
+              class="btn tabButton"
               :class="{ active: !configuration }"
-              color="#0d676d"
               @click="configuration = false"
             >
               Graph
@@ -65,108 +61,22 @@ export default {
 };
 </script>
 <style scoped>
-.tooltip {
-  position: relative;
-  display: inline-block;
-}
-.tooltip:hover .tooltiptext {
-  visibility: visible;
-}
-
-/* Tooltip text */
-.tooltip .tooltiptext {
-  visibility: hidden;
-  color: #fff;
-  text-align: center;
-  padding: 0.5rem;
-  background-color: #0d676d;
-
-  /* Position the tooltip text - see examples below! */
-  position: absolute;
-  z-index: 1;
-  top: -1px;
-  right: 110%;
-}
-
 .menu {
-  padding: 1rem;
-  background-color: #434343;
-  width: 500px;
-  height: 300px;
-  overflow-y: scroll;
-}
-
-.container:hover {
-  background-color: #1dcdda66;
-}
-
-.container:active {
-  background-color: #1dcddaff;
-}
-
-.container {
-  background-color: #da6a1dff;
-  padding: 3px;
-  cursor: pointer;
-  height: 30px;
-}
-
-.btn {
-  background: #ffffff;
-  border: 1px solid #2d9cdb;
-  box-sizing: border-box;
-  box-shadow: 1px 1px 4px rgba(45, 156, 219, 0.25);
-  border-radius: 5px;
-  padding: 3px;
-  margin-right: 1rem;
-  width: 100px;
-  margin-bottom: 1rem;
-}
-
-.btn-orange {
-  background: #424242;
-  border: 1px solid #f2994a;
-  box-sizing: border-box;
-  box-shadow: 1px 1px 4px rgba(242, 152, 74, 0.25);
-  border-radius: 5px;
-  padding: 3px;
-  margin-right: 1rem;
-  width: 100px;
-  margin-bottom: 1rem;
-}
-
-.btn-orange:hover {
-  background: linear-gradient(180deg, #f2994a 0%, rgb(240, 131, 35) 100%);
-  color: white;
-}
-
-.btn:active {
-  background: #2d9cdb;
-}
-
-.btn:hover {
-  background: linear-gradient(180deg, #2d9cdb 0%, #56ccf2 100%);
-  color: white;
+  background: #252525;
+  padding: 0.5rem;
+  width: 450px;
 }
 .loadSaveActions {
-  display: grid;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
-#spacer {
-  margin: 1rem;
-}
-.tabButton {
-  color: white;
-  border: 2px solid #ffffff;
-  margin-left: 0;
-  margin-right: 0;
-}
-#graphTab {
-  margin-left: 2px;
+.nav-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
 }
 .active {
-  transition: 0.2s;
-  background-color: #424242 !important;
-  color: white !important;
-  box-shadow: none !important;
+  background: #2d9cdb;
 }
 </style>

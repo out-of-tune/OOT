@@ -2,11 +2,13 @@
   <div class="loadSave">
     <div class="storeActions">
       <div id="autocomplete">
-        <v-autocomplete
+        <!-- TODO: create autocomplete -->
+        <input
+          type="text"
           v-model="loadName"
           label="configurations"
           :items="configurationNames"
-        ></v-autocomplete>
+        />
       </div>
       <input
         id="loadInput"
@@ -15,41 +17,40 @@
         @change="previewFiles"
         style="display: none"
       />
-      <v-icon
-        id="delete"
-        @click="deleteConfiguration()"
-        class="icon"
-        color="black"
-        icon="mdi-delete-outline"
-      />
       <button
         id="load"
-        class="actionButton"
+        class="btn"
         @click="loadConfigurationFromIndexedDb(loadName)"
       >
         Load
       </button>
-    </div>
-    <div>
-      <v-text-field
-        v-model="saveName"
-        placeholder="configuration name"
-      ></v-text-field>
-      <a
-        id="download"
-        ref="downloadButton"
-        v-show="false"
-        @click="trackDownload"
-      ></a>
-      <button v-on:click="saveConfiguration">Download</button>
-      <button class="confirmButton" v-on:click="storeConfig(saveName)">
-        Save
+      <button class="btn" id="upload" @click="uploadFile">Select File</button>
+      <button class="icon-btn">
+        <v-icon
+          id="delete"
+          @click="deleteConfiguration()"
+          class="icon"
+          name="md-delete"
+          title="delete configuration from browser"
+        />
       </button>
     </div>
-    <button id="reset" v-on:click="reimportConfiguration">
+    <input type="text" v-model="saveName" placeholder="configuration name" />
+    <a
+      id="download"
+      ref="downloadButton"
+      v-show="false"
+      @click="trackDownload"
+    ></a>
+    <button class="btn" v-on:click="storeConfig(saveName)">Save</button>
+    <button class="btn" v-on:click="saveConfiguration">Download</button>
+    <button
+      class="btn"
+      v-on:click="reimportConfiguration"
+      title="reset current configuration to default"
+    >
       Reset Configuration
     </button>
-    <button id="upload" @click="uploadFile">Load from file</button>
   </div>
 </template>
 <script>
@@ -135,36 +136,17 @@ export default {
 };
 </script>
 <style scoped>
-.loadSave {
-  display: grid;
-  grid-template-rows: 1fr 1fr 2rem;
-  grid-gap: 0.5rem;
-}
-.confirmButton {
-  float: right;
-}
-#load {
-  grid-area: storage;
-}
-#delete {
-  grid-area: delete;
-  align-self: center;
-  padding-left: 25%;
-}
-#autocomplete {
-  grid-area: input;
-}
-#upload {
-  margin: 0;
-}
 .storeActions {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 30px;
-  grid-template-areas:
-    "input input input delete"
-    ". . storage storage";
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
 }
-.actionButton {
-  margin: 0 !important;
+
+.loadSave {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
 }
 </style>
