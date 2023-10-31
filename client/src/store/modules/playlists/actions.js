@@ -32,7 +32,8 @@ const clearPlaylists = ({ commit }) => {
   commit("SET_USER_PLAYLISTS", []);
 };
 
-const setCurrentPlaylist = ({ commit }, playlist) => {
+const setCurrentPlaylist = ({ commit, dispatch }, playlist) => {
+  dispatch("setSuccess", playlist.name + " selected for editing");
   commit("SET_CURRENT_PLAYLIST", playlist);
 };
 
@@ -71,12 +72,15 @@ const addSongsToPlaylist = async ({ dispatch, rootState, state }, songs) => {
   }
 };
 
-const loadPlaylist = async ({ dispatch, rootState, commit }, playlistId) => {
-  //it is currently necessary to clear the graph because the history is used and the history stores only new nodes
-  //which means that if a "playlist node" was already in the graph it will not be expanded properly
+const loadPlaylist = async ({ dispatch, rootState, commit }, playlist) => {
+  // it is currently necessary to clear the graph because the history is used and the history stores only new nodes
+  // which means that if a "playlist node" was already in the graph it will not be expanded properly
+  //
+  const playlistId = playlist.id;
   commit("CLEAR_GRAPH");
+  dispatch("setMessage", "loading playlist " + playlist.name);
 
-  //get songs
+  // get songs
   const result = await SpotifyService.getSongsFromPlaylist(
     rootState.authentication.accessToken,
     playlistId,
