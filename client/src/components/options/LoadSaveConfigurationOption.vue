@@ -1,55 +1,36 @@
 <template>
   <div class="loadSave">
-    <div class="storeActions">
-      <div id="autocomplete">
-        <v-autocomplete
-          v-model="loadName"
-          label="configurations"
-          :items="configurationNames"
-        ></v-autocomplete>
-      </div>
-      <input
-        id="loadInput"
-        ref="loadInput"
-        type="file"
-        @change="previewFiles"
-        style="display: none"
-      />
-      <v-icon
-        id="delete"
-        @click="deleteConfiguration()"
-        class="icon"
-        color="black"
-        icon="mdi-delete-outline"
-      />
-      <button
-        id="load"
-        class="actionButton"
-        @click="loadConfigurationFromIndexedDb(loadName)"
-      >
+    <div id="autocomplete">
+      <!-- TODO: create autocomplete -->
+      <input type="text" v-model="configName" label="configurations" />
+      <ul>
+        <li v-for="config in filteredConfigurationNames" :key="config" v-on:click="configName = config">
+          {{ config }}
+        </li>
+      </ul>
+    </div>
+    <div class="actions">
+      <input id="loadInput" ref="loadInput" type="file" @change="previewFiles" style="display: none" />
+      <button id="load" class="btn" @click="loadConfigurationFromIndexedDb(configName)">
         Load
       </button>
+      <button class="btn" id="upload" @click="uploadFile">Load from File</button>
     </div>
-    <div>
-      <v-text-field
-        v-model="saveName"
-        placeholder="configuration name"
-      ></v-text-field>
-      <a
-        id="download"
-        ref="downloadButton"
-        v-show="false"
-        @click="trackDownload"
-      ></a>
-      <button v-on:click="saveConfiguration">Download</button>
-      <button class="confirmButton" v-on:click="storeConfig(saveName)">
-        Save
+
+    <div class="actions">
+      <a id="download" ref="downloadButton" v-show="false" @click="trackDownload"></a>
+      <button class="btn" v-on:click="storeConfig(configName)">Save</button>
+      <button class="btn" v-on:click="saveConfiguration">Download</button>
+    </div>
+    <div class="actions">
+      <button class="icon-btn">
+        <v-icon id="delete" @click="deleteConfiguration()" class="icon" name="md-delete"
+          title="delete configuration from browser" />
+      </button>
+      <button class="btn" v-on:click="reimportConfiguration" title="reset current configuration to default">
+        Reset
       </button>
     </div>
-    <button id="reset" v-on:click="reimportConfiguration">
-      Reset Configuration
-    </button>
-    <button id="upload" @click="uploadFile">Load from file</button>
   </div>
 </template>
 <script>
@@ -85,7 +66,7 @@ export default {
       }
     },
     generateConfigurationFileName: function () {
-      return this.saveName + "_config.json";
+      return this.configName + "_config.json";
     },
     startDownloadOfUrl: function (downloadRef, url, downloadFileName) {
       const link = downloadRef;
@@ -104,17 +85,17 @@ export default {
       );
     },
     deleteConfiguration: function () {
-      if (this.loadName.length > 0) {
-        this.removeConfigurationFromIndexedDb(this.loadName);
-        this.loadName = "";
+      if (this.configName.length > 0) {
+        this.removeConfigurationFromIndexedDb(this.configName);
+        this.configName = "";
       }
     },
-    loadFromIndexedDb(loadName) {
-      this.loadConfigurationFromIndexedDb(loadName);
+    loadFromIndexedDb(configName) {
+      this.loadConfigurationFromIndexedDb(configName);
     },
-    trackDownload() {},
-    storeConfig(saveName) {
-      this.storeConfiguration(saveName);
+    trackDownload() { },
+    storeConfig(configName) {
+      this.storeConfiguration(configName);
     },
     uploadFile() {
       this.$refs.loadInput.click();
@@ -126,45 +107,35 @@ export default {
       configurationNames: (state) =>
         state.configuration_io.storedConfigurationNames,
     }),
+    filteredConfigurationNames() {
+      if (!this.configName) return this.configurationNames
+      return this.configurationNames.filter(c => c.match(this.configName))
+    }
   },
   data: () => ({
     configFile: "",
-    loadName: "",
-    saveName: "",
+    configName: "",
   }),
 };
 </script>
 <style scoped>
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
 .loadSave {
-  display: grid;
-  grid-template-rows: 1fr 1fr 2rem;
-  grid-gap: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
 }
-.confirmButton {
-  float: right;
-}
-#load {
-  grid-area: storage;
-}
-#delete {
-  grid-area: delete;
-  align-self: center;
-  padding-left: 25%;
-}
+
 #autocomplete {
-  grid-area: input;
-}
-#upload {
-  margin: 0;
-}
-.storeActions {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 30px;
-  grid-template-areas:
-    "input input input delete"
-    ". . storage storage";
-}
-.actionButton {
-  margin: 0 !important;
+  display: flex;
+  flex-direction: column;
 }
 </style>

@@ -1,11 +1,12 @@
 <template>
-  <v-snackbar v-model="show" :color="color" :timeout="10000">
+  <div v-if="show" class="snackbar" :class="color">
     {{ message }}
-    <button flat @click="retryExpand" v-if="message === 'expand failed'">
+    <button class="btn" @click="retryExpand" v-if="message === 'expand failed'">
       Retry
     </button>
-    <button flat color="orange" @click="show = false">Close</button>
-  </v-snackbar>
+    <button class="btn snackbar-close" @click="show = false">Close</button>
+    <div class="timer"></div>
+  </div>
 </template>
 
 <script>
@@ -39,9 +40,62 @@ export default {
           this.message = this.$store.state.snackbar.message;
 
           this.setMessage("");
+          setTimeout(() => {
+            this.show = false;
+          }, 5000);
         }
       },
     );
   },
 };
 </script>
+
+<style>
+.snackbar {
+  width: 90%;
+  position: absolute;
+  z-index: 2000;
+  background-color: #424242;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  margin: 5%;
+  box-shadow: white;
+  border-radius: 5px;
+}
+.failure {
+  border: 1px solid red;
+}
+.neutral {
+  border: 1px solid white;
+}
+.success {
+  border: 1px solid green;
+}
+.snackbar-close {
+  align-self: end;
+}
+
+/* The animation code */
+@keyframes shrink {
+  to {
+    width: 0;
+  }
+}
+.timer {
+  background-color: #2d9cdb;
+  border-radius: 2px;
+  height: 2px;
+  width: 60%;
+  animation-name: shrink;
+  animation-duration: 5s;
+  position: absolute;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  margin: auto;
+}
+</style>
