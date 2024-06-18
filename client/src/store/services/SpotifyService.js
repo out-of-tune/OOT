@@ -124,9 +124,9 @@ class SpotifyService {
     return this.getFromAPI(`tracks/`, token, { ids: sidsString });
   }
 
-  addSongToPlaylist(token, playlistId, songUri) {
+  addSongToPlaylist(token, playlistId, song) {
     return this.sendToAPI(`playlists/${playlistId}/tracks`, token, {
-      uris: [songUri],
+      uris: [song.uri],
     });
   }
   async addSongsToPlaylist(token, playlistId, songUris) {
@@ -167,8 +167,8 @@ class SpotifyService {
       return r;
     } else return result;
   }
-  play(token, uris) {
-    this.putToApi("me/player/play", token, { uris });
+  async play(token, uris) {
+    return this.putToApi("me/player/play", token, { uris });
   }
 }
 export default new SpotifyService();

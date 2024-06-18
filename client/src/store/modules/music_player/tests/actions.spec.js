@@ -95,12 +95,14 @@ describe("insertInQueue", () => {
 });
 describe("addToQueue", () => {
   let commit;
+  let dispatch;
   beforeEach(() => {
     commit = vi.fn();
+    dispatch = vi.fn();
   });
   it("commits ADD_TO_QUEUE", () => {
     const song = { id: "12" };
-    addToQueue({ commit }, song);
+    addToQueue({ commit, dispatch }, song);
     expect(commit).toHaveBeenCalledWith("ADD_TO_QUEUE", song);
   });
 });

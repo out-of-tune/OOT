@@ -269,6 +269,7 @@ export default new Vuex.Store({
     visibleItems: {
       queueDisplay: false,
       nodeInfo: true,
+      addToQueueNotification: false,
     },
     activeMode: "expand",
     searchObject: {
