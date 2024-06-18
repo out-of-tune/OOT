@@ -1,0 +1,27 @@
+name: Pipeline for Merge into Release
+
+on:
+  push:
+    branches: [mock_release]
+
+jobs:
+  test:
+    uses: ./.github/workflows/tests.yml
+  deploy-release:
+    needs: test
+    uses: ./.github/workflows/docker-deploy.yml
+    with:
+      version: latest
+  restart-services:
+    needs: deploy-release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for Webhooks Server Status
+        run: curl -f https://d.out-of-tune.org/oot/webhook/status
+      - name: Invoke Deployment Hook
+        uses: distributhor/workflow-webhook@v3
+        env:
+          webhook_url: https://d.out-of-tune.org/oot/webhook/github
+          webhook_secret: ${{ secrets.WEBHOOK_SECRET }}
+          event_name: deploy
+          data: '{ "spaces": 2 }'
