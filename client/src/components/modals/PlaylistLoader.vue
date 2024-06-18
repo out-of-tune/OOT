@@ -105,7 +105,7 @@ export default {
       this.loadPlaylist(splitString[splitString.length - 1]);
     },
     loadPlaylistFromUser() {
-      this.loadPlaylist(this.selectedPlaylist.id);
+      this.loadPlaylist(this.selectedPlaylist);
     },
     loginUser() {
       this.login();
