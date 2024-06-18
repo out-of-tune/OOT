@@ -47,8 +47,13 @@ describe("getCurrentUsersPlaylists", () => {
 describe("setCurrentPlaylist", () => {
   let commit = vi.fn();
   let playlist = { name: "playlist 1" };
+  let dispatch;
+  beforeEach(() => {
+    dispatch = vi.fn();
+  });
+
   it("sets current playlist", () => {
-    setCurrentPlaylist({ commit }, playlist);
+    setCurrentPlaylist({ commit, dispatch }, playlist);
     expect(commit).toHaveBeenCalledWith("SET_CURRENT_PLAYLIST", {
       name: "playlist 1",
     });
@@ -89,25 +94,25 @@ describe("addSongsToPlaylist", () => {
   it("adds Songs to playlist", async () => {
     SpotifyService.addSongsToPlaylist = vi.fn();
     await addSongsToPlaylist({ dispatch, rootState, state }, [
-      "SongURIString",
-      "AnotherSongURI",
+      { name: "song1", uri: "uri1" },
+      { name: "song2", uri: "uri2" },
     ]);
     expect(SpotifyService.addSongsToPlaylist).toHaveBeenCalledWith(
       "TestToken",
       "12345",
-      ["SongURIString", "AnotherSongURI"],
+      ["uri1", "uri2"],
     );
   });
   it("sets success message", async () => {
     SpotifyService.addSongsToPlaylist = vi.fn();
     SpotifyService.addSongsToPlaylist.mockReturnValue("Success");
     await addSongsToPlaylist({ dispatch, rootState, state }, [
-      "SongURIString",
-      "AnotherSongURI",
+      { name: "song1", uri: "uri1" },
+      { name: "song2", uri: "uri2" },
     ]);
     expect(dispatch).toHaveBeenCalledWith(
-      "setMessage",
-      "Added 2 songs to sixSevenEight",
+      "setSuccess",
+      "Added 'song1', 'song2' to sixSevenEight",
     );
   });
   it("errors when no playlist is set", async () => {
@@ -165,15 +170,15 @@ describe("loadPlaylist", () => {
     });
   });
   it("calls Spotify API correctly", async () => {
-    await loadPlaylist({ dispatch, rootState, commit }, "12345");
+    await loadPlaylist({ dispatch, rootState, commit }, { id: "12345", name: "testPlaylist" });
     expect(SpotifyService.getSongsFromPlaylist).toHaveBeenCalledWith(
       "TestToken",
       "12345",
     );
   });
   it("adds song nodes to graph", async () => {
-    await loadPlaylist({ dispatch, rootState, commit }, "12345");
-    expect(dispatch).toHaveBeenNthCalledWith(1, "addToGraph", {
+    await loadPlaylist({ dispatch, rootState, commit }, { id: "12345", name: "testPlaylist" });
+    expect(dispatch).toHaveBeenNthCalledWith(2, "addToGraph", {
       nodes: [
         {
           id: "Song/12345",
@@ -185,7 +190,12 @@ describe("loadPlaylist", () => {
     });
   });
   it("calls expandAction three times", async () => {
-    await loadPlaylist({ dispatch, rootState, commit }, "12345");
-    expect(dispatch).toHaveBeenCalledTimes(4);
+    await loadPlaylist({ dispatch, rootState, commit }, { id: "12345", name: "testPlaylist" });
+    expect(dispatch).toHaveBeenNthCalledWith(3, "expandAction",
+      expect.any(Object));
+    expect(dispatch).toHaveBeenNthCalledWith(4, "expandAction",
+      expect.any(Object));
+    expect(dispatch).toHaveBeenNthCalledWith(5, "expandAction",
+      expect.any(Object));
   });
 });

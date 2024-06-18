@@ -47,7 +47,7 @@ const printSongList = (songs) => {
     if (index === songs.length - 1) {
       return previous + "'" + current.name + "'";
     }
-    return previous + "''" + current.name + "' , ";
+    return previous + "'" + current.name + "', ";
   }, "");
   return str;
 };
