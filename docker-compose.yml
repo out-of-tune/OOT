@@ -12,7 +12,7 @@ services:
     build:
       context: ./client
       args:
-        - PROXY_URI=${PROXY_URI}
+        - VITE_PROXY_URI=${VITE_PROXY_URI}
         - BASE_URL=${APP_MOUNT_PATH}
         - NODE_ENV=${NODE_ENV}
     depends_on:

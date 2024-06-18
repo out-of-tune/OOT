@@ -1,7 +1,7 @@
 <template>
   <Popper>
-    <button class="container action tooltip">
-      <v-icon class="icon" color="white" icon="mdi-select-all" />
+    <button id="selection-button" class="icon-btn tooltip">
+      <v-icon class="icon" color="white" name="md-selectall" />
       <span class="tooltiptext">SELECTION</span>
     </button>
     <template #content>
@@ -12,27 +12,22 @@
 
             <div>
               <div class="actions">
-                <btn class="btn" @click="collapse">Collapse</btn>
-                <btn class="btn" @click="expand">Expand</btn>
+                <button class="btn" @click="collapse">Collapse</button>
+                <button class="btn" @click="expand">Expand</button>
 
-                <btn class="btn" @click="remove">Remove</btn>
-                <btn dark class="btn" @click="pin(selectedNodes)">Pin</btn>
-                <btn
-                  dark
-                  small
-                  outline
-                  class="btn"
-                  @click="unpin(selectedNodes)"
-                  >Unpin</btn
-                >
-                <btn class="btn" @click="invert">Invert</btn>
-                <btn class="btn" @click="sortNodes">sort</btn>
-                <btn class="btn" @click="addToQueue">Add to queue</btn>
-                <btn class="btn" @click="openPlaylistChooser"
-                  >Add to playlist</btn
-                >
+                <button class="btn" @click="remove">Remove</button>
+                <button class="btn" @click="pin(selectedNodes)">Pin</button>
+                <button class="btn" @click="unpin(selectedNodes)">Unpin</button>
+                <button class="btn" @click="invert">Invert</button>
+                <button class="btn" @click="sortNodes">sort</button>
+                <button class="btn" @click="addToQueue">Add to queue</button>
+                <button class="btn" @click="addSelectedSongsToPlaylist">
+                  Add to playlist
+                </button>
               </div>
-              <btn class="btn-orange" @click="showItems">show items</btn>
+              <button class="btn btn-orange" @click="showItems">
+                show items
+              </button>
             </div>
           </div>
         </div>
@@ -51,7 +46,6 @@ export default defineComponent({
   components: {
     Popper,
   },
-  data: () => {},
   methods: {
     ...mapActions([
       "changeSelectionModalState",
@@ -64,6 +58,7 @@ export default defineComponent({
       "unpinNodes",
       "invertSelection",
       "applyNodeCoordinateSystemLine",
+      "addSelectedSongsToPlaylist",
     ]),
     collapse() {
       this.collapseSelectedNodes();
@@ -93,6 +88,9 @@ export default defineComponent({
     addToQueue() {
       this.addSelectedSongsToQueue();
     },
+    addToPlaylist() {
+      this.addSelectedSongsToPlaylist();
+    },
     showItems() {
       this.changeSelectionModalState();
     },
@@ -112,46 +110,11 @@ export default defineComponent({
   background-color: #252525;
 }
 
-.tooltip {
-  position: relative;
-  display: inline-block;
-}
-.tooltip:hover .tooltiptext {
-  visibility: visible;
-}
-
-.tooltip .tooltiptext {
-  visibility: hidden;
-  color: #fff;
-  text-align: center;
-  padding: 0.5rem;
-  background-color: #0d676d;
-
-  position: absolute;
-  z-index: 1;
-  top: -1px;
-  right: 110%;
-}
-
-.container:hover {
-  background-color: #1dcdda66;
-}
-
-.container:active {
-  background-color: #1dcddaff;
-}
-
-.container {
-  background-color: #da6a1dff;
-  padding: 3px;
-  cursor: pointer;
-  height: 30px;
-  align-self: flex-start;
-}
-
 .actions {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .menu {

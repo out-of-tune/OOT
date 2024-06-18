@@ -15,7 +15,7 @@
         size="24px"
         id="pauseIcon"
         color="white"
-        icon="mdi-pause"
+        name="md-pause"
       />
       <v-icon
         v-if="pendingRequestCount > 0"
@@ -28,13 +28,13 @@
             ? 'yellow'
             : 'green'
         "
-        icon="mdi-timer-sand-empty"
+        name="ri-loader-fill"
       />
       <b style="color: red" v-if="pendingRequestCount > 100">{{
         pendingRequestCount
       }}</b>
       <b style="color: white" v-if="groupMoveActive">M</b>
-      <v-icon style="color: white" v-if="highlight" icon="mdi-flashlight" />
+      <v-icon style="color: white" v-if="highlight" name="md-flashlighton" />
     </div>
   </div>
 </template>
@@ -42,7 +42,7 @@
 <script>
 import { defineAsyncComponent } from "vue";
 import { mapActions, mapState } from "vuex";
-import NodeInfo from "@/components/popovers/NodeInfo.vue";
+import NodeInfo from "@/components/popovers/NodeInfo/NodeInfo.vue";
 const QueueDisplay = defineAsyncComponent(() =>
   import("@/components/popovers/QueueDisplay.vue"),
 );

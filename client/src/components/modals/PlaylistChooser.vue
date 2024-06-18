@@ -2,7 +2,7 @@
   <div>
     <div v-if="open" id="playlistChooser" class="modal">
       <div class="card">
-        <v-icon @click="changePlaylistChooserState(false)" icon="mdi-close" />
+        <v-icon @click="changePlaylistChooserState(false)" name="md-close" />
         <div class="playlist-box" v-if="loggedIn">
           <div>
             <h2>PLAYLISTS</h2>
@@ -20,20 +20,13 @@
           <div>
             <h2>Playlist</h2>
             {{ currentPlaylist.name }}
-            <button small @click="addToPlaylist">add to playlist</button>
+            <button @click="addToPlaylist">add to playlist</button>
           </div>
         </div>
         <div v-else class="login-box">
           <div class="content">
             <h1>You have to be logged in to Spotify to access playlists</h1>
-            <button
-              small
-              v-if="!loggedIn"
-              id="login"
-              outline
-              color="#ffffff"
-              v-on:click="login"
-            >
+            <button v-if="!loggedIn" id="login" v-on:click="login">
               login
             </button>
           </div>
@@ -67,9 +60,11 @@ export default {
       "login",
     ]),
     async addToPlaylist() {
-      const songs = this.selectedNodes
-        .filter((node) => node.data.label === "song")
-        .map((node) => node.data.uri);
+      const songs = this.selectedNodes.filter(
+        (node) => node.data.label === "song",
+      );
+      console.log(this.selectedNodes);
+      console.log(songs);
       await this.addSongsToPlaylist(songs);
       this.changePlaylistChooserState(false);
     },

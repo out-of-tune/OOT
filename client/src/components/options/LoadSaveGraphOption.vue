@@ -2,11 +2,13 @@
   <div class="loadSave">
     <div class="storeActions">
       <div id="autocomplete">
-        <v-autocomplete
+        <!-- TODO: create autocomplete -->
+        <input
+          type="text"
           v-model="loadName"
           label="graphs"
           :items="graphNames"
-        ></v-autocomplete>
+        />
       </div>
       <input
         id="loadInput"
@@ -15,32 +17,23 @@
         type="file"
         @change="previewFiles"
       />
-      <v-icon
-        id="delete"
-        @click="deleteGraph()"
-        class="icon"
-        color="black"
-        icon="mdi-delete-outline"
-      />
-      <button
-        id="load"
-        class="actionButton"
-        @click="loadFromIndexedDb(loadName)"
-      >
+      <button id="load" class="btn" @click="loadFromIndexedDb(loadName)">
         Load
       </button>
-    </div>
-    <div>
-      <v-text-field v-model="saveName" placeholder="graph name"></v-text-field>
-      <a id="download" ref="downloadButton" v-show="false"></a>
-      <button v-on:click="saveGraph">Download</button>
-      <button class="confirmButton" @click="saveGraphToIndexedDb(saveName)">
-        Save
+      <button class="btn" @click="uploadFile">Load from file</button>
+      <button class="icon-btn">
+        <v-icon
+          id="delete"
+          @click="deleteGraph()"
+          class="icon"
+          name="md-delete"
+        />
       </button>
     </div>
-    <button id="upload" class="actionButton" @click="uploadFile">
-      Load from file
-    </button>
+    <input type="text" v-model="saveName" placeholder="graph name" />
+    <a id="download" ref="downloadButton" v-show="false"></a>
+    <button class="btn" v-on:click="saveGraph">Download</button>
+    <button class="btn" @click="saveGraphToIndexedDb(saveName)">Save</button>
   </div>
 </template>
 <script>
@@ -114,43 +107,20 @@ export default {
   }),
 };
 </script>
+
 <style scoped>
-.loadSave {
-  display: grid;
-  grid-template-rows: 1fr 1fr;
-  grid-gap: 0.5rem;
+.storeActions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-#load {
-  grid-area: storage;
-}
-#delete {
-  grid-area: delete;
-  align-self: center;
-  padding-left: 25%;
-}
-.confirmButton {
-  float: right;
-}
-#autocomplete {
-  grid-area: input;
-}
-#upload {
-  margin: 0;
-}
-.storeActions {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-areas:
-    "input input input delete"
-    ". . storage storage";
-}
-.actionButton {
-  margin: 0 !important;
-}
-.icon {
-  margin: 0;
-  padding: 0;
-  width: 24px;
+.loadSave {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+  align-items: center;
 }
 </style>
