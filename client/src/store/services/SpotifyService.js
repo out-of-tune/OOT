@@ -167,8 +167,8 @@ class SpotifyService {
       return r;
     } else return result;
   }
-  play(token, uris) {
-    this.putToApi("me/player/play", token, { uris });
+  async play(token, uris) {
+    return this.putToApi("me/player/play", token, { uris });
   }
 }
 export default new SpotifyService();

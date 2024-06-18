@@ -6,11 +6,11 @@ const getSongSamples = async ({ commit, rootState, dispatch }, node) => {
   const fetchData =
     node.data.label === "artist"
       ? (sid, token) => {
-          return [SpotifyService.getSongSamplesFromArtist(token, sid)];
-        }
+        return [SpotifyService.getSongSamplesFromArtist(token, sid)];
+      }
       : (sid, token) => {
-          return [SpotifyService.getSongsFromAlbum(token, sid)];
-        };
+        return [SpotifyService.getSongsFromAlbum(token, sid)];
+      };
 
   const result = await handleTokenError(
     fetchData,
@@ -105,10 +105,14 @@ const setAddToQueueNotifaction = ({ commit }, visible) => {
   commit("SET_ADD_TO_QUEUE_NOTIFICATION_VISIBILITY", visible);
 };
 
-const playOnSpotify = ({ rootState, dispatch }, uris) => {
+const playOnSpotify = async ({ rootState, dispatch }, uris) => {
   dispatch("setMessage", "Trying to play queue on Spotify");
   if (rootState.authentication.loginState) {
-    SpotifyService.play(rootState.authentication.accessToken, uris);
+    try {
+      await SpotifyService.play(rootState.authentication.accessToken, uris);
+    } catch (error) {
+      dispatch("setError", new Error(error.response.data.error.message))
+    }
   }
 };
 
