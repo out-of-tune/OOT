@@ -514,6 +514,7 @@ function setNodesToNearPosition(
   const layout = rootState.mainGraph.renderState.layout;
   if (!layout) return;
   const xOffset = (Math.round(Math.random() * 100) + 1) / 10;
+  const is3d = rootState.mainGraph.renderState.Renderer?.mode === "3d";
   links.forEach((link, index) => {
     const toNode = rootState.mainGraph.Graph.getNode(link.toId);
     const neighborLinks = toNode?.links ?? [];
@@ -525,18 +526,22 @@ function setNodesToNearPosition(
           : neighborLink.fromId,
       ),
     );
-    const sum = positions.reduce(
-      (acc, position) => ({ x: acc.x + position.x, y: acc.y + position.y }),
-      {
-        x: 0,
-        y: 0,
-      },
+    const sum = positions.reduce<{ x: number; y: number; z: number }>(
+      (acc, position) => ({
+        x: acc.x + position.x,
+        y: acc.y + position.y,
+        z: acc.z + (position.z ?? 0),
+      }),
+      { x: 0, y: 0, z: 0 },
     );
     commit("SET_NODE_POSITION", {
       nodeId: link.toId,
       xPosition:
         sum.x / positions.length + Math.cos((index + 1) / xOffset) * 200,
       yPosition: sum.y / positions.length + Math.sin((index + 1) / 5) * 200,
+      ...(is3d
+        ? { zPosition: sum.z / positions.length + (Math.random() - 0.5) * 200 }
+        : {}),
     });
   });
 }

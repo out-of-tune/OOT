@@ -1,5 +1,4 @@
 import type { ActionTree } from "vuex";
-import Flatbush from "flatbush";
 import { chunk, isEqual, uniq } from "lodash-es";
 import {
   getAllLinks,
@@ -21,29 +20,21 @@ type Ctx = Context<SelectionState>;
 /** Two hex digits of alpha for the selection highlight. */
 const OPACITY = { solid: "ff", half: "88", faded: "44" } as const;
 
-/** Nodes whose box overlaps the rectangle between the two graph points. */
-function getNodesWithinBoundaries(
-  rootState: RootState,
-  topLeft: Position,
-  bottomRight: Position,
-) {
-  const nodes = getAllNodes(rootState);
-  if (nodes.length === 0) return [];
-  const index = new Flatbush(nodes.length);
-  nodes.forEach((node) => {
-    const ui = getNodeUi(rootState, node);
-    const half = ui.size / 2;
-    index.add(
-      ui.position.x - half,
-      ui.position.y - half,
-      ui.position.x + half,
-      ui.position.y + half,
+/** Nodes whose screen position is inside the rectangle. Works for the 2D and the 3D view. */
+function getNodesInArea(rootState: RootState, area: SelectedArea) {
+  const renderer = rootState.mainGraph.renderState.Renderer;
+  if (!renderer) return [];
+  const graphics = renderer.getGraphics();
+  return getAllNodes(rootState).filter((node) => {
+    const point = graphics.toScreen(getNodeUi(rootState, node).position);
+    return (
+      point.visible &&
+      point.x >= area.x &&
+      point.x <= area.x + area.width &&
+      point.y >= area.y &&
+      point.y <= area.y + area.height
     );
   });
-  index.finish();
-  return index
-    .search(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
-    .map((id) => nodes[id]);
 }
 
 function getSelectedNodes(addToSelection: boolean, state: SelectionState) {
@@ -89,22 +80,7 @@ export const actions = {
     { commit, dispatch, rootState }: Ctx,
     { area }: { area: SelectedArea },
   ) {
-    const renderer = rootState.mainGraph.renderState.Renderer;
-    if (!renderer) return;
-    const graphics = renderer.getGraphics();
-    const topLeft = graphics.transformClientToGraphCoordinates({
-      x: area.x,
-      y: area.y,
-    });
-    const bottomRight = graphics.transformClientToGraphCoordinates({
-      x: area.x + area.width,
-      y: area.y + area.height,
-    });
-    const selectedNodes = getNodesWithinBoundaries(
-      rootState,
-      topLeft,
-      bottomRight,
-    );
+    const selectedNodes = getNodesInArea(rootState, area);
     const { temporarySelectedNodes, selectedNodes: currentSelection } =
       rootState.selection;
     if (isEqual(selectedNodes, temporarySelectedNodes)) return;
@@ -372,12 +348,14 @@ export const actions = {
     const newPosition = getNodePosition(rootState, originNode);
     const dx = oldOriginPosition.x - newPosition.x;
     const dy = oldOriginPosition.y - newPosition.y;
+    const dz = (oldOriginPosition.z ?? 0) - (newPosition.z ?? 0);
     nodesWithPositionToMove.forEach(({ node, position }) => {
       if (node.id === originNode.id) return;
       commit("SET_NODE_POSITION", {
         nodeId: node.id,
         xPosition: position.x - dx,
         yPosition: position.y - dy,
+        ...(position.z === undefined ? {} : { zPosition: position.z - dz }),
       });
     });
   },

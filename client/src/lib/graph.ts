@@ -1,5 +1,5 @@
 import { eq, gt, gte, lt, lte } from "lodash-es";
-import type { NodeUI } from "vivagraphjs";
+import type { NodeUI } from "@/lib/view/contract";
 import type {
   GraphLink,
   GraphNode,

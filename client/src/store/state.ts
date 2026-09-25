@@ -147,6 +147,7 @@ export const createRootState = (): BaseState => ({
     addToQueueNotification: false,
   },
   activeMode: "expand",
+  viewMode: "2d",
   searchObject: {
     valid: false,
     errors: [],

@@ -88,6 +88,7 @@ export const actions = {
         nodeId: entry.node.id,
         xPosition: entry.position.x,
         yPosition: entry.position.y,
+        zPosition: entry.position.z,
       });
       if (entry.pinned) commit("PIN_NODE", entry.node);
     });

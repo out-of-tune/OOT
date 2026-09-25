@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { getAllNodes, getNodePosition } from "@/lib/graph";
+import { getAllNodes } from "@/lib/graph";
 import { actions, placeNodeLabel } from "../actions";
 vi.mock("@/lib/graph");
 
@@ -140,13 +140,15 @@ describe("setNodeLabels", () => {
 describe("placeNodeLabels", () => {
   let commit;
   let rootState;
+  const toScreen = vi.fn();
   beforeEach(() => {
     commit = vi.fn();
+    toScreen.mockReset();
     rootState = {
       mainGraph: {
         renderState: {
           Renderer: {
-            getGraphics: vi.fn(),
+            getGraphics: () => ({ toScreen }),
           },
         },
       },
@@ -154,27 +156,23 @@ describe("placeNodeLabels", () => {
         nodeLabels: {},
       },
     };
+    Object.defineProperty(window, "innerWidth", {
+      value: 1000,
+      configurable: true,
+    });
+    Object.defineProperty(window, "innerHeight", {
+      value: 1000,
+      configurable: true,
+    });
   });
   it("doesn't do anything when node label doesn't exist", () => {
-    const transformClientToGraphCoordinates = vi.fn();
-    transformClientToGraphCoordinates
-      .mockReturnValueOnce({ x: 100, y: 100 })
-      .mockReturnValueOnce({ x: 1000, y: 1000 });
-    rootState.mainGraph.renderState.Renderer.getGraphics.mockReturnValue({
-      transformClientToGraphCoordinates,
-    });
+    toScreen.mockReturnValue({ x: -50, y: 20, visible: true });
     const ui = { node: { id: "Genre/123" } };
     placeNodeLabel({ x: 1, y: 1 }, ui, rootState, commit);
     expect(commit).not.toHaveBeenCalled();
   });
-  it("deletes nodeLabel when it exists", () => {
-    const transformClientToGraphCoordinates = vi.fn();
-    transformClientToGraphCoordinates
-      .mockReturnValueOnce({ x: 100, y: 100 })
-      .mockReturnValueOnce({ x: 1000, y: 1000 });
-    rootState.mainGraph.renderState.Renderer.getGraphics.mockReturnValue({
-      transformClientToGraphCoordinates,
-    });
+  it("deletes nodeLabel when the node leaves the screen", () => {
+    toScreen.mockReturnValue({ x: 20, y: 20, visible: false });
     rootState.graph_camera.nodeLabels["Genre/123"] = {
       id: "Genre/123",
       data: "someData",
@@ -187,17 +185,7 @@ describe("placeNodeLabels", () => {
     });
   });
   it("adds label when node is on screen", () => {
-    const transformClientToGraphCoordinates = vi.fn();
-    const transformGraphToClientCoordinates = vi.fn();
-    transformClientToGraphCoordinates
-      .mockReturnValueOnce({ x: 100, y: 100 })
-      .mockReturnValueOnce({ x: 1000, y: 1000 });
-    transformGraphToClientCoordinates.mockReturnValueOnce({ x: 150, y: 150 });
-
-    rootState.mainGraph.renderState.Renderer.getGraphics.mockReturnValue({
-      transformClientToGraphCoordinates,
-      transformGraphToClientCoordinates,
-    });
+    toScreen.mockReturnValue({ x: 150, y: 150, visible: true });
     const ui = {
       node: {
         id: "Genre/125",
@@ -227,117 +215,15 @@ describe("placeNodeLabels", () => {
 });
 
 describe("fitGraphToNodes", () => {
-  let rootState;
-  let commit;
-  beforeEach(() => {
-    commit = vi.fn();
-    rootState = {};
-    getNodePosition.mockClear();
-  });
   it("does nothing when no nodes are in the call", () => {
-    fitGraphToNodes({ commit, rootState }, []);
+    const commit = vi.fn();
+    fitGraphToNodes({ commit, rootState: {} }, []);
     expect(commit).not.toHaveBeenCalled();
   });
-  it("centers graph", () => {
-    getNodePosition
-      .mockReturnValueOnce({ x: 200, y: 200 })
-      .mockReturnValue({ x: 100, y: 100 });
-    Object.defineProperty(
-      global.window.HTMLBodyElement.prototype,
-      "clientWidth",
-      { value: 1000, configurable: true },
-    );
-    Object.defineProperty(
-      global.window.HTMLBodyElement.prototype,
-      "clientHeight",
-      { value: 1000, configurable: true },
-    );
-
-    fitGraphToNodes({ commit, rootState }, [{ id: 1 }, { id: 2 }, { id: 3 }]);
-    expect(commit).toHaveBeenNthCalledWith(1, "MOVE_TO", { x: 150, y: 150 });
-  });
-  it("zooms to scale 2 when only one node is given", () => {
-    getNodePosition.mockReturnValue({ x: 100, y: 100 });
-
-    Object.defineProperty(
-      global.window.HTMLBodyElement.prototype,
-      "clientWidth",
-      { value: 500, configurable: true },
-    );
-    Object.defineProperty(
-      global.window.HTMLBodyElement.prototype,
-      "clientHeight",
-      { value: 500, configurable: true },
-    );
-
-    fitGraphToNodes({ commit, rootState }, [{ id: 1 }]);
-
-    expect(commit).toHaveBeenNthCalledWith(2, "ZOOM_TO_SCALE", 2);
-  });
-  it("zooms to desired scale", () => {
-    getNodePosition.mockReturnValueOnce({ x: 100, y: 100 });
-    getNodePosition.mockReturnValueOnce({ x: 700, y: 700 });
-
-    Object.defineProperty(
-      global.window.HTMLBodyElement.prototype,
-      "clientWidth",
-      { value: 500, configurable: true },
-    );
-    Object.defineProperty(
-      global.window.HTMLBodyElement.prototype,
-      "clientHeight",
-      { value: 500, configurable: true },
-    );
-
-    const graphSize = 600;
-    const screenSize = 500;
-    const desiredScale = screenSize / graphSize;
-
-    fitGraphToNodes({ commit, rootState }, [
-      { id: "Node/1" },
-      { id: "Node/2" },
-    ]);
-
-    expect(commit).toHaveBeenNthCalledWith(
-      2,
-      "ZOOM_TO_SCALE",
-      desiredScale - desiredScale / 4,
-    );
-  });
-  it("zooms to desired scale, but no more than 2", () => {
-    getNodePosition.mockReturnValueOnce({ x: 100, y: 100 });
-    getNodePosition.mockReturnValueOnce({ x: 150, y: 150 });
-    Object.defineProperty(
-      global.window.HTMLBodyElement.prototype,
-      "clientWidth",
-      { value: 500, configurable: true },
-    );
-    Object.defineProperty(
-      global.window.HTMLBodyElement.prototype,
-      "clientHeight",
-      { value: 500, configurable: true },
-    );
-
-    const graphSize = 600;
-    const screenSize = 500;
-    const desiredScale = screenSize / graphSize;
-
-    fitGraphToNodes({ commit, rootState }, [
-      { id: "Node/1" },
-      { id: "Node/2" },
-    ]);
-
-    expect(commit).toHaveBeenNthCalledWith(2, "ZOOM_TO_SCALE", 2);
-  });
-  it("moves to 0 and sets zoom level to 2 when graph size is 0", () => {
-    getAllNodes.mockReturnValue([{ id: "Node/1" }, { id: "Node/2" }]);
-    getNodePosition.mockReturnValueOnce({ x: 0, y: 0 });
-    getNodePosition.mockReturnValueOnce({ x: 0, y: 0 });
-    fitGraphToNodes({ commit, rootState }, [
-      { id: "Node/1" },
-      { id: "Node/2" },
-    ]);
-    expect(commit).toHaveBeenCalledWith("ZOOM_TO_SCALE", 2);
-    expect(commit).toHaveBeenCalledWith("MOVE_TO", { x: 0, y: 0 });
+  it("asks the renderer to fit the nodes", () => {
+    const commit = vi.fn();
+    const nodes = [{ id: "Node/1" }, { id: "Node/2" }];
+    fitGraphToNodes({ commit, rootState: {} }, nodes);
+    expect(commit).toHaveBeenCalledWith("FIT_TO_NODES", nodes);
   });
 });

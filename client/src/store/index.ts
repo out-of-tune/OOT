@@ -101,6 +101,12 @@ const persistTour = new VuexPersistence<RootState>({
     generalSettingsMutations.includes(mutation.type),
 });
 
+const persistViewMode = new VuexPersistence<RootState>({
+  key: "oot_view",
+  reducer: (state) => ({ viewMode: state.viewMode }),
+  filter: (mutation: Mutation) => mutation.type === "SET_VIEW_MODE",
+});
+
 export const key: InjectionKey<Store<RootState>> = Symbol("store");
 
 export const store = createStore<RootState>({
@@ -110,6 +116,7 @@ export const store = createStore<RootState>({
     persistGraphNames.plugin,
     persistConfigurationNames.plugin,
     persistTour.plugin,
+    persistViewMode.plugin,
     shareMutations<RootState>([
       ...userMutations,
       ...configurationMutations,

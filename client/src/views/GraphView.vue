@@ -121,24 +121,22 @@ let unsubscribe: (() => void) | undefined;
 onMounted(async () => {
   if (!container.value) return;
   store.dispatch("setGraphContainer", container.value);
-  store.dispatch("initGraph");
-  const graph = store.state.mainGraph.Graph;
-  graph.on("changed", () => (nodeCount.value = graph.getNodesCount()));
-  container.value.focus();
-  window.addEventListener("resize", onResize);
-
+  // Subscribe first, so the label zoom also follows renderers built by initGraph and by view switches.
   let zoomLevel = 1;
-  store.state.mainGraph.renderState.Renderer?.on("scale", () => {
-    const previous = zoomLevel;
-    zoomLevel =
-      store.state.mainGraph.renderState.Renderer?.getTransform().scale ?? 1;
-    if (zoomLevel > LABEL_ZOOM_THRESHOLD && previous <= LABEL_ZOOM_THRESHOLD)
-      store.dispatch("displayNodeLabels");
-    if (zoomLevel <= LABEL_ZOOM_THRESHOLD && previous > LABEL_ZOOM_THRESHOLD)
-      store.dispatch("removeNodeLabels");
-  });
-
+  const watchZoom = () => {
+    const renderer = store.state.mainGraph.renderState.Renderer;
+    zoomLevel = renderer?.getTransform().scale ?? 1;
+    renderer?.on("scale", (scale) => {
+      const previous = zoomLevel;
+      zoomLevel = scale;
+      if (scale > LABEL_ZOOM_THRESHOLD && previous <= LABEL_ZOOM_THRESHOLD)
+        store.dispatch("displayNodeLabels");
+      if (scale <= LABEL_ZOOM_THRESHOLD && previous > LABEL_ZOOM_THRESHOLD)
+        store.dispatch("removeNodeLabels");
+    });
+  };
   unsubscribe = store.subscribe((mutation) => {
+    if (mutation.type === "SET_RENDERER") watchZoom();
     if (LAYOUT_MUTATIONS.includes(mutation.type))
       store.dispatch("applyCoordinateSystems");
     if (NODE_RULE_MUTATIONS.includes(mutation.type)) {
@@ -148,6 +146,12 @@ onMounted(async () => {
     if (EDGE_RULE_MUTATIONS.includes(mutation.type))
       store.dispatch("applyEdgeColorConfiguration");
   });
+
+  await store.dispatch("initGraph");
+  const graph = store.state.mainGraph.Graph;
+  graph.on("changed", () => (nodeCount.value = graph.getNodesCount()));
+  container.value.focus();
+  window.addEventListener("resize", onResize);
 
   await authenticate();
 
@@ -173,6 +177,7 @@ onBeforeUnmount(() => {
       aria-label="Music graph. Click a node to expand it."
       class="fixed inset-0 overflow-hidden outline-none"
       @mousemove="onMouseMove"
+      @pointerdown="container?.focus()"
     >
       <NodeLabels :items="nodeLabels" />
     </div>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {
+  Box,
   CircleQuestionMark,
   Compass,
   ListVideo,
@@ -24,6 +25,17 @@ import type { ActiveMode } from "@/store/types";
 const store = useStore();
 const activeMode = computed(() => store.state.activeMode);
 const selectionOpen = ref(false);
+const viewMode = computed(() => store.state.viewMode);
+const switchingView = ref(false);
+
+async function toggleViewMode() {
+  switchingView.value = true;
+  try {
+    await store.dispatch("setViewMode", viewMode.value === "3d" ? "2d" : "3d");
+  } finally {
+    switchingView.value = false;
+  }
+}
 const saveOpen = ref(false);
 
 const modes: {
@@ -82,6 +94,20 @@ const openInNewTab = (path: string) =>
         <component :is="entry.icon" />
       </IconButton>
     </div>
+
+    <hr class="my-1 w-6 border-line" />
+
+    <IconButton
+      id="view-mode-button"
+      :label="
+        viewMode === '3d' ? 'Switch to the 2D view' : 'Switch to the 3D view'
+      "
+      :active="viewMode === '3d'"
+      :disabled="switchingView"
+      @click="toggleViewMode"
+    >
+      <Box />
+    </IconButton>
 
     <hr class="my-1 w-6 border-line" />
 

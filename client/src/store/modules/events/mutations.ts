@@ -9,9 +9,7 @@ export const mutations = {
     state.groupMoveActive = active;
   },
   SET_MOVE_ORIGIN_POSITION(state, position: Position | undefined) {
-    state.moveOriginPosition = position
-      ? { x: position.x, y: position.y }
-      : undefined;
+    state.moveOriginPosition = position ? { ...position } : undefined;
   },
   SET_AFFECTED_NODES_ORIGIN_POSITION(
     state,

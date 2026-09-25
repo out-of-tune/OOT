@@ -51,6 +51,8 @@ export interface GraphItems {
 export interface Position {
   x: number;
   y: number;
+  /** Depth, only in the 3D view. */
+  z?: number;
 }
 
 /** Serialized graph, used by download, IndexedDB and share. */

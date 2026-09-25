@@ -1,6 +1,6 @@
 import type { ActionContext } from "vuex";
 import type { NgraphGraph } from "ngraph.graph";
-import type { Layout, Renderer } from "vivagraphjs";
+import type { GraphLayout, GraphRenderer, ViewMode } from "@/lib/view/contract";
 import type { Configuration } from "@/types/configuration";
 import type { GraphLink, NodeData, NodeId } from "@/types/graph";
 import type { Schema } from "@/types/schema";
@@ -41,8 +41,8 @@ export interface MainGraphState {
     showTooltip: boolean;
   };
   renderState: {
-    Renderer: Renderer | null;
-    layout?: Layout;
+    Renderer: GraphRenderer | null;
+    layout?: GraphLayout;
     isRendered: boolean;
     layoutOptions: {
       springLength: number;
@@ -64,6 +64,8 @@ export interface BaseState {
     addToQueueNotification: boolean;
   };
   activeMode: ActiveMode;
+  /** 2D (VivaGraphJS) or 3D (three.js) graph view. Saved in local storage. */
+  viewMode: ViewMode;
   searchObject: SearchObject;
   searchString: string;
 }

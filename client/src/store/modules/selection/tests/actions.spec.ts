@@ -195,8 +195,6 @@ describe("handleAreaSelected", () => {
   let rootState;
   let graphics;
   let nodes;
-  let topLeft;
-  let bottomRight;
   let nodePos;
   let area;
   beforeEach(() => {
@@ -219,8 +217,6 @@ describe("handleAreaSelected", () => {
       { id: "1", data: { name: "karl" } },
       { id: "2", data: { name: "heinz" } },
     ];
-    topLeft = { x: -91.93242967690891, y: 3.086346444249347 };
-    bottomRight = { x: -35.24307976348013, y: 73.68063124210396 };
     nodePos = { x: -61.12435098964026, y: 37.50443237426515 };
     area = {
       x: 781,
@@ -234,12 +230,11 @@ describe("handleAreaSelected", () => {
           color: "aabbccff",
         };
       },
-      transformClientToGraphCoordinates: function ({ x, y }) {
-        return x === area.x && y === area.y
-          ? topLeft
-          : x === area.x + area.width && y === area.y + area.height
-            ? bottomRight
-            : null;
+      // Only the node at the original nodePos projects inside the selected area.
+      toScreen: function (position) {
+        return position.x === -61.12435098964026
+          ? { x: area.x + 10, y: area.y + 10, visible: true }
+          : { x: 0, y: 0, visible: true };
       },
     };
     rootState.mainGraph.renderState.Renderer.getGraphics.mockReturnValue(
@@ -288,9 +283,12 @@ describe("handleAreaSelected", () => {
     expect(commit).not.toHaveBeenCalled();
   });
   it("removes nodes from temporary selection", () => {
-    topLeft = { x: -91.93242967690891, y: -3.086346444249347 };
-    bottomRight = { x: 35.24307976348013, y: 73.68063124210396 };
     nodePos = { x: -601.12435098964, y: 37.50443237426515 };
+    // The area moved: now only the second node (at 0, 0) is inside it.
+    graphics.toScreen = (position) =>
+      position.x === 0
+        ? { x: area.x + 10, y: area.y + 10, visible: true }
+        : { x: 0, y: 0, visible: true };
     getNodeUi
       .mockReturnValueOnce({ position: nodePos, size: 10 })
       .mockReturnValueOnce({ position: { x: 0, y: 0 }, size: 10 });

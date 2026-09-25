@@ -1,32 +1,12 @@
 import type { ActionTree, Commit } from "vuex";
-import type { NodeUI, WebglGraphics } from "vivagraphjs";
-import { getAllNodes, getNodePosition } from "@/lib/graph";
+import type { NodeUI, ScreenPoint } from "@/lib/view/contract";
+import { getAllNodes } from "@/lib/graph";
 import type { GraphNode, Position } from "@/types/graph";
 import type { Context, NodeRef, RootState } from "@/store/types";
 import type { GraphCameraState } from "./index";
 import { toHexColor } from "@/lib/color";
 
 type Ctx = Context<GraphCameraState>;
-
-/** Largest zoom level that fit-to-nodes uses. */
-const MAX_FIT_SCALE = 2;
-
-function getDesiredScale(x1: number, x2: number, y1: number, y2: number) {
-  const scaleX = document.body.clientWidth / (x2 - x1);
-  const scaleY = document.body.clientHeight / (y2 - y1);
-  return Math.min(scaleX, scaleY);
-}
-
-function getNodeBoundaries(positions: Position[]) {
-  const xs = positions.map((position) => position.x);
-  const ys = positions.map((position) => position.y);
-  return {
-    smallestX: Math.min(...xs),
-    smallestY: Math.min(...ys),
-    biggestX: Math.max(...xs),
-    biggestY: Math.max(...ys),
-  };
-}
 
 /** "black" or "white", whichever reads better on the hex color (RRGGBB...). */
 export function getContrastYIQ(hexcolor: string): "black" | "white" {
@@ -36,17 +16,14 @@ export function getContrastYIQ(hexcolor: string): "black" | "white" {
   return (r * 299 + g * 587 + b * 114) / 1000 >= 128 ? "black" : "white";
 }
 
-function isNodeOnScreen(nodePosition: Position, graphics: WebglGraphics) {
-  const start = graphics.transformClientToGraphCoordinates({ x: 0, y: 0 });
-  const end = graphics.transformClientToGraphCoordinates({
-    x: window.document.body.clientWidth,
-    y: window.document.body.clientHeight,
-  });
+/** True when the point is in front of the camera and inside the window. */
+function isOnScreen(point: ScreenPoint) {
   return (
-    nodePosition.x > start.x &&
-    nodePosition.x < end.x &&
-    nodePosition.y > start.y &&
-    nodePosition.y < end.y
+    point.visible &&
+    point.x > 0 &&
+    point.x < window.innerWidth &&
+    point.y > 0 &&
+    point.y < window.innerHeight
   );
 }
 
@@ -66,13 +43,10 @@ export function placeNodeLabel(
 ) {
   const renderer = rootState.mainGraph.renderState.Renderer;
   if (!renderer) return;
-  const graphics = renderer.getGraphics();
-  if (isNodeOnScreen(position, graphics)) {
+  const point = renderer.getGraphics().toScreen(position);
+  if (isOnScreen(point)) {
     commit("ADD_NODE_LABEL", {
-      coordinates: graphics.transformGraphToClientCoordinates({
-        x: position.x,
-        y: position.y,
-      }),
+      coordinates: { x: point.x, y: point.y },
       colors: generateColorObject(ui),
       id: ui.node.id,
       data: ui.node.data,
@@ -92,26 +66,8 @@ export const actions = {
   },
 
   /** Centers the view on the nodes and zooms so that they fit on the screen. */
-  fitGraphToNodes({ rootState, commit }: Ctx, nodes: GraphNode[]) {
-    if (nodes.length === 0) return;
-    const positions = nodes.map((node) => getNodePosition(rootState, node));
-    const bounds = getNodeBoundaries(positions);
-    const desiredScale = getDesiredScale(
-      bounds.smallestX,
-      bounds.biggestX,
-      bounds.smallestY,
-      bounds.biggestY,
-    );
-    commit("MOVE_TO", {
-      x: bounds.smallestX + (bounds.biggestX - bounds.smallestX) / 2,
-      y: bounds.smallestY + (bounds.biggestY - bounds.smallestY) / 2,
-    });
-    const paddedScale = desiredScale - desiredScale / 4;
-    const usable =
-      Number.isFinite(desiredScale) &&
-      desiredScale !== 0 &&
-      paddedScale < MAX_FIT_SCALE;
-    commit("ZOOM_TO_SCALE", usable ? paddedScale : MAX_FIT_SCALE);
+  fitGraphToNodes({ commit }: Ctx, nodes: GraphNode[]) {
+    if (nodes.length > 0) commit("FIT_TO_NODES", nodes);
   },
 
   fitGraphToScreen({ dispatch, rootState }: Ctx) {

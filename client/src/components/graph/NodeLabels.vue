@@ -5,7 +5,7 @@ defineProps<{ items: NodeLabel[] }>();
 </script>
 
 <template>
-  <div class="pointer-events-none absolute inset-0 overflow-hidden">
+  <div class="pointer-events-none absolute inset-0 z-10 overflow-hidden">
     <span
       v-for="item in items"
       :key="item.id"

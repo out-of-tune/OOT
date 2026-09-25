@@ -1,5 +1,4 @@
 import type { ActionTree, Commit, Dispatch } from "vuex";
-import Viva from "vivagraphjs";
 import { getNodePosition, getPinnedState } from "@/lib/graph";
 import { startMultiSelect } from "@/lib/select";
 import type { GraphNode } from "@/types/graph";
@@ -122,7 +121,7 @@ export const actions = {
         const position = getNodePosition(rootState, selected);
         return {
           node: { id: selected.id },
-          position: { x: position.x, y: position.y },
+          position: { ...position },
         };
       }),
     );
@@ -150,10 +149,7 @@ export const actions = {
   initEvents({ rootState, dispatch }: Ctx) {
     const renderer = rootState.mainGraph.renderState.Renderer;
     if (!renderer) return;
-    const inputEvents = Viva.Graph.webglInputEvents(
-      renderer.getGraphics(),
-      rootState.mainGraph.Graph,
-    );
+    const inputEvents = renderer.createInputEvents();
     dispatch("initSelectionEvents");
     inputEvents
       .mouseEnter((node) => dispatch("mouseEnterFunctionality", node))

@@ -1,7 +1,8 @@
 import { markRaw } from "vue";
 import type { MutationTree } from "vuex";
 import createGraph from "ngraph.graph";
-import Viva from "vivagraphjs";
+import { createVivaView } from "@/lib/view/vivaView";
+import type { ViewFactory, ViewMode } from "@/lib/view/contract";
 import type {
   ActionRule,
   Configuration,
@@ -15,6 +16,7 @@ import type {
 import type {
   GraphItems,
   GraphLink,
+  GraphNode,
   NodeData,
   NodeId,
   Position,
@@ -24,9 +26,6 @@ import type { SearchObject } from "@/types/search";
 import type { ActiveMode, BaseState, NodeRef } from "./types";
 
 type State = BaseState;
-
-/** Delay between zoom steps of the zoom animation, in milliseconds. */
-const ZOOM_STEP_DELAY = 16;
 
 function requireRenderer(state: State) {
   const renderer = state.mainGraph.renderState.Renderer;
@@ -75,28 +74,21 @@ export const mutations = {
     graphics(state).updateSize(width, height);
   },
 
-  SET_RENDERER(state) {
-    const { layoutOptions } = state.mainGraph.renderState;
+  /** Builds the renderer on the current graph. The factory picks the 2D or the 3D view. */
+  SET_RENDERER(state, factory: ViewFactory = createVivaView) {
     const container = state.mainGraph.graphContainer;
     if (!container) throw new Error("The graph container is not set");
-    const webglGraphics = Viva.Graph.View.webglGraphics({
-      clearColor: true,
-      clearColorValue: { r: 0, g: 0, b: 0, a: 1 },
+    const renderer = factory({
+      graph: state.mainGraph.Graph,
+      container,
+      layoutOptions: { ...state.mainGraph.renderState.layoutOptions },
     });
-    const layout = Viva.Graph.Layout.forceDirected(state.mainGraph.Graph, {
-      springLength: layoutOptions.springLength,
-      springCoeff: layoutOptions.springCoeff,
-      dragCoeff: layoutOptions.dragCoeff,
-      gravity: layoutOptions.gravity,
-    });
-    state.mainGraph.renderState.layout = markRaw(layout);
-    state.mainGraph.renderState.Renderer = markRaw(
-      Viva.Graph.View.renderer(state.mainGraph.Graph, {
-        layout,
-        container,
-        graphics: webglGraphics,
-      }),
-    );
+    state.mainGraph.renderState.Renderer = markRaw(renderer);
+    state.mainGraph.renderState.layout = markRaw(renderer.getLayout());
+  },
+
+  SET_VIEW_MODE(state, mode: ViewMode) {
+    state.viewMode = mode;
   },
 
   START_RENDERER(state) {
@@ -219,17 +211,28 @@ export const mutations = {
       nodeId,
       xPosition,
       yPosition,
-    }: { nodeId: NodeId; xPosition: number; yPosition: number },
+      zPosition,
+    }: {
+      nodeId: NodeId;
+      xPosition: number;
+      yPosition: number;
+      zPosition?: number;
+    },
   ) {
-    requireLayout(state).setNodePosition(nodeId, xPosition, yPosition);
+    requireLayout(state).setNodePosition(
+      nodeId,
+      xPosition,
+      yPosition,
+      zPosition,
+    );
   },
 
   PIN_NODE(state, node: { id: NodeId }) {
-    requireLayout(state).pinNode(node as never, true);
+    requireLayout(state).pinNode(node, true);
   },
 
   UNPIN_NODE(state, node: { id: NodeId }) {
-    requireLayout(state).pinNode(node as never, false);
+    requireLayout(state).pinNode(node, false);
   },
 
   SET_CONFIGURATION(state, configuration: Configuration) {
@@ -322,29 +325,11 @@ export const mutations = {
   },
 
   MOVE_TO(state, position: Position) {
-    const renderer = requireRenderer(state);
-    renderer.moveTo(position.x, position.y);
-    renderer.rerender();
+    requireRenderer(state).moveTo(position.x, position.y, position.z);
   },
 
-  /** Zooms step by step until the renderer reaches the desired scale. */
-  ZOOM_TO_SCALE(state, desiredScale: number) {
-    const renderer = requireRenderer(state);
-    const zoomIn = (currentScale: number) => {
-      if (desiredScale > currentScale) {
-        const nextScale = renderer.zoomIn();
-        setTimeout(() => zoomIn(nextScale), ZOOM_STEP_DELAY);
-      }
-    };
-    const zoomOut = (currentScale: number) => {
-      if (desiredScale < currentScale) {
-        const nextScale = renderer.zoomOut();
-        setTimeout(() => zoomOut(nextScale), ZOOM_STEP_DELAY);
-      }
-    };
-    const current = renderer.getTransform().scale;
-    if (current > desiredScale) zoomOut(current);
-    else zoomIn(current);
+  FIT_TO_NODES(state, nodes: GraphNode[]) {
+    requireRenderer(state).fitToNodes(nodes);
   },
 
   UPDATE_EXPAND_CONFIGURATION(state, configuration: ActionRule) {
