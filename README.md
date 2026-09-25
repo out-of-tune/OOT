@@ -31,7 +31,8 @@ It might inspire them to use a graph-based approach for their own data visualiza
 
 First you must install:
 - Git
-- Docker (with docker-compose)
+- Docker (with Docker Compose)
+- Node.js 24, only for development without Docker (see `.nvmrc`)
 
 
 Clone the out-of-tune repository from github.
@@ -45,7 +46,7 @@ Follow the instruction and add the key and secret to the .env file.
 
 Now you can start the service by running:
 ```
-docker-compose up --build
+docker compose up --build
 ```
 
 You will now have to add the CLIENT_KEY and CLIENT_SECRET to the database. To accomplish this, you will have to follow these steps: 
@@ -97,9 +98,16 @@ For a full documentation go to the [graphQL documentation](https://graphql.org/l
 We use VivaGraphJS as our core rendering library. It draws all our graphs and provides many of our frontend graph functionalities.   
 For a full documentation go to the [VivaGraphJS documentation](https://github.com/anvaka/VivaGraphJS)
 ### VueJS
-Our client side application consists of VueJS as frontend engine in combination with vuex for state management.  
-For a full documentation go to the [VueJS documentation](https://vuejs.org/v2/guide/)  
-For a full documentation go to the [Vuex documentation](https://vuex.vuejs.org/)
+The client is written in TypeScript with Vue 3, Vuex 4 for state management and Tailwind CSS 4 for styling.
+See the [client README](./client/README.md) for the commands and the structure.
+For a full documentation go to the [Vue documentation](https://vuejs.org/guide/introduction)
+and the [Vuex documentation](https://vuex.vuejs.org/)
+
+## Development checks
+
+Each package has its own tests. From the repository root, `npm run check` runs all of them:
+the client type check, lint, tests and build, the API type check and tests, and the auth and share tests.
+CI runs the same checks on every pull request (`.github/workflows/ci.yml`).
 
 ## Service Structure
 The service consists of multiple parts. 
