@@ -1,8 +1,17 @@
+# Development mode: `docker compose up` mounts the sources and restarts on changes.
+# Each Node service keeps its node_modules in an anonymous volume. The host's
+# node_modules are built for macOS or Windows and would not run in the Linux container.
+# The services run as root here, so npm can write to the mounted source folders.
 services:
   apollo:
-    entrypoint: ["/bin/sh", "-c", "npm install && npm run serve"]
+    build:
+      context: ./api
+      target: build
+    user: root
+    entrypoint: ["/bin/sh", "-c", "npm install --include=dev && npm run serve"]
     volumes:
       - "./api:/usr/src/app"
+      - "/usr/src/app/node_modules"
       - "/dev/null:/usr/src/app/.env"
     ports:
       - "3003:3003"
@@ -10,31 +19,37 @@ services:
     build:
       context: ./client
       target: build-stage
+    entrypoint: ["/bin/sh", "-c", "npm install --include=dev && npm run serve"]
+    environment:
+      - VITE_PROXY_URI=${VITE_PROXY_URI}
     volumes:
       - "./client:/app"
-    entrypoint: ["/bin/sh", "-c", "npm install && npm run serve"]
+      - "/app/node_modules"
     ports:
       - "8080:8080"
-      
   arangodb:
     ports:
       - "8529:8529"
   auth:
-    entrypoint: ["/bin/sh", "-c", "npm install && npm run serve"]
+    user: root
+    entrypoint: ["/bin/sh", "-c", "npm install --include=dev && npm run serve"]
     volumes:
       - "./auth:/usr/src/app"
+      - "/usr/src/app/node_modules"
     ports:
       - "4000:4000"
   proxy:
     ports:
-      - "80:80"
-      - "443:443"
+      - "${PROXY_HTTP_PORT:-80}:80"
+      - "${PROXY_HTTPS_PORT:-443}:443"
   memcached:
     ports:
       - "11211:11211"
   share:
-    entrypoint: ["/bin/sh", "-c", "npm install && npm run serve"]
+    user: root
+    entrypoint: ["/bin/sh", "-c", "npm install --include=dev && npm run serve"]
     volumes:
       - "./services/share:/usr/src/app"
+      - "/usr/src/app/node_modules"
     ports:
       - "4444:4444"
