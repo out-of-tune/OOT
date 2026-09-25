@@ -1,43 +1,38 @@
-const arangojs = require('arangojs')
+const { Database } = require('arangojs')
 const ShareAPI = require('./share')
 const settings = require('../../settings')
 
-class ArangoAPI {
-    constructor() {
-    }
+/** Wait between connection attempts while the database starts, in milliseconds. */
+const RETRY_DELAY = 5000
 
-    async connect(arango_url, arango_database, user, password, context=this) {
-        try {
-            const system = new arangojs.Database(arango_url)
-                .useDatabase('_system')
-                .useBasicAuth(user, password)
+const delay = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
 
-            const databases = await system.listDatabases()
+const isConnectionRefused = error =>
+    /ECONNREFUSED|fetch failed/.test(`${error.message} ${String(error.cause)}`)
 
-            if (databases.indexOf(arango_database) === -1) {
-                system.createDatabase(arango_database)
+/** Holds the data sources. `share` is set once the database is reachable. */
+const arango = {
+    share: null,
+
+    /** Connects and creates the database and the collection if they are missing. Retries until the server is up. */
+    async connect(url, databaseName, username, password) {
+        const system = new Database({ url, databaseName: '_system', auth: { username, password } })
+        for (;;) {
+            try {
+                const databases = await system.listDatabases()
+                if (!databases.includes(databaseName)) await system.createDatabase(databaseName)
+                const share = new ShareAPI(system.database(databaseName))
+                await share.ensureCollection()
+                this.share = share
+                console.log('ArangoDB connected:', (await system.version()).version)
+                return
+            } catch (error) {
+                if (!isConnectionRefused(error)) throw error
+                console.log(`ArangoDB is not reachable. Retrying in ${RETRY_DELAY / 1000}s...`)
+                await delay(RETRY_DELAY)
             }
-
-            const db = system.useDatabase(arango_database)
-            
-            context.share = new ShareAPI(db)
-            console.log('ArangoDB connected: ', await system.version())
-            
-        } catch(err) {
-            if (err.message.startsWith('connect ECONNREFUSED')) {
-                console.log(err.message, 'Retrying in 5s...')
-                setTimeout(() => context.connect(arango_url, arango_database, user, password, context), 5000)
-            } else console.log(err.message)
         }
     }
 }
-
-const arango = new ArangoAPI()
-arango.connect(
-    `http://${settings.ARANGO_HOST}:${settings.ARANGO_PORT}`, 
-    settings.ARANGO_DB, 
-    settings.ARANGO_USER, 
-    settings.getArangoPassword()
-)
 
 module.exports = arango

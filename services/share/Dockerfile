@@ -1,13 +1,11 @@
-FROM node:16
-
-# Create app directory
+FROM node:24-alpine
+ENV NODE_ENV=production
 WORKDIR /usr/src/app
-
-COPY package*.json ./
-RUN npm ci
-
-# Bundle app source
-COPY . .
-
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev && npm cache clean --force
+COPY --chown=node:node . .
+# The service writes the shared objects below its directory (SHARE_LOC).
+RUN chown node:node /usr/src/app
+USER node
 EXPOSE 4444
-CMD [ "npm", "start" ]
+CMD ["node", "index.js"]

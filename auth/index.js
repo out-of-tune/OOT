@@ -1,13 +1,4 @@
-const express = require('express')
-const cors = require('cors')
-const oauth2Routes = require('./routes/oauth2')
+const app = require('./app')
+const settings = require('./settings')
 
-
-const app = express()
-const port = 4000
-
-app.use(cors())
-
-app.use('/oauth2', oauth2Routes)
-
-app.listen(port, () => console.log(`Server running on port ${port}`))
+app.listen(settings.PORT, () => console.log(`Server running on port ${settings.PORT}`))
