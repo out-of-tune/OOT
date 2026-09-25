@@ -93,6 +93,9 @@ describe("insertInQueue", () => {
     });
   });
 });
+const previewOnly = { spotify_player: { status: "off" } };
+const spotifyReady = { spotify_player: { status: "ready" } };
+
 describe("addToQueue", () => {
   let commit;
   let dispatch;
@@ -102,8 +105,14 @@ describe("addToQueue", () => {
   });
   it("commits ADD_TO_QUEUE", () => {
     const song = { id: "12" };
-    addToQueue({ commit, dispatch }, song);
+    addToQueue({ commit, dispatch, rootState: previewOnly }, song);
     expect(commit).toHaveBeenCalledWith("ADD_TO_QUEUE", song);
+  });
+  it("adds to the Spotify queue when the Spotify player is ready", () => {
+    const song = { id: "12", uri: "spotify:track:12" };
+    addToQueue({ commit, dispatch, rootState: spotifyReady }, song);
+    expect(dispatch).toHaveBeenCalledWith("addToSpotifyQueue", song);
+    expect(commit).not.toHaveBeenCalled();
   });
 });
 describe("playNextInQueue", () => {
@@ -136,8 +145,21 @@ describe("playSong", () => {
       queueIndex: 0,
     };
   });
+  it("plays the full song on Spotify when the Spotify player is ready", () => {
+    playSong(
+      { dispatch, state, rootState: spotifyReady },
+      { uri: "spotify:track:1" },
+    );
+    expect(dispatch).toHaveBeenCalledWith("spotifyPlay", {
+      uris: ["spotify:track:1"],
+    });
+    expect(dispatch).toHaveBeenCalledTimes(1);
+  });
   it("adds song to first place when queue is empty", () => {
-    playSong({ dispatch, state }, { el: "one dummy element" });
+    playSong(
+      { dispatch, state, rootState: previewOnly },
+      { el: "one dummy element" },
+    );
     expect(dispatch).toHaveBeenNthCalledWith(1, "insertInQueue", {
       song: { el: "one dummy element" },
       position: 0,
@@ -151,7 +173,10 @@ describe("playSong", () => {
       { el: "three dummy element" },
     ];
     state.queueIndex = 1;
-    playSong({ dispatch, state }, { el: "between to and three dummy element" });
+    playSong(
+      { dispatch, state, rootState: previewOnly },
+      { el: "between to and three dummy element" },
+    );
     expect(dispatch).toHaveBeenNthCalledWith(1, "insertInQueue", {
       song: { el: "between to and three dummy element" },
       position: 2,

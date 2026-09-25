@@ -26,6 +26,7 @@ import search from "./modules/search";
 import selection from "./modules/selection";
 import share from "./modules/share";
 import snackbar from "./modules/snackbar";
+import spotify_player from "./modules/spotify_player";
 import user from "./modules/user";
 import mutations from "./mutations";
 import { createRootState } from "./state";
@@ -51,7 +52,6 @@ const configurationMutations = [
 
 const userMutations = [
   "SET_ACCESS_TOKEN",
-  "SET_REFRESH_TOKEN",
   "SET_EXPIRY_TIME",
   "SET_LOGIN_STATE",
 ];
@@ -148,6 +148,7 @@ export const store = createStore<RootState>({
     user,
     playlists,
     snackbar,
+    spotify_player,
     search,
     graph_camera,
     selection,

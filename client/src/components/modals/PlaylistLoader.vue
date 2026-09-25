@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ListMusic, LogIn } from "@lucide/vue";
+import { Heart, History, ListMusic, LogIn, Mic2, Play } from "@lucide/vue";
 import { computed, ref, watch } from "vue";
 import UiButton from "@/components/ui/UiButton.vue";
 import UiModal from "@/components/ui/UiModal.vue";
@@ -47,6 +47,25 @@ watch(
 );
 
 const close = () => store.dispatch("changePlaylistLoaderState", false);
+const spotifyReady = computed(
+  () => store.state.spotify_player.status === "ready",
+);
+
+function playSelected() {
+  if (!selected.value) return;
+  store.dispatch("spotifyPlay", {
+    contextUri: selected.value.uri ?? `spotify:playlist:${selected.value.id}`,
+  });
+}
+
+/** Builds a graph from the Spotify library of the user. */
+function loadLibrary(
+  action:
+    "loadTopArtistsGraph" | "loadLikedSongsGraph" | "loadRecentlyPlayedGraph",
+) {
+  store.dispatch(action);
+  close();
+}
 
 function loadGraph() {
   if (!selected.value) return;
@@ -144,6 +163,26 @@ function loadGraph() {
           >
             Add songs to this playlist
           </UiButton>
+          <UiButton
+            v-if="spotifyReady"
+            :disabled="!selected"
+            @click="playSelected"
+            ><Play class="size-4" /> Play</UiButton
+          >
+        </div>
+        <div class="flex flex-col gap-1 border-t border-line pt-3">
+          <h3 class="label mb-1">Graph from your library</h3>
+          <UiButton variant="ghost" @click="loadLibrary('loadTopArtistsGraph')"
+            ><Mic2 class="size-4" /> Top artists</UiButton
+          >
+          <UiButton variant="ghost" @click="loadLibrary('loadLikedSongsGraph')"
+            ><Heart class="size-4" /> Liked songs</UiButton
+          >
+          <UiButton
+            variant="ghost"
+            @click="loadLibrary('loadRecentlyPlayedGraph')"
+            ><History class="size-4" /> Recently played</UiButton
+          >
         </div>
         <div class="border-t border-line pt-3">
           <h3 class="label mb-1">Songs are added to</h3>

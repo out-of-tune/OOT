@@ -6,12 +6,14 @@ import type { UserState } from "./index";
 type Ctx = Context<UserState>;
 
 export const actions = {
-  async getCurrentUser({ commit, rootState }: Ctx) {
+  /** Loads the profile of the logged-in user, then connects the Spotify player of this tab. */
+  async getCurrentUser({ commit, dispatch, rootState }: Ctx) {
     if (!rootState.authentication.loginState) return;
     const user = await SpotifyService.getCurrentUserProfile(
       rootState.authentication.accessToken,
     );
     commit("SET_CURRENT_USER", user);
+    dispatch("connectSpotifyPlayer");
   },
   deleteCurrentUser({ commit }: Ctx) {
     commit("SET_CURRENT_USER", {});

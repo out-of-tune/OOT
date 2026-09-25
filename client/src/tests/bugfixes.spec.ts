@@ -224,12 +224,13 @@ describe("20. authentication", () => {
     ).toHaveLength(1);
   });
 
-  it("logs out when the browser blocks the pop-up", () => {
-    vi.spyOn(window, "open").mockReturnValue(null);
+  it("logs out when the session cookie cannot be deleted", async () => {
     const dispatch = vi.fn();
-    expect(() =>
-      authenticationActions.logout({ dispatch, commit: vi.fn() } as never),
-    ).not.toThrow();
+    await authenticationActions.logout({
+      dispatch,
+      commit: vi.fn(),
+    } as never);
+    expect(dispatch).toHaveBeenCalledWith("setLoginState", false);
     expect(dispatch).toHaveBeenCalledWith("setInfo", "Logged out");
   });
 });

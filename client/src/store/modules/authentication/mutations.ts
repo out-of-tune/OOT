@@ -5,9 +5,6 @@ export const mutations = {
   SET_ACCESS_TOKEN(state, token: string) {
     state.accessToken = token;
   },
-  SET_REFRESH_TOKEN(state, token: string) {
-    state.refreshToken = token;
-  },
   SET_EXPIRY_TIME(state, time: number) {
     state.expiryTime = time;
   },
@@ -16,7 +13,6 @@ export const mutations = {
   },
   DELETE_USER_STATE(state) {
     state.accessToken = "";
-    state.refreshToken = "";
     state.expiryTime = 10;
   },
 } satisfies MutationTree<AuthenticationState>;

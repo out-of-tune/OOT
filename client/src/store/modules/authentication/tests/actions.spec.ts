@@ -10,7 +10,6 @@ import { actions } from "../actions";
 const {
   login,
   setAccessToken,
-  setRefreshToken,
   setExpiryTime,
   refreshToken,
   setLoginState,
@@ -36,19 +35,6 @@ describe("refreshTokenAfterTimeout", () => {
   });
 });
 
-describe("setRefreshToken", () => {
-  let commit;
-  let token;
-  beforeEach(() => {
-    commit = vi.fn();
-    token = "1323";
-  });
-  it("sets the refresh token", () => {
-    setRefreshToken({ commit }, token);
-    expect(commit).toHaveBeenCalledWith("SET_REFRESH_TOKEN", token);
-  });
-});
-
 describe("setExpiryTime", () => {
   let commit;
   let time;
@@ -56,7 +42,7 @@ describe("setExpiryTime", () => {
     commit = vi.fn();
     time = "1323";
   });
-  it("sets the refresh token", () => {
+  it("sets the expiry time", () => {
     setExpiryTime({ commit }, time);
     expect(commit).toHaveBeenCalledWith("SET_EXPIRY_TIME", Number(time));
   });
@@ -88,16 +74,21 @@ describe("refreshToken", () => {
   beforeEach(() => {
     dispatch = vi.fn();
   });
-  it("refreshes the token", async () => {
-    const state = {
-      refreshToken: "refreshToken",
-    };
+  it("gets a new token from the session cookie", async () => {
     AuthenticationService.refreshToken = vi.fn();
-    AuthenticationService.refreshToken.mockReturnValue({
+    AuthenticationService.refreshToken.mockResolvedValue({
       access_token: "newToken",
+      expires_in: 3600,
     });
-    await refreshToken({ state, dispatch });
+    await refreshToken({ dispatch });
+    expect(dispatch).toHaveBeenCalledWith("setExpiryTime", 3600);
     expect(dispatch).toHaveBeenCalledWith("setAccessToken", "newToken");
+  });
+  it("throws when there is no session", async () => {
+    AuthenticationService.refreshToken = vi.fn();
+    AuthenticationService.refreshToken.mockRejectedValue(new Error("401"));
+    await expect(refreshToken({ dispatch })).rejects.toThrow("401");
+    expect(dispatch).not.toHaveBeenCalled();
   });
 });
 
@@ -151,6 +142,13 @@ describe("logout", () => {
   it("deletes current user object", async () => {
     logout({ commit, dispatch });
     expect(dispatch).toHaveBeenCalledWith("deleteCurrentUser");
+  });
+  it("disconnects the Spotify player and deletes the session cookie", async () => {
+    AuthenticationService.logout = vi.fn().mockResolvedValue(undefined);
+    await logout({ commit, dispatch });
+    expect(dispatch).toHaveBeenCalledWith("disconnectSpotifyPlayer");
+    expect(AuthenticationService.logout).toHaveBeenCalled();
+    expect(dispatch).toHaveBeenCalledWith("setInfo", "Logged out");
   });
 });
 

@@ -3,12 +3,23 @@ import { Music } from "@lucide/vue";
 import { computed } from "vue";
 import { searchGraph } from "@/lib/graph";
 import { useStore } from "@/store";
+import type { SpotifyImage } from "@/types/spotify";
+
+const props = defineProps<{
+  song: {
+    id?: string | null;
+    name: string;
+    images?: SpotifyImage[];
+    artists?: { name: string; id?: string }[];
+  };
+  /** Text shown when no song is set. */
+  placeholder: string;
+}>();
 
 const store = useStore();
-const song = computed(() => store.state.music_player.currentSong);
-const cover = computed(() => song.value.images?.[0]?.url);
+const cover = computed(() => props.song.images?.[0]?.url);
 const artists = computed(() =>
-  (song.value.artists ?? []).map((artist) => artist.name).join(", "),
+  (props.song.artists ?? []).map((artist) => artist.name).join(", "),
 );
 
 /** Centers the graph on the nodes of the song or of its artists. */
@@ -47,7 +58,7 @@ function showInGraph(type: "song" | "artist", sids: (string | undefined)[]) {
           type="button"
           class="block max-w-full truncate font-medium text-fg hover:text-brand-soft"
           title="Show the song in the graph"
-          @click="showInGraph('song', [song.id])"
+          @click="showInGraph('song', [song.id ?? undefined])"
         >
           {{ song.name }}
         </button>
@@ -65,9 +76,7 @@ function showInGraph(type: "song" | "artist", sids: (string | undefined)[]) {
           {{ artists }}
         </button>
       </template>
-      <p v-else class="text-xs text-fg-subtle">
-        Click a song node to play a preview
-      </p>
+      <p v-else class="text-xs text-fg-subtle">{{ placeholder }}</p>
     </div>
   </div>
 </template>

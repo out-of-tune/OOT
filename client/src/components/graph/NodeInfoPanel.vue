@@ -1,6 +1,16 @@
 <script setup lang="ts">
-import { Disc3, ExternalLink, Music, Play, Plus, X } from "@lucide/vue";
-import { computed } from "vue";
+import {
+  Disc3,
+  ExternalLink,
+  Music,
+  Play,
+  Plus,
+  UserCheck,
+  UserPlus,
+  X,
+} from "@lucide/vue";
+import { computed, ref, watch } from "vue";
+import UiButton from "@/components/ui/UiButton.vue";
 import IconButton from "@/components/ui/IconButton.vue";
 import { formatDuration } from "@/lib/formatDuration";
 import { useStore } from "@/store";
@@ -58,8 +68,62 @@ const album = computed(
     data.value.album as { name?: string; release_date?: string } | undefined,
 );
 
-const play = (track: SpotifyTrack) =>
+const loggedIn = computed(() => store.state.authentication.loginState);
+const spotifyReady = computed(
+  () => store.state.spotify_player.status === "ready",
+);
+const sid = computed(() => data.value.sid as string | undefined);
+
+/** Spotify URI of the node. An artist or album plays as a context, a song as a track. */
+const nodeUri = computed(() => {
+  if (!sid.value) return undefined;
+  if (label.value === "song") return `spotify:track:${sid.value}`;
+  if (label.value === "artist" || label.value === "album")
+    return `spotify:${label.value}:${sid.value}`;
+  return undefined;
+});
+
+function playNode() {
+  if (!nodeUri.value) return;
+  store.dispatch(
+    "spotifyPlay",
+    label.value === "song"
+      ? { uris: [nodeUri.value] }
+      : { contextUri: nodeUri.value },
+  );
+}
+
+const following = ref(false);
+watch(
+  [sid, label, loggedIn],
+  async ([id, nodeLabel, isLoggedIn]) => {
+    following.value = false;
+    if (!id || nodeLabel !== "artist" || !isLoggedIn) return;
+    const result = await store.dispatch("isFollowingSpotifyArtist", id);
+    if (sid.value === id) following.value = result;
+  },
+  { immediate: true },
+);
+async function toggleFollow() {
+  if (!sid.value) return;
+  following.value = !following.value;
+  await store.dispatch("followSpotifyArtist", {
+    sid: sid.value,
+    follow: following.value,
+  });
+}
+
+/** An album track plays in the album, so Spotify goes on with the next track. */
+function play(track: SpotifyTrack) {
+  if (spotifyReady.value && label.value === "album" && nodeUri.value) {
+    store.dispatch("spotifyPlay", {
+      contextUri: nodeUri.value,
+      offset: { uri: track.uri },
+    });
+    return;
+  }
   store.dispatch("playSong", { ...track, images: trackImages(track) });
+}
 const queue = (track: SpotifyTrack) =>
   store.dispatch("addToQueue", { ...track, images: trackImages(track) });
 const focusNode = () => {
@@ -129,6 +193,30 @@ const focusNode = () => {
         </div>
       </div>
 
+      <div
+        v-if="(spotifyReady && nodeUri) || (loggedIn && label === 'artist')"
+        class="flex gap-2"
+      >
+        <UiButton
+          v-if="spotifyReady && nodeUri"
+          variant="primary"
+          size="sm"
+          @click="playNode"
+        >
+          <Play class="size-3.5" /> Play
+        </UiButton>
+        <UiButton
+          v-if="loggedIn && label === 'artist'"
+          size="sm"
+          :aria-pressed="following"
+          @click="toggleFollow"
+        >
+          <UserCheck v-if="following" class="size-3.5" />
+          <UserPlus v-else class="size-3.5" />
+          {{ following ? "Following" : "Follow" }}
+        </UiButton>
+      </div>
+
       <dl
         v-if="label === 'album' || label === 'song'"
         class="grid grid-cols-2 gap-x-3 gap-y-2 text-sm"
@@ -177,9 +265,15 @@ const focusNode = () => {
             <button
               type="button"
               class="flex min-w-0 flex-1 items-center gap-2 text-left"
-              :class="track.preview_url ? 'text-fg' : 'text-fg-subtle'"
+              :class="
+                spotifyReady || track.preview_url ? 'text-fg' : 'text-fg-subtle'
+              "
               :title="
-                track.preview_url ? 'Play preview' : 'No preview available'
+                spotifyReady
+                  ? 'Play'
+                  : track.preview_url
+                    ? 'Play preview'
+                    : 'No preview available'
               "
               @click="play(track)"
             >

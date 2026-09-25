@@ -77,16 +77,14 @@ function onResize() {
   });
 }
 
-/** Restores the Spotify session, or gets the public token. */
+/** Restores the Spotify session from its cookie, or gets the public token. */
 async function authenticate() {
-  if (store.state.authentication.refreshToken) {
+  if (!store.state.authentication.loginState) {
     try {
       await store.dispatch("refreshToken");
       store.dispatch("getCurrentUser");
-      return;
     } catch {
-      store.dispatch("setLoginState", false);
-      store.dispatch("setRefreshToken", "");
+      // No session: the app works with the public token.
     }
   }
   try {

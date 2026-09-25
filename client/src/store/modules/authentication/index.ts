@@ -5,7 +5,6 @@ import mutations from "./mutations";
 
 export interface AuthenticationState {
   accessToken: string;
-  refreshToken: string;
   /** Lifetime of the access token in seconds. */
   expiryTime: number;
   loginState: boolean;
@@ -14,7 +13,6 @@ export interface AuthenticationState {
 export const authentication: Module<AuthenticationState, RootState> = {
   state: () => ({
     accessToken: "",
-    refreshToken: "",
     expiryTime: 10,
     loginState: false,
   }),

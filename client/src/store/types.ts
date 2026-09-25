@@ -20,6 +20,7 @@ import type { SearchState } from "./modules/search";
 import type { SelectionState } from "./modules/selection";
 import type { ShareState } from "./modules/share";
 import type { SnackbarState } from "./modules/snackbar";
+import type { SpotifyPlayerState } from "./modules/spotify_player";
 import type { UserState } from "./modules/user";
 
 /** Node shown in the info panel or the tooltip. `id` is 0 when no node is set. */
@@ -86,6 +87,7 @@ export interface ModuleStates {
   selection: SelectionState;
   share: ShareState;
   snackbar: SnackbarState;
+  spotify_player: SpotifyPlayerState;
   user: UserState;
 }
 

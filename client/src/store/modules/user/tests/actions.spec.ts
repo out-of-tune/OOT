@@ -7,9 +7,11 @@ const { getCurrentUser, deleteCurrentUser } = actions;
 
 describe("getCurrentUser", () => {
   let commit;
+  let dispatch;
   let rootState;
   beforeEach(() => {
     commit = vi.fn();
+    dispatch = vi.fn();
     rootState = {
       authentication: {
         loginState: true,
@@ -20,16 +22,20 @@ describe("getCurrentUser", () => {
     SpotifyService.getCurrentUserProfile.mockReturnValue({ id: "userID" });
   });
   it("calls Spotify API", () => {
-    getCurrentUser({ commit, rootState });
+    getCurrentUser({ commit, dispatch, rootState });
     expect(SpotifyService.getCurrentUserProfile).toHaveBeenCalledWith("12345");
   });
   it("sets user when logged in", async () => {
-    await getCurrentUser({ commit, rootState });
+    await getCurrentUser({ commit, dispatch, rootState });
     expect(commit).toHaveBeenCalledWith("SET_CURRENT_USER", { id: "userID" });
+  });
+  it("connects the Spotify player after the profile loads", async () => {
+    await getCurrentUser({ commit, dispatch, rootState });
+    expect(dispatch).toHaveBeenCalledWith("connectSpotifyPlayer");
   });
   it("does nothing when not logged in", async () => {
     rootState.authentication.loginState = false;
-    await getCurrentUser({ commit, rootState });
+    await getCurrentUser({ commit, dispatch, rootState });
     expect(commit).not.toHaveBeenCalled();
   });
 });

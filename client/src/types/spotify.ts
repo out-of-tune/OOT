@@ -57,6 +57,9 @@ export interface SpotifyPlaylist {
 export interface SpotifyUser {
   id: string;
   display_name?: string;
+  /** "premium" or "free". Full playback in the browser needs "premium". */
+  product?: string;
+  country?: string;
   images?: SpotifyImage[];
 }
 
@@ -83,4 +86,40 @@ export interface Song {
   images: SpotifyImage[];
   artists?: Pick<SpotifyArtist, "id" | "name">[];
   [key: string]: unknown;
+}
+
+export type RepeatState = "off" | "context" | "track";
+
+export interface SpotifyDevice {
+  id: string | null;
+  name: string;
+  type: string;
+  is_active: boolean;
+  is_restricted: boolean;
+  volume_percent: number | null;
+}
+
+/** GET /me/player */
+export interface SpotifyPlaybackState {
+  device: SpotifyDevice;
+  is_playing: boolean;
+  progress_ms: number | null;
+  shuffle_state: boolean;
+  repeat_state: RepeatState;
+  item: SpotifyTrack | null;
+  timestamp: number;
+}
+
+export interface SpotifyQueue {
+  currently_playing: SpotifyTrack | null;
+  queue: SpotifyTrack[];
+}
+
+export interface StartPlaybackOptions {
+  deviceId?: string;
+  uris?: string[];
+  contextUri?: string;
+  /** Start at this position of the list or the context. */
+  offset?: { position: number } | { uri: string };
+  positionMs?: number;
 }

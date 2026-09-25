@@ -181,3 +181,81 @@ declare module "vivagraphjs" {
   };
   export default Viva;
 }
+
+// Spotify Web Playback SDK (https://developer.spotify.com/documentation/web-playback-sdk).
+// The SDK script defines window.Spotify at runtime.
+interface SpotifySdkTrack {
+  id: string | null;
+  uri: string;
+  name: string;
+  duration_ms: number;
+  artists: { name: string; uri: string }[];
+  album: {
+    name: string;
+    uri: string;
+    images: { url: string; width?: number; height?: number }[];
+  };
+}
+
+interface SpotifySdkPlaybackState {
+  paused: boolean;
+  position: number;
+  duration: number;
+  shuffle: boolean;
+  /** 0: off, 1: context, 2: track. */
+  repeat_mode: 0 | 1 | 2;
+  timestamp: number;
+  track_window: {
+    current_track: SpotifySdkTrack;
+    previous_tracks: SpotifySdkTrack[];
+    next_tracks: SpotifySdkTrack[];
+  };
+}
+
+interface SpotifySdkError {
+  message: string;
+}
+
+interface SpotifySdkPlayer {
+  connect(): Promise<boolean>;
+  disconnect(): void;
+  addListener(
+    event: "ready" | "not_ready",
+    callback: (data: { device_id: string }) => void,
+  ): boolean;
+  addListener(
+    event: "player_state_changed",
+    callback: (state: SpotifySdkPlaybackState | null) => void,
+  ): boolean;
+  addListener(
+    event:
+      | "initialization_error"
+      | "authentication_error"
+      | "account_error"
+      | "playback_error"
+      | "autoplay_failed",
+    callback: (error: SpotifySdkError) => void,
+  ): boolean;
+  getCurrentState(): Promise<SpotifySdkPlaybackState | null>;
+  togglePlay(): Promise<void>;
+  resume(): Promise<void>;
+  pause(): Promise<void>;
+  nextTrack(): Promise<void>;
+  previousTrack(): Promise<void>;
+  seek(positionMs: number): Promise<void>;
+  setVolume(volume: number): Promise<void>;
+  activateElement(): Promise<void>;
+}
+
+interface SpotifySdk {
+  Player: new (options: {
+    name: string;
+    getOAuthToken: (callback: (token: string) => void) => void;
+    volume?: number;
+  }) => SpotifySdkPlayer;
+}
+
+interface Window {
+  Spotify?: SpotifySdk;
+  onSpotifyWebPlaybackSDKReady?: () => void;
+}

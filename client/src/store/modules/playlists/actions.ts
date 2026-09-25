@@ -1,7 +1,7 @@
-import type { ActionTree } from "vuex";
+import type { ActionTree, Dispatch } from "vuex";
 import SpotifyService from "@/services/SpotifyService";
 import type { GraphItems, NodeInput } from "@/types/graph";
-import type { SpotifyPlaylist } from "@/types/spotify";
+import type { SpotifyPlaylist, SpotifyTrack } from "@/types/spotify";
 import type { Context, RootState } from "@/store/types";
 import type { PlaylistsState } from "./index";
 import { nodeFromSpotify } from "@/lib/spotifyNode";
@@ -13,6 +13,37 @@ const formatSongList = (songs: { name?: string }[]) =>
 
 const nodesOf = (result: unknown): NodeInput[] =>
   (result as GraphItems | undefined)?.nodes ?? [];
+
+/**
+ * Adds song nodes to the graph, then their albums, the artists of those albums and the
+ * genres of those artists. Playlists, liked songs and recently played songs use it.
+ */
+export async function addSongsWithNeighbors(
+  dispatch: Dispatch,
+  tracks: (SpotifyTrack | null | undefined)[],
+) {
+  const songNodes: NodeInput[] = tracks
+    .filter((track): track is SpotifyTrack => Boolean(track?.id))
+    .map((track) => ({
+      ...nodeFromSpotify("song", track as unknown as Record<string, unknown>),
+      links: [],
+    }));
+
+  dispatch("addToGraph", { nodes: songNodes, links: [] });
+
+  const albums = await dispatch("expandAction", {
+    nodes: songNodes,
+    expandConfiguration: [{ nodeType: "song", edges: ["Song_to_Album"] }],
+  });
+  const artists = await dispatch("expandAction", {
+    nodes: nodesOf(albums).filter((node) => node.data.label === "album"),
+    expandConfiguration: [{ nodeType: "album", edges: ["Album_to_Artist"] }],
+  });
+  await dispatch("expandAction", {
+    nodes: nodesOf(artists).filter((node) => node.data.label === "artist"),
+    expandConfiguration: [{ nodeType: "artist", edges: ["Artist_to_Genre"] }],
+  });
+}
 
 export const actions = {
   changePlaylistLoaderState({ commit }: Ctx, modalState: boolean) {
@@ -98,30 +129,10 @@ export const actions = {
       rootState.authentication.accessToken,
       playlist.id,
     );
-    const songNodes: NodeInput[] = result.items
-      .filter((item) => item.track?.id)
-      .map((item) => ({
-        ...nodeFromSpotify(
-          "song",
-          item.track as unknown as Record<string, unknown>,
-        ),
-        links: [],
-      }));
-
-    dispatch("addToGraph", { nodes: songNodes, links: [] });
-
-    const albums = await dispatch("expandAction", {
-      nodes: songNodes,
-      expandConfiguration: [{ nodeType: "song", edges: ["Song_to_Album"] }],
-    });
-    const artists = await dispatch("expandAction", {
-      nodes: nodesOf(albums).filter((node) => node.data.label === "album"),
-      expandConfiguration: [{ nodeType: "album", edges: ["Album_to_Artist"] }],
-    });
-    await dispatch("expandAction", {
-      nodes: nodesOf(artists).filter((node) => node.data.label === "artist"),
-      expandConfiguration: [{ nodeType: "artist", edges: ["Artist_to_Genre"] }],
-    });
+    await addSongsWithNeighbors(
+      dispatch,
+      result.items.map((item) => item.track),
+    );
   },
 } satisfies ActionTree<PlaylistsState, RootState>;
 

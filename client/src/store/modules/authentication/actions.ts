@@ -35,12 +35,18 @@ export const actions = {
     );
     refreshTimer = setTimeout(() => {
       refreshTimer = undefined;
-      dispatch("refreshToken");
+      Promise.resolve(dispatch("refreshToken")).catch(() => {
+        dispatch("setLoginState", false);
+        dispatch("disconnectSpotifyPlayer");
+        dispatch("setInfo", "Your Spotify session ended. Log in again.");
+      });
     }, delay);
   },
 
-  async refreshToken({ state, dispatch }: Ctx) {
-    const result = await AuthenticationService.refreshToken(state.refreshToken);
+  /** Gets a new user access token from the session cookie. Throws when the user is not logged in. */
+  async refreshToken({ dispatch }: Ctx) {
+    const result = await AuthenticationService.refreshToken();
+    dispatch("setExpiryTime", result.expires_in);
     dispatch("setAccessToken", result.access_token);
   },
 
@@ -48,10 +54,6 @@ export const actions = {
     commit("SET_ACCESS_TOKEN", token);
     dispatch("setLoginState", true);
     dispatch("refreshTokenAfterTimeout");
-  },
-
-  setRefreshToken({ commit }: Ctx, token: string) {
-    commit("SET_REFRESH_TOKEN", token);
   },
 
   setExpiryTime({ commit }: Ctx, time: number | string) {
@@ -65,20 +67,19 @@ export const actions = {
     return result;
   },
 
-  logout({ dispatch, commit }: Ctx) {
+  /** Ends the out-of-tune session. The user stays logged in to Spotify itself. */
+  async logout({ dispatch, commit }: Ctx) {
     clearRefreshTimer();
     commit("DELETE_USER_STATE");
     dispatch("setLoginState", false);
     dispatch("deleteCurrentUser");
     dispatch("clearPlaylists");
-    // Spotify has no logout API. Opening its logout page ends the Spotify session.
-    // A blocked pop-up is not an error: the local session is already gone.
-    const spotifyLogoutWindow = window.open(
-      "https://accounts.spotify.com/en/logout",
-      "Spotify Logout",
-      "width=700,height=500,top=40,left=40",
-    );
-    if (spotifyLogoutWindow) setTimeout(() => spotifyLogoutWindow.close(), 200);
+    dispatch("disconnectSpotifyPlayer");
+    try {
+      await AuthenticationService.logout();
+    } catch (error) {
+      console.warn("The session cookie could not be deleted", error);
+    }
     dispatch("setInfo", "Logged out");
   },
 } satisfies ActionTree<AuthenticationState, RootState>;

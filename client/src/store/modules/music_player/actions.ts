@@ -74,14 +74,24 @@ export const actions = {
     commit("INSERT_IN_QUEUE", { song, position });
   },
 
-  /** Inserts the song after the current song and plays it. */
-  playSong({ dispatch, state }: Ctx, song: Song) {
+  /**
+   * Plays the full song with the Spotify player when it is connected. Else inserts the
+   * song after the current song and plays its preview.
+   */
+  playSong({ dispatch, state, rootState }: Ctx, song: Song) {
+    if (rootState.spotify_player.status === "ready" && song.uri) {
+      return dispatch("spotifyPlay", { uris: [song.uri] });
+    }
     const position = state.queue.length === 0 ? 0 : state.queueIndex + 1;
     dispatch("insertInQueue", { song, position });
     dispatch("playAtIndexInQueue", position);
   },
 
-  addToQueue({ commit, dispatch }: Ctx, song: Song) {
+  /** Adds the song to the Spotify queue when the Spotify player is connected, else to the preview queue. */
+  addToQueue({ commit, dispatch, rootState }: Ctx, song: Song) {
+    if (rootState.spotify_player.status === "ready" && song.uri) {
+      return dispatch("addToSpotifyQueue", song);
+    }
     dispatch("setAddToQueueNotifaction", true);
     setTimeout(
       () => dispatch("setAddToQueueNotifaction", false),
@@ -151,6 +161,10 @@ export const actions = {
   async playOnSpotify({ rootState, dispatch }: Ctx, uris: string[]) {
     if (!rootState.authentication.loginState) {
       dispatch("setInfo", "Log in to Spotify to play the queue there");
+      return;
+    }
+    if (rootState.spotify_player.status === "ready") {
+      await dispatch("spotifyPlay", { uris });
       return;
     }
     dispatch("setMessage", "Trying to play queue on Spotify");

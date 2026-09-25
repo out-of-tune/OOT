@@ -296,7 +296,9 @@ export const actions = {
       });
       commit("ADD_TO_GRAPH", { nodes: updatedNodes, links: [] });
       dispatch("applyAllConfigurations");
-      updatedNodes.forEach((node) => dispatch("addToQueue", { ...node.data }));
+      // One after another, so the Spotify queue keeps the order of the selection.
+      for (const node of updatedNodes)
+        await dispatch("addToQueue", { ...node.data });
       dispatch("setSuccess", `Added ${updatedNodes.length} songs to queue`);
     } catch (error) {
       dispatch("setError", error);
