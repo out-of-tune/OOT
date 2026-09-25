@@ -46,7 +46,7 @@ const submit = () =>
 
 <template>
   <form
-    class="search flex flex-wrap items-center gap-2"
+    class="search flex min-w-0 items-center gap-2"
     role="search"
     @submit.prevent="submit"
   >
@@ -67,10 +67,10 @@ const submit = () =>
         type="search"
         aria-label="Search artists, albums, songs and genres"
         placeholder="Search artists, albums, songs…"
-        class="field min-w-0 flex-1 sm:w-64"
+        class="field w-40 min-w-0 flex-1 lg:w-64"
       />
     </template>
-    <div v-else class="min-w-0 flex-1 sm:w-80">
+    <div v-else class="w-48 min-w-0 flex-1 lg:w-80">
       <SearchQueryInput
         v-model="advancedText"
         label="Search the graph"

@@ -139,7 +139,11 @@ export const createRootState = (): BaseState => ({
   spotify: { accessToken: "" },
   visibleItems: {
     queueDisplay: false,
-    nodeInfo: true,
+    // On small screens the panel would cover most of the graph, so it starts closed there.
+    nodeInfo:
+      typeof window === "undefined" ||
+      typeof window.matchMedia !== "function" ||
+      window.matchMedia("(min-width: 1024px) and (min-height: 640px)").matches,
     addToQueueNotification: false,
   },
   activeMode: "expand",

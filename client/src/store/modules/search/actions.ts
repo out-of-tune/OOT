@@ -366,10 +366,10 @@ export const actions = {
       ...graphNodes,
       ...databaseNodes.map((node) => ({ ...node, links: [] })),
     ];
-    dispatch(
-      "selectNodes",
-      uniqBy(found, (node) => node.id),
-    );
+    const selected = uniqBy(found, (node) => node.id);
+    dispatch("selectNodes", selected);
+    // New nodes appear at random places. Moving the camera to them makes the result visible.
+    if (selected.length > 0) dispatch("fitGraphToSelection");
   },
 
   setSearchString({ commit }: Ctx, searchString: string) {

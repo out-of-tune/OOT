@@ -21,7 +21,9 @@ async function login() {
 <template>
   <div class="panel flex items-center gap-2 p-1.5">
     <UiButton v-if="!loggedIn" id="login" variant="primary" @click="login">
-      <LogIn class="size-4" /> Log in with Spotify
+      <LogIn class="size-4" /> Log in<span class="hidden lg:inline">
+        with Spotify</span
+      >
     </UiButton>
     <template v-else>
       <div class="flex items-center gap-2 pl-1.5">
@@ -37,7 +39,7 @@ async function login() {
         >
           {{ (user.display_name ?? "?").charAt(0) }}
         </span>
-        <span class="max-w-40 truncate text-sm font-medium">{{
+        <span class="hidden max-w-40 truncate text-sm font-medium lg:inline">{{
           user.display_name
         }}</span>
       </div>

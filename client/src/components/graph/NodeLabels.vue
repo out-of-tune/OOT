@@ -9,7 +9,7 @@ defineProps<{ items: NodeLabel[] }>();
     <span
       v-for="item in items"
       :key="item.id"
-      class="absolute max-w-28 truncate rounded px-1.5 py-0.5 text-[11px] leading-tight font-medium shadow"
+      class="absolute max-w-28 -translate-x-1/2 translate-y-3 truncate rounded px-1.5 py-0.5 text-[11px] leading-tight font-medium shadow"
       :style="{
         left: `${item.coordinates.x}px`,
         top: `${item.coordinates.y}px`,

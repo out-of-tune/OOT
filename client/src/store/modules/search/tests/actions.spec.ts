@@ -522,7 +522,8 @@ describe("startSimpleGraphSearch", () => {
         links: [],
       },
     ];
-    expect(dispatch).toHaveBeenLastCalledWith("selectNodes", expectedNodes);
+    expect(dispatch).toHaveBeenCalledWith("selectNodes", expectedNodes);
+    expect(dispatch).toHaveBeenLastCalledWith("fitGraphToSelection");
   });
   it("adds nodes from graphql with certain nodetype", async () => {
     handleGraphqlTokenError.mockReturnValue({

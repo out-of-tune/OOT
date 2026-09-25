@@ -7,6 +7,7 @@ import {
   ref,
 } from "vue";
 import { useRoute } from "vue-router";
+import EmptyGraphHint from "@/components/graph/EmptyGraphHint.vue";
 import GraphStatus from "@/components/graph/GraphStatus.vue";
 import NodeInfoPanel from "@/components/graph/NodeInfoPanel.vue";
 import NodeLabels from "@/components/graph/NodeLabels.vue";
@@ -29,6 +30,8 @@ const TOOLTIP_OFFSET = 16;
 const store = useStore();
 const route = useRoute();
 const container = ref<HTMLElement | null>(null);
+/** Number of nodes in the graph. The graph engine is not reactive, so its change events update this. */
+const nodeCount = ref(0);
 const tooltipPosition = ref({ x: 0, y: 0 });
 
 const hoveredNode = computed(() => store.state.mainGraph.hoveredNode);
@@ -119,6 +122,8 @@ onMounted(async () => {
   if (!container.value) return;
   store.dispatch("setGraphContainer", container.value);
   store.dispatch("initGraph");
+  const graph = store.state.mainGraph.Graph;
+  graph.on("changed", () => (nodeCount.value = graph.getNodesCount()));
   container.value.focus();
   window.addEventListener("resize", onResize);
 
@@ -181,6 +186,13 @@ onBeforeUnmount(() => {
       :style="{ left: `${tooltipPosition.x}px`, top: `${tooltipPosition.y}px` }"
     >
       <span v-if="isPinned" aria-label="pinned">📌 </span>{{ tooltipText }}
+    </div>
+
+    <div
+      v-if="nodeCount === 0 && store.state.appearance.pendingRequestCount === 0"
+      class="pointer-events-none fixed inset-0 z-[5] flex items-center justify-center"
+    >
+      <EmptyGraphHint />
     </div>
 
     <TopBar />
