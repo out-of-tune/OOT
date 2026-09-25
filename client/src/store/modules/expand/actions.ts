@@ -574,15 +574,21 @@ export const actions = {
         ? getGraphQlResult(rootState, nodesWithConnections, dispatch)
         : getSpotifyResult(rootState, nodesWithConnections, dispatch);
     };
+    // A failing endpoint (for example Spotify without credentials) must not drop the results of the other.
+    const settle = async (endpoint: EdgeDirection["endpoint"]) => {
+      try {
+        return await getResult(endpoint);
+      } catch (error) {
+        dispatch("setError", error);
+        return [];
+      }
+    };
     let result: GraphItems;
     try {
       result = addResults([
-        ...(await getResult("graphQl")),
-        ...(await getResult("spotify")),
+        ...(await settle("graphQl")),
+        ...(await settle("spotify")),
       ]);
-    } catch (error) {
-      dispatch("setError", error);
-      return { nodes: [], links: [] };
     } finally {
       dispatch("removePendingRequest");
     }

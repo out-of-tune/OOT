@@ -103,6 +103,18 @@ See the [client README](./client/README.md) for the commands and the structure.
 For a full documentation go to the [Vue documentation](https://vuejs.org/guide/introduction)
 and the [Vuex documentation](https://vuex.vuejs.org/)
 
+## Sample data for local tests
+
+`db/seed/seed.mjs` loads a small graph into ArangoDB: 25 genres with their subgenres, and 24 well known artists with their genres. The artists have their Spotify ids, so with Spotify credentials their albums and songs load too. Start the stack once, so that the API creates the collections, then run:
+
+```
+docker run --rm --network <project>_default -v "$PWD/db/seed:/seed:ro" \
+  -e ARANGODB_DATABASE=<database> -e ARANGODB_PASSWORD=<password> \
+  node:24-alpine node /seed/seed.mjs
+```
+
+`<project>` is the Docker Compose project name, by default the name of the repository folder. Running the script again replaces the same documents.
+
 ## Development checks
 
 Each package has its own tests. From the repository root, `npm run check` runs all of them:

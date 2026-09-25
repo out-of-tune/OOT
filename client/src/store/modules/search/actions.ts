@@ -104,6 +104,34 @@ async function searchSpotify(
   );
 }
 
+/**
+ * Spotify search that does not fail the whole search. Without a working Spotify token
+ * (for example no app credentials) the database results still show.
+ */
+async function searchSpotifyOrSkip(
+  searchString: string,
+  rootState: RootState,
+  dispatch: Dispatch,
+  spotifyNodeTypes: string[],
+): Promise<NodeInput[]> {
+  if (spotifyNodeTypes.length === 0) return [];
+  try {
+    return await searchSpotify(
+      searchString,
+      rootState,
+      dispatch,
+      spotifyNodeTypes,
+    );
+  } catch (error) {
+    console.warn("Spotify search failed", error);
+    dispatch(
+      "setInfo",
+      "Spotify is not reachable. Only database results are shown.",
+    );
+    return [];
+  }
+}
+
 const nameAndLimit = (
   searchString: string,
   limit: number,
@@ -156,7 +184,7 @@ async function queryAllNodeTypes(
     )
     .map((nodeType) => nodeType.label);
 
-  const spotifyNodes = await searchSpotify(
+  const spotifyNodes = await searchSpotifyOrSkip(
     searchString,
     rootState,
     dispatch,
@@ -174,7 +202,12 @@ async function queryAllNodeTypes(
   const missingTypes = difference(bothTypes, foundTypes);
   const fallbackNodes =
     missingTypes.length > 0
-      ? await searchSpotify(searchString, rootState, dispatch, missingTypes)
+      ? await searchSpotifyOrSkip(
+          searchString,
+          rootState,
+          dispatch,
+          missingTypes,
+        )
       : [];
   missingTypes.forEach((type) =>
     registerArtists(
@@ -200,7 +233,9 @@ async function queryNodeType(
   if (!schemaNodeType) throw new Error(`Node ${nodeType} not found in schema`);
   const [spotifyNodes, graphQlNodes] = await Promise.all([
     schemaNodeType.endpoints?.includes("spotify")
-      ? searchSpotify(searchString, rootState, dispatch, [schemaNodeType.label])
+      ? searchSpotifyOrSkip(searchString, rootState, dispatch, [
+          schemaNodeType.label,
+        ])
       : [],
     schemaNodeType.endpoints?.includes("graphql")
       ? searchGraphql(

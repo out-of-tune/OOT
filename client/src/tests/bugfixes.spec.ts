@@ -18,6 +18,7 @@ import feedbackActions from "@/store/modules/feedback/actions";
 import musicPlayerMutations from "@/store/modules/music_player/mutations";
 import playlistActions from "@/store/modules/playlists/actions";
 import search from "@/store/modules/search";
+import searchActions from "@/store/modules/search/actions";
 import snackbarActions from "@/store/modules/snackbar/actions";
 import snackbarMutations from "@/store/modules/snackbar/mutations";
 import createGraph from "ngraph.graph";
@@ -311,5 +312,122 @@ describe("6 and 7. playlists", () => {
       [{ name: "no uri" } as never],
     );
     expect(dispatch).toHaveBeenCalledWith("setInfo", "No songs to add");
+  });
+});
+
+describe("one failing endpoint keeps the results of the other", () => {
+  const schema = {
+    nodeTypes: [
+      { label: "genre", attributes: ["name", "id"], endpoints: ["graphql"] },
+      { label: "album", attributes: ["name", "id"], endpoints: ["spotify"] },
+      { label: "song", attributes: ["name", "id"], endpoints: ["spotify"] },
+      {
+        label: "artist",
+        attributes: ["name", "id"],
+        endpoints: ["graphql", "spotify"],
+      },
+    ],
+    edgeTypes: [
+      {
+        label: "Genre_to_Genre",
+        inbound: {
+          from: "genre",
+          to: "genre",
+          connectionName: "subgenres",
+          endpoint: "graphQl",
+        },
+        outbound: {
+          from: "genre",
+          to: "genre",
+          connectionName: "supergenres",
+          endpoint: "graphQl",
+        },
+      },
+      {
+        label: "Song_to_Album",
+        inbound: {
+          from: "song",
+          to: "album",
+          connectionName: "albums",
+          endpoint: "spotify",
+        },
+        outbound: {
+          from: "album",
+          to: "song",
+          connectionName: "songs",
+          endpoint: "spotify",
+        },
+      },
+    ],
+  };
+
+  it("expand keeps the Spotify nodes when the database fails", async () => {
+    vi.spyOn(GraphService, "getNodes").mockRejectedValue(
+      new Error("database down"),
+    );
+    vi.spyOn(SpotifyService, "getSongsFromAlbum").mockResolvedValue({
+      items: [{ id: "s1", name: "Song" }],
+    } as never);
+    const dispatch = vi.fn();
+    const rootState = {
+      authentication: { loginState: false, accessToken: "" },
+      spotify: { accessToken: "token" },
+      schema,
+      configurations: {
+        actionConfiguration: {
+          expand: [
+            { nodeType: "genre", edges: ["Genre_to_Genre"] },
+            { nodeType: "album", edges: ["Song_to_Album"] },
+          ],
+        },
+      },
+      expand: { failedExpandedConnections: [] },
+    };
+    const result = await expandActions.expandAction(
+      { rootState, dispatch } as never,
+      {
+        nodes: [
+          { id: "Genre/1", data: { label: "genre" } },
+          { id: "album/a1", data: { label: "album", sid: "a1" } },
+        ],
+      },
+    );
+    expect(result.nodes.map((node) => node.id)).toEqual(["song/s1"]);
+    expect(dispatch).toHaveBeenCalledWith("setError", expect.any(Error));
+  });
+
+  it("search shows database results when Spotify fails", async () => {
+    vi.spyOn(SpotifyService, "searchByString").mockRejectedValue(
+      new Error("Network Error"),
+    );
+    vi.spyOn(GraphService, "getNodes").mockResolvedValue({
+      artist: [{ id: "Artist/1", name: "Radiohead" }],
+      genre: [],
+    } as never);
+    const dispatch = vi.fn();
+    const rootState = {
+      authentication: { loginState: false, accessToken: "" },
+      spotify: { accessToken: "" },
+      schema,
+      selection: { selectedNodes: [] },
+      mainGraph: { Graph: createGraph() },
+    };
+    await searchActions.startSimpleGraphSearch(
+      { dispatch, rootState } as never,
+      {
+        nodeType: "any",
+        searchString: "radio",
+      },
+    );
+    const added = dispatch.mock.calls.find(
+      ([type]) => type === "addToGraph",
+    )?.[1];
+    expect(added.nodes.map((node: { id: string }) => node.id)).toEqual([
+      "Artist/1",
+    ]);
+    expect(dispatch).toHaveBeenCalledWith(
+      "setInfo",
+      "Spotify is not reachable. Only database results are shown.",
+    );
   });
 });
