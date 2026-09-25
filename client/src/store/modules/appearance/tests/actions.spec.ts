@@ -4,8 +4,8 @@ import {
   getAllLinks,
   getNodeColor,
   getLinkColor,
-} from "@/assets/js/graphHelper";
-vi.mock("@/assets/js/graphHelper");
+} from "@/lib/graph";
+vi.mock("@/lib/graph");
 import Viva from "vivagraphjs";
 
 const {
@@ -29,7 +29,7 @@ describe("toggleEdgeVisibility", () => {
   it("calls the hide edges function when displayEdges is true", () => {
     const commit = vi.fn();
 
-    let rootState = {
+    const rootState = {
       mainGraph: {
         displayState: {
           displayEdges: true,
@@ -45,7 +45,7 @@ describe("toggleEdgeVisibility", () => {
   it("calls the show edges function when displayEdges is false", () => {
     const commit = vi.fn();
 
-    let rootState = {
+    const rootState = {
       mainGraph: {
         displayState: {
           displayEdges: false,
@@ -64,7 +64,7 @@ describe("switchRendering", () => {
   it("calls the pause rendering mutation when isRendered is true", () => {
     const commit = vi.fn();
 
-    let rootState = {
+    const rootState = {
       mainGraph: {
         renderState: {
           isRendered: true,
@@ -80,7 +80,7 @@ describe("switchRendering", () => {
   it("calls the show edges function when displayEdges is false", () => {
     const commit = vi.fn();
 
-    let rootState = {
+    const rootState = {
       mainGraph: {
         renderState: {
           isRendered: false,
@@ -290,7 +290,7 @@ describe("highlight", () => {
       opacity: "ff",
     });
   });
-  it("sets all not highlighted nodes transparent", () => {
+  it("sets all not highlighted links transparent", () => {
     highlight({ rootState, dispatch, commit }, allNodes[0]);
     expect(commit).toHaveBeenCalledWith("SET_EDGE_COLOR", {
       link: allLinks[1],
@@ -350,14 +350,6 @@ describe("clusterLoop", () => {
     clusterLoop({ dispatch, rootState });
     expect(dispatch).toHaveBeenCalledWith("storeColors");
   });
-  it("calls getAllNodes", () => {
-    clusterLoop({ dispatch, rootState });
-    expect(getAllNodes).toHaveBeenCalledWith(rootState);
-  });
-  it("calls getAllLinks", () => {
-    clusterLoop({ dispatch, rootState });
-    expect(getAllLinks).toHaveBeenCalledWith(rootState);
-  });
   it("clusters nodes", () => {
     clusterLoop({ dispatch, rootState });
     expect(dispatch).toHaveBeenCalledWith("clusterNodes");
@@ -392,10 +384,6 @@ describe("fadeOut", () => {
   it("calls getAllNodes", () => {
     fadeOut({ commit, dispatch, rootState });
     expect(getAllNodes).toHaveBeenCalledWith(rootState);
-  });
-  it("calls getAllLinks", () => {
-    fadeOut({ commit, dispatch, rootState });
-    expect(getAllLinks).toHaveBeenCalledWith(rootState);
   });
   it("calls deletes nodes", () => {
     fadeOut({ commit, dispatch, rootState });

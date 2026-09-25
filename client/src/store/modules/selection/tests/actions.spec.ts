@@ -1,14 +1,13 @@
 import { actions } from "../actions";
 import Viva from "vivagraphjs";
-global._ = require("lodash");
 
 import {
   getNodeUi,
   getAllNodes,
   getAllLinks,
   getNodePosition,
-} from "@/assets/js/graphHelper";
-vi.mock("@/assets/js/graphHelper");
+} from "@/lib/graph";
+vi.mock("@/lib/graph");
 const {
   markNodes,
   setSelectedNodes,
@@ -74,7 +73,7 @@ describe("markNodes", () => {
         },
       },
     };
-    let nodes = [
+    const nodes = [
       {
         id: "Auftrag/1",
         data: {
@@ -102,7 +101,7 @@ describe("markNodes", () => {
     });
   });
   it("sets the color of not selected nodes transparent", () => {
-    let foundNodes = [
+    const foundNodes = [
       {
         id: "Auftrag/1",
         links: [],
@@ -125,13 +124,13 @@ describe("markNodes", () => {
       node: {
         id: "Kunde/1",
         data: { name: "franz", label: "Kunde" },
-        links: [],
+        links: null,
       },
       opacity: "44",
     });
   });
   it("sets the color of all found nodes to intransparent", () => {
-    let foundNodes = [
+    const foundNodes = [
       {
         id: "Auftrag/1",
         links: [],
@@ -177,7 +176,7 @@ describe("markNodes", () => {
 
 describe("setSelectedNodes", () => {
   it("sets the selectedNodes array", () => {
-    let commit = vi.fn();
+    const commit = vi.fn();
     const nodes = [
       { id: "node1", data: { label: "Auftrag" } },
       { id: "node2", data: { label: "Auftrag" } },
@@ -191,7 +190,7 @@ describe("setSelectedNodes", () => {
 });
 
 describe("handleAreaSelected", () => {
-  let dispatch = vi.fn();
+  const dispatch = vi.fn();
   let commit;
   let rootState;
   let graphics;
@@ -239,8 +238,8 @@ describe("handleAreaSelected", () => {
         return x === area.x && y === area.y
           ? topLeft
           : x === area.x + area.width && y === area.y + area.height
-          ? bottomRight
-          : null;
+            ? bottomRight
+            : null;
       },
     };
     rootState.mainGraph.renderState.Renderer.getGraphics.mockReturnValue(
@@ -279,7 +278,7 @@ describe("handleAreaSelected", () => {
     handleAreaSelected({ commit, dispatch, rootState }, { area, graphics });
     expect(commit).toHaveBeenCalledWith("SET_TEMPORARY_SELECTED", [nodes[0]]);
   });
-  it("doesnt do anything when no new nodes are added ", () => {
+  it("doesnt do anything when no new nodes are added", () => {
     rootState.selection.temporarySelectedNodes = [nodes[0]];
     getNodeUi
       .mockReturnValueOnce({ position: nodePos, size: 10 })
@@ -291,7 +290,7 @@ describe("handleAreaSelected", () => {
   it("removes nodes from temporary selection", () => {
     topLeft = { x: -91.93242967690891, y: -3.086346444249347 };
     bottomRight = { x: 35.24307976348013, y: 73.68063124210396 };
-    nodePos = { x: -601.124350989640, y: 37.50443237426515 };
+    nodePos = { x: -601.12435098964, y: 37.50443237426515 };
     getNodeUi
       .mockReturnValueOnce({ position: nodePos, size: 10 })
       .mockReturnValueOnce({ position: { x: 0, y: 0 }, size: 10 });
@@ -378,8 +377,8 @@ describe("setLinkOpactity", () => {
     commit = vi.fn();
   });
   it("sets link opacity", () => {
-    let getLinkUI = vi.fn();
-    let getGraphics = vi.fn();
+    const getLinkUI = vi.fn();
+    const getGraphics = vi.fn();
     rootState = {
       mainGraph: {
         renderState: {
@@ -389,7 +388,7 @@ describe("setLinkOpactity", () => {
         },
       },
     };
-    getLinkUI.mockReturnValue({ color: "ffffffff" });
+    getLinkUI.mockReturnValue({ color: 0xffffffff });
     getGraphics.mockReturnValue({ getLinkUI });
     setLinkOpacity(
       { rootState, commit },
@@ -409,8 +408,8 @@ describe("setNodeOpactity", () => {
     commit = vi.fn();
   });
   it("sets node opacity", () => {
-    let getNodeUI = vi.fn();
-    let getGraphics = vi.fn();
+    const getNodeUI = vi.fn();
+    const getGraphics = vi.fn();
     rootState = {
       mainGraph: {
         renderState: {
@@ -420,7 +419,7 @@ describe("setNodeOpactity", () => {
         },
       },
     };
-    getNodeUi.mockReturnValue({ color: "ffffffff" });
+    getNodeUi.mockReturnValue({ color: 0xffffffff });
     getGraphics.mockReturnValue({ getNodeUI });
     setNodeOpacity(
       { rootState, commit },
@@ -556,7 +555,7 @@ describe("setEdgesTransparent", () => {
         },
       },
     };
-    let nodes = [
+    const nodes = [
       {
         id: "Auftrag/1",
         data: {
@@ -579,7 +578,7 @@ describe("setEdgesTransparent", () => {
         },
       },
     ];
-    let links = [
+    const links = [
       { from: "Auftrag/1", to: "Kunde/1" },
       { from: "Auftrag/2", to: "Kunde/1" },
     ];

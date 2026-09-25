@@ -42,7 +42,7 @@ describe("initGraph", () => {
 });
 
 describe("setGraphContainer", () => {
-  let commit = vi.fn();
+  const commit = vi.fn();
   it("calls the right mutation", () => {
     const graphContainer = {
       id: "test",

@@ -1,9 +1,9 @@
 import { actions } from "../actions";
 import { JSDOM } from "jsdom";
-import { startMultiSelect } from "@/assets/js/selectHelper";
-import { getNodePosition, getPinnedState } from "@/assets/js/graphHelper";
-vi.mock("@/assets/js/selectHelper");
-vi.mock("@/assets/js/graphHelper");
+import { startMultiSelect } from "@/lib/select";
+import { getNodePosition, getPinnedState } from "@/lib/graph";
+vi.mock("@/lib/select");
+vi.mock("@/lib/graph");
 
 const dom = new JSDOM();
 global.document = dom.window.document;
@@ -244,7 +244,7 @@ describe("mouseEnterFunctionality", () => {
 describe("mouseLeaveFunctionality", () => {
   it("sets tooltip to invisible", () => {
     const commit = vi.fn();
-    let rootState = {
+    const rootState = {
       appearance: {
         highlight: false,
       },

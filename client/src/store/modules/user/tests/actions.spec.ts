@@ -1,6 +1,6 @@
-import SpotifyService from "@/store/services/SpotifyService";
+import SpotifyService from "@/services/SpotifyService";
 
-vi.mock("@/store/services/SpotifyService");
+vi.mock("@/services/SpotifyService");
 import { actions } from "../actions";
 
 const { getCurrentUser, deleteCurrentUser } = actions;

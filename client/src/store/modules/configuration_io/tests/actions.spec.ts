@@ -1,10 +1,8 @@
-/**
- * @jest-environment jsdom
- */
-
+// @vitest-environment jsdom
 import { actions } from "../actions";
-import IndexedDbService from "@/store/services/IndexedDbService";
-vi.mock("@/store/services/IndexedDbService");
+import schemaExample from "./schema.json";
+import IndexedDbService from "@/services/IndexedDbService";
+vi.mock("@/services/IndexedDbService");
 
 const {
   importConfiguration,
@@ -21,8 +19,7 @@ describe("importConfiguration", () => {
     dispatch = vi.fn();
   });
   it("verifies a correct schema", () => {
-    const js = require("./schema.json");
-    const testString = js;
+    const testString = schemaExample;
 
     importConfiguration(
       {
@@ -80,22 +77,22 @@ describe("storeConfiguration", () => {
     };
     state = rootState.configuration_io;
   });
-  it("calls saveIndexedDb", () => {
-    storeConfiguration({ rootState, dispatch, commit, state }, "abc");
+  it("calls saveIndexedDb", async () => {
+    await storeConfiguration({ rootState, dispatch, commit, state }, "abc");
     expect(IndexedDbService.saveConfiguration).toHaveBeenCalledWith(
       "abc",
       rootState.configurations,
     );
   });
-  it("adds name to stored configuration name list if it is not there yet", () => {
-    storeConfiguration({ rootState, dispatch, commit, state }, "abc");
+  it("adds name to stored configuration name list if it is not there yet", async () => {
+    await storeConfiguration({ rootState, dispatch, commit, state }, "abc");
     expect(commit).toHaveBeenCalledWith("SET_STORED_CONFIGURATION_NAMES", [
       "MamboNo1Config",
       "abc",
     ]);
   });
-  it("doesn't add name if string already exists", () => {
-    storeConfiguration(
+  it("doesn't add name if string already exists", async () => {
+    await storeConfiguration(
       { rootState, dispatch, commit, state },
       "MamboNo1Config",
     );
@@ -103,11 +100,14 @@ describe("storeConfiguration", () => {
       "MamboNo1Config",
     ]);
   });
-  it("dispatches an error message when IndexedDb errors", () => {
+  it("dispatches an error message when IndexedDb errors", async () => {
     IndexedDbService.saveConfiguration.mockImplementationOnce(
       new Error("A error"),
     );
-    storeConfiguration({ rootState, dispatch, commit, state }, "MamboNo1");
+    await storeConfiguration(
+      { rootState, dispatch, commit, state },
+      "MamboNo1",
+    );
     expect(dispatch).toHaveBeenCalledWith("setError", expect.anything());
   });
 });
@@ -132,7 +132,7 @@ describe("loadConfigurationFromIndexedDb", () => {
       id: "A configuration",
     });
   });
-  it("it applies configurations", async () => {
+  it("applies configurations", async () => {
     IndexedDbService.getConfiguration = vi.fn();
     IndexedDbService.getConfiguration.mockReturnValue({
       id: "A configuration",

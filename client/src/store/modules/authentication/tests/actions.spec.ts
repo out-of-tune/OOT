@@ -1,12 +1,9 @@
-/**
- * @jest-environment jsdom
- */
-
-import SpotifyTokenService from "@/store/services/SpotifyTokenService";
-import AuthenticationService from "@/store/services/AuthenticationService";
-vi.mock("@/store/services/SpotifyTokenService");
-vi.mock("@/store/services/AuthenticationService");
-vi.mock("@/store/services/BaseService");
+// @vitest-environment jsdom
+import SpotifyTokenService from "@/services/SpotifyTokenService";
+import AuthenticationService from "@/services/AuthenticationService";
+vi.mock("@/services/SpotifyTokenService");
+vi.mock("@/services/AuthenticationService");
+vi.mock("@/services/BaseService");
 
 import { actions } from "../actions";
 
@@ -61,7 +58,7 @@ describe("setExpiryTime", () => {
   });
   it("sets the refresh token", () => {
     setExpiryTime({ commit }, time);
-    expect(commit).toHaveBeenCalledWith("SET_EXPIRY_TIME", time);
+    expect(commit).toHaveBeenCalledWith("SET_EXPIRY_TIME", Number(time));
   });
 });
 
@@ -69,11 +66,10 @@ describe("requireAccessToken", () => {
   let commit;
   let rootState;
   beforeEach(() => {
-    (commit = vi.fn()),
-      (rootState = {
-        authentication: {
-        },
-      });
+    commit = vi.fn();
+    rootState = {
+      authentication: {},
+    };
   });
   it("Obtains the token and writes it to the database", async () => {
     SpotifyTokenService.getAccessToken.mockReturnValue({
@@ -93,7 +89,7 @@ describe("refreshToken", () => {
     dispatch = vi.fn();
   });
   it("refreshes the token", async () => {
-    let state = {
+    const state = {
       refreshToken: "refreshToken",
     };
     AuthenticationService.refreshToken = vi.fn();

@@ -1,4 +1,6 @@
-const schema = {
+import type { Schema } from "jsonschema";
+
+const schema: Schema = {
   definitions: {
     searchObject: {
       type: "object",

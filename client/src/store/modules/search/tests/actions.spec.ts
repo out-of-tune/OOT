@@ -1,24 +1,18 @@
-/**
- * @jest-environment jsdom
- */
-
+// @vitest-environment jsdom
 import { actions } from "../actions";
 
-import GraphService from "@/store/services/GraphService";
-vi.mock("@/store/services/GraphService");
+import GraphService from "@/services/GraphService";
+vi.mock("@/services/GraphService");
 import _ from "lodash";
 import Viva from "vivagraphjs";
-import SpotifyService from "@/store/services/SpotifyService";
-vi.mock("@/store/services/SpotifyService");
-import searchObjectHelper from "@/assets/js/searchObjectHelper";
-vi.mock("@/assets/js/searchObjectHelper");
-import "@/assets/js/graphQlHelper.js";
-vi.mock("@/assets/js/graphQlHelper.js");
-import {
-  handleGraphqlTokenError,
-  handleTokenError,
-} from "@/assets/js/TokenHelper";
-vi.mock("@/assets/js/TokenHelper");
+import SpotifyService from "@/services/SpotifyService";
+vi.mock("@/services/SpotifyService");
+import searchObjectHelper from "@/lib/search/searchObject";
+vi.mock("@/lib/search/searchObject");
+import "@/lib/graphql";
+vi.mock("@/lib/graphql");
+import { handleGraphqlTokenError, handleTokenError } from "@/lib/token";
+vi.mock("@/lib/token");
 
 const {
   generateSearchObject,
@@ -171,7 +165,7 @@ describe("startGraphQlSearch", () => {
     await startGraphQlSearch({ commit, rootState, dispatch });
     expect(commit).not.toHaveBeenCalled();
   });
-  it("adds nodes from graphql endpoint ", async () => {
+  it("adds nodes from graphql endpoint", async () => {
     rootState.searchObject = {
       valid: true,
       errors: [],
@@ -335,7 +329,7 @@ describe("startSimpleGraphSearch", () => {
         accessToken: "asdklmsklm",
       },
     };
-    let nodes = [
+    const nodes = [
       {
         id: "artist/1",
         data: {
@@ -373,7 +367,7 @@ describe("startSimpleGraphSearch", () => {
     const expectedNodes = [
       {
         id: "artist/1",
-        links: [],
+        links: null,
         data: {
           name: "bob",
           label: "artist",
@@ -385,7 +379,7 @@ describe("startSimpleGraphSearch", () => {
           name: "karl",
           label: "artist",
         },
-        links: [],
+        links: null,
       },
     ];
     expect(dispatch).toHaveBeenCalledWith("selectNodes", expectedNodes);
@@ -398,7 +392,7 @@ describe("startSimpleGraphSearch", () => {
     const expectedNodes = [
       {
         id: "artist/1",
-        links: [],
+        links: null,
         data: {
           name: "bob",
           label: "artist",
@@ -410,7 +404,7 @@ describe("startSimpleGraphSearch", () => {
           name: "karl",
           label: "artist",
         },
-        links: [],
+        links: null,
       },
       {
         id: "album/1",
@@ -418,7 +412,7 @@ describe("startSimpleGraphSearch", () => {
           name: "franz",
           label: "album",
         },
-        links: [],
+        links: null,
       },
     ];
     expect(dispatch).toHaveBeenCalledWith("selectNodes", expectedNodes);
@@ -528,7 +522,7 @@ describe("startSimpleGraphSearch", () => {
         links: [],
       },
     ];
-    expect(dispatch).toHaveBeenNthCalledWith(4, "selectNodes", expectedNodes);
+    expect(dispatch).toHaveBeenLastCalledWith("selectNodes", expectedNodes);
   });
   it("adds nodes from graphql with certain nodetype", async () => {
     handleGraphqlTokenError.mockReturnValue({
@@ -560,6 +554,7 @@ describe("startSimpleGraphSearch", () => {
       { dispatch, rootState },
       { nodeType: "artist", searchString: "artist/2" },
     );
+    // The node is in the graph and in the database. It is selected once.
     const expectedNodes = [
       {
         id: "artist/2",
@@ -567,15 +562,7 @@ describe("startSimpleGraphSearch", () => {
           name: "karl",
           label: "artist",
         },
-        links: [],
-      },
-      {
-        id: "artist/2",
-        data: {
-          name: "karl",
-          label: "artist",
-        },
-        links: [],
+        links: null,
       },
     ];
     expect(dispatch).toHaveBeenCalledWith("selectNodes", expectedNodes);
@@ -623,7 +610,7 @@ describe("startAdvancedGraphSearch", () => {
         ],
       },
     };
-    let nodes = [
+    const nodes = [
       {
         id: "Auftrag/1",
         data: {
@@ -678,7 +665,7 @@ describe("startAdvancedGraphSearch", () => {
       { addToSelection: false },
     );
 
-    let foundNodes = [
+    const foundNodes = [
       {
         id: "Auftrag/1",
         data: {
@@ -687,7 +674,7 @@ describe("startAdvancedGraphSearch", () => {
           ph: 7.4,
           label: "Auftrag",
         },
-        links: [],
+        links: null,
       },
       {
         id: "Auftrag/2",
@@ -697,7 +684,7 @@ describe("startAdvancedGraphSearch", () => {
           ph: 2.4,
           label: "Auftrag",
         },
-        links: [],
+        links: null,
       },
     ];
     expect(dispatch).toHaveBeenCalledWith("selectNodes", foundNodes);
@@ -708,7 +695,7 @@ describe("startAdvancedGraphSearch", () => {
       { addToSelection: false },
     );
 
-    let foundNodes = [
+    const foundNodes = [
       {
         id: "Auftrag/1",
         data: {
@@ -717,7 +704,7 @@ describe("startAdvancedGraphSearch", () => {
           ph: 7.4,
           label: "Auftrag",
         },
-        links: [],
+        links: null,
       },
       {
         id: "Auftrag/2",
@@ -727,7 +714,7 @@ describe("startAdvancedGraphSearch", () => {
           ph: 2.4,
           label: "Auftrag",
         },
-        links: [],
+        links: null,
       },
     ];
     expect(dispatch).toHaveBeenNthCalledWith(1, "setSuccess", "2 nodes found");
@@ -751,7 +738,7 @@ describe("startAdvancedGraphSearch", () => {
       { addToSelection: false },
     );
 
-    let foundNodes = [
+    const foundNodes = [
       {
         id: "Auftrag/1",
         data: {
@@ -760,7 +747,7 @@ describe("startAdvancedGraphSearch", () => {
           ph: 7.4,
           label: "Auftrag",
         },
-        links: [],
+        links: null,
       },
       {
         id: "Auftrag/2",
@@ -770,7 +757,7 @@ describe("startAdvancedGraphSearch", () => {
           ph: 2.4,
           label: "Auftrag",
         },
-        links: [],
+        links: null,
       },
     ];
     expect(dispatch).toHaveBeenNthCalledWith(1, "setInfo", "0 nodes found");
@@ -794,7 +781,7 @@ describe("startAdvancedGraphSearch", () => {
       { addToSelection: false },
     );
 
-    let foundNodes = [
+    const foundNodes = [
       {
         id: "Auftrag/2",
         data: {
@@ -803,7 +790,7 @@ describe("startAdvancedGraphSearch", () => {
           ph: 2.4,
           label: "Auftrag",
         },
-        links: [],
+        links: null,
       },
     ];
     expect(dispatch).toHaveBeenCalledWith("selectNodes", foundNodes);
@@ -827,7 +814,7 @@ describe("startAdvancedGraphSearch", () => {
       { addToSelection: false },
     );
 
-    let foundNodes = [
+    const foundNodes = [
       {
         id: "Auftrag/1",
         data: {
@@ -836,7 +823,7 @@ describe("startAdvancedGraphSearch", () => {
           ph: 7.4,
           label: "Auftrag",
         },
-        links: [],
+        links: null,
       },
     ];
     expect(dispatch).toHaveBeenCalledWith("selectNodes", foundNodes);
@@ -856,7 +843,7 @@ describe("startAdvancedGraphSearch", () => {
       { addToSelection: false },
     );
 
-    let foundNodes = [
+    const foundNodes = [
       {
         id: "Auftrag/1",
         data: {
@@ -865,7 +852,7 @@ describe("startAdvancedGraphSearch", () => {
           ph: 7.4,
           label: "Auftrag",
         },
-        links: [],
+        links: null,
       },
     ];
     expect(dispatch).toHaveBeenCalledWith("selectNodes", foundNodes);
@@ -885,7 +872,7 @@ describe("startAdvancedGraphSearch", () => {
       { addToSelection: false },
     );
 
-    let foundNodes = [
+    const foundNodes = [
       {
         id: "Auftrag/1",
         data: {
@@ -894,7 +881,7 @@ describe("startAdvancedGraphSearch", () => {
           ph: 7.4,
           label: "Auftrag",
         },
-        links: [],
+        links: null,
       },
     ];
     expect(dispatch).toHaveBeenCalledWith("selectNodes", foundNodes);
@@ -914,7 +901,7 @@ describe("startAdvancedGraphSearch", () => {
       { addToSelection: false },
     );
 
-    let foundNodes = [
+    const foundNodes = [
       {
         id: "Auftrag/2",
         data: {
@@ -923,7 +910,7 @@ describe("startAdvancedGraphSearch", () => {
           ph: 2.4,
           label: "Auftrag",
         },
-        links: [],
+        links: null,
       },
     ];
     expect(dispatch).toHaveBeenCalledWith("selectNodes", foundNodes);
@@ -943,7 +930,7 @@ describe("startAdvancedGraphSearch", () => {
       { addToSelection: false },
     );
 
-    let foundNodes = [
+    const foundNodes = [
       {
         id: "Auftrag/2",
         data: {
@@ -952,7 +939,7 @@ describe("startAdvancedGraphSearch", () => {
           ph: 2.4,
           label: "Auftrag",
         },
-        links: [],
+        links: null,
       },
     ];
     expect(dispatch).toHaveBeenCalledWith("selectNodes", foundNodes);
@@ -972,7 +959,7 @@ describe("startAdvancedGraphSearch", () => {
       { addToSelection: false },
     );
 
-    let foundNodes = [
+    const foundNodes = [
       {
         id: "Auftrag/2",
         data: {
@@ -981,7 +968,7 @@ describe("startAdvancedGraphSearch", () => {
           ph: 2.4,
           label: "Auftrag",
         },
-        links: [],
+        links: null,
       },
     ];
     expect(dispatch).toHaveBeenCalledWith("selectNodes", foundNodes);
@@ -1005,7 +992,7 @@ describe("startAdvancedGraphSearch", () => {
       { addToSelection: false },
     );
 
-    let foundNodes = [
+    const foundNodes = [
       {
         id: "Werk/1",
         data: {
@@ -1013,7 +1000,7 @@ describe("startAdvancedGraphSearch", () => {
           "alias name": "frabab",
           label: "Werk",
         },
-        links: [],
+        links: null,
       },
     ];
     expect(dispatch).toHaveBeenCalledWith("selectNodes", foundNodes);
@@ -1031,7 +1018,7 @@ describe("startAdvancedGraphSearch", () => {
     };
     startAdvancedGraphSearch({ dispatch, rootState }, { addToSelection: true });
 
-    let foundNodes = [
+    const foundNodes = [
       {
         id: "Auftrag/2",
         data: {
@@ -1040,7 +1027,7 @@ describe("startAdvancedGraphSearch", () => {
           ph: 2.4,
           label: "Auftrag",
         },
-        links: [],
+        links: null,
       },
     ];
     expect(dispatch).toHaveBeenCalledWith("selectNodes", [

@@ -1,7 +1,7 @@
 import { actions } from "../actions";
 
-import SpotifyService from "@/store/services/SpotifyService";
-vi.mock("@/store/services/SpotifyService");
+import SpotifyService from "@/services/SpotifyService";
+vi.mock("@/services/SpotifyService");
 
 const {
   getSongSamples,
@@ -193,7 +193,7 @@ describe("playAtIndexInQueue", () => {
     playAtIndexInQueue({ commit, state }, 5);
     expect(commit).not.toHaveBeenCalled();
   });
-  it("it plays the song and sets the queueIndex", () => {
+  it("plays the song and sets the queueIndex", () => {
     playAtIndexInQueue({ commit, state }, 1);
     expect(commit).toHaveBeenNthCalledWith(1, "SET_CURRENT_SONG", {
       el: "two dummy element",

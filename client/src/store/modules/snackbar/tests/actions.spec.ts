@@ -1,9 +1,8 @@
 import { actions } from "../actions";
 import Viva from "vivagraphjs";
-global._ = require("lodash");
 
-import { getAllNodes } from "@/assets/js/graphHelper";
-vi.mock("@/assets/js/graphHelper");
+import { getAllNodes } from "@/lib/graph";
+vi.mock("@/lib/graph");
 const { setError, setInfo, setSuccess, setMessage, setSnackColor } = actions;
 
 describe("setError", () => {
@@ -56,18 +55,18 @@ describe("setMessage", () => {
   beforeEach(() => {
     commit = vi.fn();
   });
-  it("sets the snackbar color to error", () => {
+  it("commits the message", () => {
     setMessage({ commit }, "123");
     expect(commit).toHaveBeenCalledWith("SET_MESSAGE", "123");
   });
 });
 
-describe("setMessage", () => {
+describe("setSnackColor", () => {
   let commit;
   beforeEach(() => {
     commit = vi.fn();
   });
-  it("sets the snackbar color to error", () => {
+  it("commits the color", () => {
     setSnackColor({ commit }, "error");
     expect(commit).toHaveBeenCalledWith("SET_SNACK_COLOR", "error");
   });

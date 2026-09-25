@@ -1,4 +1,4 @@
-import getters from "../store/getters.js";
+import getters from "../store/getters";
 
 describe("getNodeLabelNames", () => {
   let state;

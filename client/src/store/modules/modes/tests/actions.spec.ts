@@ -1,5 +1,4 @@
 import { actions } from "../actions";
-global._ = require("lodash");
 const { updateGraphModificationConfiguration, setActiveMode } = actions;
 
 describe("updateGraphModificationConfiguration", () => {

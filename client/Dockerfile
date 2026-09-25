@@ -1,24 +1,23 @@
-# build stage
-FROM node:16 as build-stage
+# Build stage. docker-compose.override.yml also uses it as the development server.
+FROM node:24-alpine AS build-stage
 
-ARG NODE_ENV
+ARG NODE_ENV=production
 ARG VITE_PROXY_URI
-ARG BASE_URL
+ARG BASE_URL=/
 
-ENV NODE_ENV=$NODE_ENV
 ENV VITE_PROXY_URI=$VITE_PROXY_URI
 ENV BASE_URL=$BASE_URL
 
 WORKDIR /app
 COPY package*.json ./
-RUN NODE_ENV=development npm install
+RUN npm ci --include=dev
 COPY . .
-RUN npm run build
+RUN NODE_ENV=$NODE_ENV npm run build
 
-# production stage
-FROM nginx:stable-alpine as production-stage
+# Production stage: static files served by nginx.
+FROM nginx:stable-alpine AS production-stage
 COPY --from=build-stage /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf
-COPY mime.types  /etc/nginx/mime.types
+COPY mime.types /etc/nginx/mime.types
 
 EXPOSE 8080

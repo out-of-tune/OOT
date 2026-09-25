@@ -1,6 +1,6 @@
 import { actions } from "../actions";
-import { getAllLinks } from "@/assets/js/graphHelper";
-vi.mock("@/assets/js/graphHelper");
+import { getAllLinks } from "@/lib/graph";
+vi.mock("@/lib/graph");
 
 const { addChange, undo, redo, addToClickHistory } = actions;
 
@@ -107,7 +107,7 @@ describe("undo", () => {
     });
     expect(dispatch).toHaveBeenCalledWith("applyAllConfigurations");
   });
-  it("adds nodes and their links when the last change was of type remove ", () => {
+  it("adds nodes and their links when the last change was of type remove", () => {
     state.changes[2] = {
       data: {
         nodes: [

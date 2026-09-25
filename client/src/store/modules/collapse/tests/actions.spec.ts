@@ -92,13 +92,13 @@ describe("collapseAction", () => {
         toId: 3,
       },
     ];
-    var graph = rootState.mainGraph.Graph;
+    const graph = rootState.mainGraph.Graph;
     nodes.forEach((node) => {
       graph.addNode(node.id, node.data);
     });
-    var linksErg = [];
+    const linksErg = [];
     edges.forEach((edge) => {
-      var lonk = graph.addLink(edge.fromId, edge.toId);
+      const lonk = graph.addLink(edge.fromId, edge.toId);
       lonk.linkTypes = ["Soup"];
       linksErg.push(lonk);
     });
@@ -203,13 +203,13 @@ describe("collapseAction", () => {
         toId: 3,
       },
     ];
-    var graph = rootState.mainGraph.Graph;
+    const graph = rootState.mainGraph.Graph;
     nodes.forEach((node) => {
       graph.addNode(node.id, node.data);
     });
-    var linksErg = [];
+    const linksErg = [];
     edges.forEach((edge) => {
-      var lonk = graph.addLink(edge.fromId, edge.toId);
+      const lonk = graph.addLink(edge.fromId, edge.toId);
       lonk.linkTypes = ["Soup"];
       linksErg.push(lonk);
     });
@@ -348,13 +348,13 @@ describe("collapseAction", () => {
         toId: 3,
       },
     ];
-    var graph = rootState.mainGraph.Graph;
+    const graph = rootState.mainGraph.Graph;
     nodes.forEach((node) => {
       graph.addNode(node.id, node.data);
     });
-    var linksErg = [];
+    const linksErg = [];
     edges.forEach((edge) => {
-      var lonk = graph.addLink(edge.fromId, edge.toId);
+      const lonk = graph.addLink(edge.fromId, edge.toId);
       lonk.linkTypes = ["Soup"];
       linksErg.push(lonk);
     });
@@ -449,13 +449,13 @@ describe("collapseAction", () => {
         toId: 3,
       },
     ];
-    var graph = rootState.mainGraph.Graph;
+    const graph = rootState.mainGraph.Graph;
     nodes.forEach((node) => {
       graph.addNode(node.id, node.data);
     });
-    var linksErg = [];
+    const linksErg = [];
     edges.forEach((edge) => {
-      var lonk = graph.addLink(edge.fromId, edge.toId);
+      const lonk = graph.addLink(edge.fromId, edge.toId);
       lonk.linkTypes = ["Soup"];
       linksErg.push(lonk);
     });

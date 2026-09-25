@@ -1,7 +1,4 @@
-/**
- * @jest-environment jsdom
- */
-
+// @vitest-environment jsdom
 import { mutations } from "../store/mutations";
 
 const {
@@ -93,7 +90,7 @@ describe("CREATE_GRAPH", () => {
 describe("SET_RENDERER", () => {
   it("creates and sets the renderer", () => {
     const container = document.createElement("div");
-    let state = {
+    const state = {
       mainGraph: {
         Graph: null,
         graphContainer: container,
@@ -120,7 +117,7 @@ describe("SET_RENDERER", () => {
 
 describe("ADD_TO_GRAPH", () => {
   it("adds all nodes to the graph", () => {
-    let state = getState();
+    const state = getState();
     const nodes = [
       {
         id: 1,
@@ -147,7 +144,7 @@ describe("ADD_TO_GRAPH", () => {
     expect(actual).toBe(expected);
   });
   it("adds only links that are not already in the graph", () => {
-    let state = getState();
+    const state = getState();
     const nodes = [
       {
         id: 1,
@@ -220,7 +217,7 @@ describe("ADD_TO_GRAPH", () => {
 
     // const actual = state.mainGraph.Graph.getLinksCount()
 
-    let actualEdges = [];
+    const actualEdges = [];
     state.mainGraph.Graph.forEachLink((link) => {
       actualEdges.push(link);
     });
@@ -231,7 +228,7 @@ describe("ADD_TO_GRAPH", () => {
     expect(actual).toBe(expected);
   });
   it("adds an array of links to the link object when the link is in the graph", () => {
-    let state = getState();
+    const state = getState();
     const nodes = [
       {
         id: 1,
@@ -288,7 +285,7 @@ describe("ADD_TO_GRAPH", () => {
 
 describe("DELETE_NODES_FROM_GRAPH", () => {
   it("deletes all nodes with certain label", () => {
-    let state = getState();
+    const state = getState();
     const nodes = [
       {
         id: 1,
@@ -344,12 +341,12 @@ describe("ADD_NODE_RULE", () => {
     };
   });
   it("adds a color node rule", () => {
-    let searchObject = {
+    const searchObject = {
       nodeType: "Auftrag",
       attributes: [],
     };
-    let searchString = "Auftrag";
-    let type = "color";
+    const searchString = "Auftrag";
+    const type = "color";
 
     ADD_NODE_RULE(state, {
       searchObject,
@@ -375,12 +372,12 @@ describe("ADD_NODE_RULE", () => {
     ]);
   });
   it("adds a size node rule", () => {
-    let searchObject = {
+    const searchObject = {
       nodeType: "Auftrag",
       attributes: [],
     };
-    let searchString = "Auftrag";
-    let type = "size";
+    const searchString = "Auftrag";
+    const type = "size";
     ADD_NODE_RULE(state, {
       searchObject,
       searchString,
@@ -405,14 +402,14 @@ describe("ADD_NODE_RULE", () => {
     ]);
   });
   it("adds a size mapped node rule", () => {
-    let searchObject = {
+    const searchObject = {
       nodeType: "Auftrag",
       attributes: [
         { attributeSearch: "value", operator: "=", data: "irrelevant" },
       ],
     };
-    let searchString = "Auftrag";
-    let type = "size";
+    const searchString = "Auftrag";
+    const type = "size";
     ADD_NODE_RULE(state, {
       searchObject,
       searchString,
@@ -456,14 +453,14 @@ describe("ADD_NODE_RULE", () => {
         ],
       },
     ];
-    let searchObject = {
+    const searchObject = {
       nodeType: "Auftrag",
       attributes: [
         { attributeSearch: "name", operator: "=", attruteData: "N123" },
       ],
     };
-    let searchString = "Auftrag: name=N123";
-    let type = "color";
+    const searchString = "Auftrag: name=N123";
+    const type = "color";
     ADD_NODE_RULE(state, {
       searchObject,
       searchString,
@@ -537,7 +534,7 @@ describe("UPDATE_NODE_RULESET", () => {
         ],
       },
     ];
-    let rules = [
+    const rules = [
       {
         searchObject: {
           nodeType: "Auftrag",
@@ -549,8 +546,8 @@ describe("UPDATE_NODE_RULESET", () => {
         color: "ffffffff",
       },
     ];
-    let type = "color";
-    let nodeLabel = "Auftrag";
+    const type = "color";
+    const nodeLabel = "Auftrag";
     UPDATE_NODE_RULESET(state, {
       rules,
       nodeLabel,

@@ -1,7 +1,7 @@
 import actions from "../actions";
-import GraphService from "@/store/services/GraphService";
+import GraphService from "@/services/GraphService";
 
-vi.mock("@/store/services/GraphService");
+vi.mock("@/services/GraphService");
 
 const { generateInceptionGraph } = actions;
 
@@ -13,8 +13,7 @@ describe("generateInceptionGraph", () => {
     commit = vi.fn();
     dispatch = vi.fn();
     rootState = {
-      authentication: {
-      },
+      authentication: {},
     };
   });
   it("adds nodes and links of an initial connection", async () => {

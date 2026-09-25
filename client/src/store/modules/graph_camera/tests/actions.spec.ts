@@ -1,9 +1,7 @@
-/**
- * @jest-environment jsdom
- */
-import { getAllNodes, getNodePosition } from "@/assets/js/graphHelper.js";
-import { actions } from "../actions";
-vi.mock("@/assets/js/graphHelper.js");
+// @vitest-environment jsdom
+import { getAllNodes, getNodePosition } from "@/lib/graph";
+import { actions, placeNodeLabel } from "../actions";
+vi.mock("@/lib/graph");
 
 const {
   moveToNode,
@@ -12,12 +10,11 @@ const {
   fitGraphToNodes,
   removeNodeLabels,
   setNodeLabels,
-  placeNodeLabel,
 } = actions;
 
 describe("moveToNode", () => {
   it("commits MOVE_TO with node position", () => {
-    let rootState = {
+    const rootState = {
       mainGraph: {
         renderState: {
           layout: {
@@ -27,11 +24,11 @@ describe("moveToNode", () => {
         },
       },
     };
-    let node = {
+    const node = {
       id: "1",
       data: {},
     };
-    let commit = vi.fn();
+    const commit = vi.fn();
     moveToNode({ commit, rootState }, node);
     expect(commit).toHaveBeenCalledWith("MOVE_TO", { x: 10, y: 10 });
   });
@@ -121,7 +118,7 @@ describe("removeNodeLabels", () => {
     expect(dispatch).toHaveBeenCalledWith("setNodeLabels", {});
   });
   it("deletes placeNode callback", () => {
-    let placeNode = vi.fn();
+    const placeNode = vi.fn();
     rootState.mainGraph.renderState.Renderer.getGraphics.mockReturnValue({
       placeNode,
     });
@@ -292,9 +289,9 @@ describe("fitGraphToNodes", () => {
       { value: 500, configurable: true },
     );
 
-    var graphSize = 600;
-    var screenSize = 500;
-    var desiredScale = screenSize / graphSize;
+    const graphSize = 600;
+    const screenSize = 500;
+    const desiredScale = screenSize / graphSize;
 
     fitGraphToNodes({ commit, rootState }, [
       { id: "Node/1" },
@@ -321,9 +318,9 @@ describe("fitGraphToNodes", () => {
       { value: 500, configurable: true },
     );
 
-    var graphSize = 600;
-    var screenSize = 500;
-    var desiredScale = screenSize / graphSize;
+    const graphSize = 600;
+    const screenSize = 500;
+    const desiredScale = screenSize / graphSize;
 
     fitGraphToNodes({ commit, rootState }, [
       { id: "Node/1" },

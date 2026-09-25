@@ -1,11 +1,11 @@
 import { actions } from "../actions";
 import Viva from "vivagraphjs";
-import GraphService from "@/store/services/GraphService";
-import SpotifyService from "@/store/services/SpotifyService";
-import { getAllNodes } from "@/assets/js/graphHelper";
-vi.mock("@/store/services/GraphService");
-vi.mock("@/store/services/SpotifyService");
-vi.mock("@/assets/js/graphHelper");
+import GraphService from "@/services/GraphService";
+import SpotifyService from "@/services/SpotifyService";
+import { getAllNodes } from "@/lib/graph";
+vi.mock("@/services/GraphService");
+vi.mock("@/services/SpotifyService");
+vi.mock("@/lib/graph");
 
 const { expandAction, addToGraph } = actions;
 
@@ -15,11 +15,9 @@ describe("expandAction", () => {
   let rootState;
   let state;
   beforeEach(() => {
-    (dispatch = vi.fn()),
-      (commit = vi.fn()),
-      (state = {
-        failedExpandedNodes: [],
-      });
+    dispatch = vi.fn();
+    commit = vi.fn();
+    state = { failedExpandedNodes: [] };
     rootState = {
       authentication: {
         loginState: false,
@@ -126,7 +124,7 @@ describe("expandAction", () => {
             },
           },
         ],
-      }
+      },
     };
     const nodes = [
       {
@@ -314,7 +312,7 @@ describe("expandAction", () => {
     });
   });
 
-  it("it adds artists from Spotify", async () => {
+  it("adds artists from Spotify", async () => {
     rootState.configurations.actionConfiguration.expand = [
       {
         nodeType: "album",
@@ -385,7 +383,7 @@ describe("expandAction", () => {
     });
   });
 
-  it("it adds nothing when the result is empty", async () => {
+  it("adds nothing when the result is empty", async () => {
     const node = {
       id: "Genre/20",
       data: {

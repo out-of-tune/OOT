@@ -93,7 +93,7 @@ describe("unpinAllNodes", () => {
       rootState.mainGraph.Graph.addNode(node.id, node.data);
     });
     edges.forEach((edge) => {
-      var lonk = rootState.mainGraph.Graph.addLink(edge.fromId, edge.toId);
+      const lonk = rootState.mainGraph.Graph.addLink(edge.fromId, edge.toId);
     });
   });
   it("calls UNPIN_NODE for Each node", () => {
@@ -166,7 +166,7 @@ describe("removePinnedStateFromNodeType", () => {
       rootState.mainGraph.Graph.addNode(node.id, node.data);
     });
     edges.forEach((edge) => {
-      var lonk = rootState.mainGraph.Graph.addLink(edge.fromId, edge.toId);
+      const lonk = rootState.mainGraph.Graph.addLink(edge.fromId, edge.toId);
     });
   });
   it("calls UNPIN_NODE for Each node with the corresponding label", () => {
@@ -247,7 +247,7 @@ describe("setConnectedNodesNearby", () => {
       rootState.mainGraph.Graph.addNode(node.id, node.data);
     });
     edges.forEach((edge) => {
-      var lonk = rootState.mainGraph.Graph.addLink(edge.fromId, edge.toId);
+      const lonk = rootState.mainGraph.Graph.addLink(edge.fromId, edge.toId);
     });
   });
   it("calls SET_NODE_POSITION for each node when no nodes are pinned", () => {
@@ -293,9 +293,10 @@ describe("applyNodeCoordinateSystemLine", () => {
   it("pins all nodes", () => {
     applyNodeCoordinateSystemLine({ commit, rootState }, params);
     expect(commit).toHaveBeenCalledTimes(6);
+    // Sorted by name, "Ziggy" is last.
     expect(commit).toHaveBeenLastCalledWith(
       "PIN_NODE",
-      rootState.selection.selectedNodes[2],
+      rootState.selection.selectedNodes[0],
     );
   });
   it("draws a flat line on the x axis", () => {

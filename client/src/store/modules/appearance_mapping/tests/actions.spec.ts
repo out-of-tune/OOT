@@ -1,14 +1,14 @@
 import { actions } from "../actions";
 import Viva from "vivagraphjs";
-import searchObjectHelper from "@/assets/js/searchObjectHelper";
-vi.mock("@/assets/js/searchObjectHelper");
+import searchObjectHelper from "@/lib/search/searchObject";
+vi.mock("@/lib/search/searchObject");
 import {
   getNodesByLabel,
   getNodeColor,
   searchGraph,
   getAllNodes,
-} from "@/assets/js/graphHelper";
-vi.mock("@/assets/js/graphHelper");
+} from "@/lib/graph";
+vi.mock("@/lib/graph");
 
 const {
   setNodeColorDefault,
@@ -134,7 +134,7 @@ describe("setNodeSizeRule", () => {
   let dispatch;
   let commit;
   let rule;
-  let nodes;
+  const nodes = undefined;
   let rootState;
   let selectedNodes;
   beforeEach(() => {
@@ -197,7 +197,7 @@ describe("setNodeSizeRule", () => {
     });
   });
   it("commits SET_NODE_SIZE when sizeType is compare", () => {
-    let selectedNodes = [
+    const selectedNodes = [
       {
         id: 1,
         data: {
@@ -608,7 +608,7 @@ describe("addRule", () => {
       searchString: "Auftrag: name=bob",
     };
     type = "color";
-    let color = "ffffffff";
+    const color = "ffffffff";
     addRule(
       { commit, rootState, dispatch },
       {
@@ -653,7 +653,7 @@ describe("addRule", () => {
       searchString: "Auftrag name=bob",
     };
     type = "color";
-    let color = "ffffffff";
+    const color = "ffffffff";
     addRule(
       { commit, rootState, dispatch },
       {
@@ -682,7 +682,7 @@ describe("addRule", () => {
       searchString: "Auftrag: name=bob",
     };
     type = "size";
-    let size = 12;
+    const size = 12;
     addRule(
       { commit, rootState, dispatch },
       {
@@ -721,7 +721,7 @@ describe("addRule", () => {
       searchString: "Auftrag: name=bob",
     };
     type = "size";
-    let size = 12;
+    const size = 12;
     addRule(
       { commit, rootState, dispatch },
       {
@@ -825,13 +825,16 @@ describe("applyEdgeColorConfiguration", () => {
       },
     ];
     links.forEach((link) => {
-      let graphLink = rootState.mainGraph.Graph.addLink(link.fromId, link.toId);
+      const graphLink = rootState.mainGraph.Graph.addLink(
+        link.fromId,
+        link.toId,
+      );
       graphLink.linkTypes = link.linkTypes;
     });
   });
   it("commits SET_EDGE_COLOR for all links", () => {
     applyEdgeColorConfiguration({ rootState, commit });
-    let expectedColors = ["00ffffff", "00ffffff", "00fffff8"];
+    const expectedColors = ["00ffffff", "00ffffff", "00fffff8"];
     expect(commit).toHaveBeenNthCalledWith(1, "SET_EDGE_COLOR", {
       link: links[0],
       color: parseInt(expectedColors[0], 16),
@@ -899,7 +902,10 @@ describe("setConfiguratedEdgeColor", () => {
       },
     ];
     links.forEach((link) => {
-      let graphLink = rootState.mainGraph.Graph.addLink(link.fromId, link.toId);
+      const graphLink = rootState.mainGraph.Graph.addLink(
+        link.fromId,
+        link.toId,
+      );
       graphLink.linkTypes = link.linkTypes;
     });
   });
@@ -913,7 +919,7 @@ describe("setConfiguratedEdgeColor", () => {
         linkTypes: ["a"],
       },
     );
-    let expectedColor = "00ffffff";
+    const expectedColor = "00ffffff";
     expect(commit).toHaveBeenNthCalledWith(1, "SET_EDGE_COLOR", {
       link: links[0],
       color: parseInt(expectedColor, 16),

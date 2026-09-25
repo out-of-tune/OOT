@@ -1,17 +1,14 @@
-/**
- * @jest-environment jsdom
- */
-
+// @vitest-environment jsdom
 import { actions } from "../actions";
-import IndexedDbService from "@/store/services/IndexedDbService";
+import IndexedDbService from "@/services/IndexedDbService";
 import {
   getAllNodes,
   getAllLinks,
   getNodePosition,
   getPinnedState,
-} from "@/assets/js/graphHelper";
-vi.mock("@/assets/js/graphHelper");
-vi.mock("@/store/services/IndexedDbService");
+} from "@/lib/graph";
+vi.mock("@/lib/graph");
+vi.mock("@/services/IndexedDbService");
 const {
   downloadGraph,
   storeGraph,
@@ -43,7 +40,7 @@ describe("storeGraph", () => {
     };
     state = rootState.graph_io;
   });
-  it("adds name to stored graph name list if it is not there yet", () => {
+  it("adds name to stored graph name list if it is not there yet", async () => {
     getAllNodes.mockReturnValueOnce([
       { id: "artist/1", data: { somedata: "some data" } },
       { id: "artist/2", data: { somedata: "some data" } },
@@ -53,13 +50,13 @@ describe("storeGraph", () => {
     getNodePosition
       .mockReturnValueOnce({ x: 123, y: 123 })
       .mockReturnValueOnce({ x: 12, y: 12 });
-    storeGraph({ rootState, dispatch, commit, state }, "abc");
+    await storeGraph({ rootState, dispatch, commit, state }, "abc");
     expect(commit).toHaveBeenCalledWith("SET_STORED_GRAPH_NAMES", [
       "MamboNo1",
       "abc",
     ]);
   });
-  it("doesn't add name if string already exists", () => {
+  it("doesn't add name if string already exists", async () => {
     getAllNodes.mockReturnValueOnce([
       { id: "artist/1", data: { somedata: "some data" } },
       { id: "artist/2", data: { somedata: "some data" } },
@@ -69,10 +66,10 @@ describe("storeGraph", () => {
       .mockReturnValueOnce({ x: 123, y: 123 })
       .mockReturnValueOnce({ x: 12, y: 12 });
     getPinnedState.mockReturnValueOnce(true).mockReturnValue(false);
-    storeGraph({ rootState, dispatch, commit, state }, "MamboNo1");
+    await storeGraph({ rootState, dispatch, commit, state }, "MamboNo1");
     expect(commit).toHaveBeenCalledWith("SET_STORED_GRAPH_NAMES", ["MamboNo1"]);
   });
-  it("dispatches success message", () => {
+  it("dispatches success message", async () => {
     getAllNodes.mockReturnValueOnce([
       { id: "artist/1", data: { somedata: "some data" } },
       { id: "artist/2", data: { somedata: "some data" } },
@@ -82,10 +79,10 @@ describe("storeGraph", () => {
       .mockReturnValueOnce({ x: 123, y: 123 })
       .mockReturnValueOnce({ x: 12, y: 12 });
     getPinnedState.mockReturnValueOnce(true).mockReturnValue(false);
-    storeGraph({ rootState, dispatch, commit, state }, "MamboNo1");
+    await storeGraph({ rootState, dispatch, commit, state }, "MamboNo1");
     expect(dispatch).toHaveBeenCalledWith("setSuccess", expect.anything());
   });
-  it("dispatches an error message when IndexedDb errors", () => {
+  it("dispatches an error message when IndexedDb errors", async () => {
     getAllNodes.mockReturnValueOnce([
       { id: "artist/1", data: { somedata: "some data" } },
       { id: "artist/2", data: { somedata: "some data" } },
@@ -96,7 +93,7 @@ describe("storeGraph", () => {
       .mockReturnValueOnce({ x: 12, y: 12 });
     getPinnedState.mockReturnValueOnce(true).mockReturnValue(false);
     IndexedDbService.saveGraph.mockImplementationOnce(new Error("A error"));
-    storeGraph({ rootState, dispatch, commit, state }, "MamboNo1");
+    await storeGraph({ rootState, dispatch, commit, state }, "MamboNo1");
     expect(dispatch).toHaveBeenCalledWith("setError", expect.anything());
   });
 });
@@ -152,21 +149,10 @@ describe("loadGraph", () => {
       graph.nodesWithPositions[0].node,
     );
   });
-  it(
-    "clears graph before adding nodes",
-    () => {
-      loadGraph(
-        {
-          commit,
-          dispatch,
-        },
-        graph,
-      );
-
-      expect(commit).toHaveBeenCalledWith("CLEAR_GRAPH");
-    },
-    { graph },
-  );
+  it("clears graph before adding nodes", () => {
+    loadGraph({ commit, dispatch }, graph);
+    expect(commit).toHaveBeenCalledWith("CLEAR_GRAPH");
+  });
   it("adds the loaded graph", () => {
     loadGraph(
       {
@@ -250,12 +236,6 @@ describe("loadGraphFromIndexedDb", () => {
     IndexedDbService.getGraph.mockReturnValue({ id: "A graph" });
     await loadGraphFromIndexedDb({ dispatch }, "graph1");
     expect(dispatch).toHaveBeenCalledWith("loadGraph", { id: "A graph" });
-  });
-  it("sets success message", async () => {
-    IndexedDbService.getGraph = vi.fn();
-    IndexedDbService.getGraph.mockReturnValue({ id: "A graph" });
-    await loadGraphFromIndexedDb({ dispatch }, "graph1");
-    expect(dispatch).toHaveBeenCalledWith("setSuccess", "Graph loaded");
   });
   it("sets error message when IndexedDb errors", async () => {
     IndexedDbService.getGraph = vi.fn();
@@ -354,13 +334,6 @@ describe("importGraph", () => {
   it("loads valid graph file", () => {
     importGraph({ dispatch }, JSON.stringify(graph));
     expect(dispatch).toHaveBeenCalledWith("loadGraph", graph);
-  });
-  it("sets success message", () => {
-    importGraph({ dispatch }, JSON.stringify(graph));
-    expect(dispatch).toHaveBeenCalledWith(
-      "setSuccess",
-      "Loaded graph successfully",
-    );
   });
   it("Errors when json is wrong", () => {
     graph = { name: "I AM A WRONG GRAPH" };

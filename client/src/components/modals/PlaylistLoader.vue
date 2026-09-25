@@ -1,223 +1,157 @@
-<template>
-  <div>
-    <!-- The Modal -->
-    <div v-if="open" id="myModal" class="modal">
-      <!-- Modal content -->
-      <div class="card">
-        <v-icon
-          @click="changePlaylistLoaderState(false)"
-          class="close"
-          name="md-close"
-        />
-        <div class="playlist-box" v-if="loggedIn">
-          <div>
-            <h2>Your playlists</h2>
-            <div class="playlists-header">
-              <div>
-                {{ playlists.length }}
-                <button class="btn" @click="loadMore()">load more</button>
-              </div>
-              <div>
-                <label class="label">filter playlists:</label>
-                <input type="text" class="textfield" v-model="filterQuery" />
-              </div>
-            </div>
-            <ul class="playlists">
-              <li
-                v-for="playlist in filteredPlaylists"
-                :key="playlist.name"
-                class="playlist-item"
-                @click="() => playlistClickHandler(playlist)"
-              >
-                {{ playlist.name }}
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h2>selected Playlist</h2>
-            <h3 v-if="selectedPlaylist">{{ selectedPlaylist.name }}</h3>
-            <h3 v-else>no playlist selected</h3>
-            <button class="btn" @click="loadPlaylistFromUser">
-              load playlist graph
-            </button>
-            <button class="btn" @click="changeCurrentPlaylist">
-              edit playlist
-            </button>
-          </div>
-          <div>
-            <h2>current Playlist to edit</h2>
-            <h3 v-if="currentPlaylist">{{ currentPlaylist.name }}</h3>
-            <h3 v-else>no playlist for editing selected</h3>
-          </div>
-        </div>
-        <div v-else class="login-box">
-          <div class="content">
-            <h1>You have to be logged in to Spotify to access playlists</h1>
-            <button
-              class="btn"
-              v-if="!loggedIn"
-              id="login"
-              color="#ffffff"
-              v-on:click="loginUser"
-            >
-              login
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-<script>
-import { mapState, mapActions } from "vuex";
-export default {
-  data: () => ({
-    uriString: "",
-    filterQuery: "",
-    selectedPlaylist: undefined,
-  }),
-  computed: {
-    ...mapState({
-      open: (state) => state.playlists.playlistLoaderOpen,
-      playlists: (state) => state.playlists.playlists,
-      currentPlaylist: (state) => state.playlists.currentPlaylist,
-      loggedIn: (state) => state.authentication.loginState,
-    }),
-    filteredPlaylists: {
-      get() {
-        return this.playlists.filter((item) =>
-          item.name.match(this.filterQuery),
-        );
-      },
-    },
-  },
-  methods: {
-    ...mapActions([
-      "changePlaylistLoaderState",
-      "setCurrentPlaylist",
-      "getCurrentUsersPlaylists",
-      "loadMoreCurrentUsersPlaylists",
-      "loadPlaylist",
-      "login",
-    ]),
-    loadPlaylistFromUri(uriString) {
-      const splitString = uriString.split(":");
-      this.loadPlaylist(splitString[splitString.length - 1]);
-    },
-    loadPlaylistFromUser() {
-      this.loadPlaylist(this.selectedPlaylist);
-    },
-    loginUser() {
-      this.login();
-    },
-    loadMore() {
-      this.loadMoreCurrentUsersPlaylists();
-    },
-    playlistClickHandler(playlist) {
-      this.selectedPlaylist = playlist;
-    },
-    changeCurrentPlaylist() {
-      this.setCurrentPlaylist(this.selectedPlaylist);
-      console.log(this.currentPlaylist.id);
-    },
-  },
-  mounted: function () {
-    if (this.$store.state.authentication.loginState) {
-      this.getCurrentUsersPlaylists();
-    }
-  },
-};
-</script>
-<style scoped>
-/* The Modal (background) */
-.modal {
-  display: block; /* Hidden by default */
-  position: fixed; /* Stay in place */
-  z-index: 100; /* Sit on top */
-  left: 0;
-  top: 0;
-  overflow: auto;
-  background-color: rgb(0, 0, 0); /* Fallback color */
-  background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+<script setup lang="ts">
+import { ListMusic, LogIn } from "@lucide/vue";
+import { computed, ref, watch } from "vue";
+import UiButton from "@/components/ui/UiButton.vue";
+import UiModal from "@/components/ui/UiModal.vue";
+import { useStore } from "@/store";
+import type { SpotifyPlaylist } from "@/types/spotify";
 
-  width: 100vw; /* Full width */
-  height: 100vh; /* Full height */
-}
+const store = useStore();
+const open = computed(() => store.state.playlists.playlistLoaderOpen);
+const loggedIn = computed(() => store.state.authentication.loginState);
+const playlists = computed(() => store.state.playlists.playlists);
+const currentPlaylist = computed(() => store.state.playlists.currentPlaylist);
+const filter = ref("");
+const selected = ref<SpotifyPlaylist | null>(null);
+const loading = ref(false);
 
-@media screen and (min-width: 500px) {
-  .modal {
-    padding-top: 10vh; /* Location of the box */
-    padding-left: 10vw;
-    padding-right: 10vw;
-    width: 80vw; /* Full width */
-    height: 80vh; /* Full height */
+/** Case-insensitive text filter. The text is not a regular expression. */
+const filtered = computed(() => {
+  const query = filter.value.trim().toLowerCase();
+  return query
+    ? playlists.value.filter((playlist) =>
+        playlist.name.toLowerCase().includes(query),
+      )
+    : playlists.value;
+});
+
+async function fetchPlaylists(more = false) {
+  loading.value = true;
+  try {
+    await store.dispatch(
+      more ? "loadMoreCurrentUsersPlaylists" : "getCurrentUsersPlaylists",
+    );
+  } catch {
+    store.dispatch("setError", new Error("Your playlists could not be loaded"));
+  } finally {
+    loading.value = false;
   }
 }
 
-.card {
-  color: white;
-  border: 2px solid white;
-  background-color: rgb(37, 37, 37);
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-  border-radius: 5px;
-  padding-left: 1rem;
-  padding-right: 1rem;
+watch(
+  [open, loggedIn],
+  ([isOpen, isLoggedIn]) => {
+    if (isOpen && isLoggedIn && playlists.value.length === 0) fetchPlaylists();
+  },
+  { immediate: true },
+);
 
-  margin: 0.5rem;
-  overflow-y: auto;
-  height: 80%;
-}
-.close {
-  grid-area: actions;
-  position: sticky;
-  top: 0;
-  padding-top: 1rem;
-  padding-bottom: 0.5rem;
-  cursor: pointer;
-  float: right;
-  border-radius: 2px 0 0 0;
-  box-shadow: -1px -1px -13px -6px rgba(0, 0, 0, 1);
-}
+const close = () => store.dispatch("changePlaylistLoaderState", false);
 
-.playlist-box {
-  display: flex;
-  margin: 1rem;
-  grid-gap: 1rem;
+function loadGraph() {
+  if (!selected.value) return;
+  store.dispatch("loadPlaylist", selected.value);
+  close();
 }
+</script>
 
-.login-box {
-  min-width: 30rem;
-  min-height: 20rem;
-  display: grid;
-}
-.content {
-  align-self: center;
-  justify-self: center;
-  display: grid;
-}
-.playlists {
-  height: 200px;
-}
-.textfield {
-  color: white;
-  border: 1px solid white;
-  background-color: #454545;
-}
-.label {
-  background-color: #454545;
-  padding: 0.25rem;
-  margin-right: 0.25rem;
-}
-.playlist-item {
-  cursor: pointer;
-}
+<template>
+  <UiModal :open="open" title="Playlists" size="lg" @close="close">
+    <div
+      v-if="!loggedIn"
+      class="flex flex-col items-center gap-4 py-8 text-center"
+    >
+      <ListMusic class="size-8 text-fg-subtle" />
+      <p class="max-w-sm text-sm text-fg-muted">
+        Log in to Spotify to turn your playlists into graphs and to add songs to
+        them.
+      </p>
+      <UiButton variant="primary" @click="store.dispatch('login')"
+        ><LogIn class="size-4" /> Log in with Spotify</UiButton
+      >
+    </div>
 
-.playlist-item:hover {
-  color: #f2994a;
-}
+    <div v-else class="grid gap-5 sm:grid-cols-[1fr_14rem]">
+      <div class="flex min-w-0 flex-col gap-2">
+        <input
+          v-model="filter"
+          type="search"
+          placeholder="Filter playlists"
+          aria-label="Filter playlists"
+          class="field"
+        />
+        <ul
+          role="listbox"
+          aria-label="Your playlists"
+          class="scrollbar-thin flex h-72 flex-col overflow-y-auto rounded-lg border border-line p-1"
+        >
+          <li v-for="playlist in filtered" :key="playlist.id">
+            <button
+              type="button"
+              role="option"
+              :aria-selected="selected?.id === playlist.id"
+              class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm"
+              :class="
+                selected?.id === playlist.id
+                  ? 'bg-accent/20 text-fg'
+                  : 'text-fg-muted hover:bg-surface-hover hover:text-fg'
+              "
+              @click="selected = playlist"
+              @dblclick="loadGraph"
+            >
+              <img
+                v-if="playlist.images?.[0]"
+                :src="playlist.images[0].url"
+                alt=""
+                class="size-7 rounded object-cover"
+              />
+              <span v-else class="size-7 rounded bg-surface-hover" />
+              <span class="truncate">{{ playlist.name }}</span>
+            </button>
+          </li>
+          <li
+            v-if="!loading && filtered.length === 0"
+            class="p-4 text-center text-xs text-fg-subtle"
+          >
+            No playlists found.
+          </li>
+        </ul>
+        <div class="flex items-center justify-between text-xs text-fg-subtle">
+          <span>{{ playlists.length }} loaded</span>
+          <UiButton
+            size="sm"
+            variant="ghost"
+            :disabled="loading"
+            @click="fetchPlaylists(true)"
+          >
+            {{ loading ? "Loading…" : "Load more" }}
+          </UiButton>
+        </div>
+      </div>
 
-.playlists-header {
-  display: flex;
-  flex-direction: column;
-}
-</style>
+      <aside class="flex flex-col gap-4 text-sm">
+        <div>
+          <h3 class="label mb-1">Selected</h3>
+          <p class="truncate">{{ selected?.name ?? "No playlist selected" }}</p>
+        </div>
+        <div class="flex flex-col gap-2">
+          <UiButton variant="primary" :disabled="!selected" @click="loadGraph"
+            >Load as graph</UiButton
+          >
+          <UiButton
+            :disabled="!selected"
+            @click="selected && store.dispatch('setCurrentPlaylist', selected)"
+          >
+            Add songs to this playlist
+          </UiButton>
+        </div>
+        <div class="border-t border-line pt-3">
+          <h3 class="label mb-1">Songs are added to</h3>
+          <p class="truncate text-fg-muted">
+            {{ currentPlaylist.name ?? "No playlist chosen" }}
+          </p>
+        </div>
+      </aside>
+    </div>
+  </UiModal>
+</template>
