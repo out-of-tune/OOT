@@ -29,8 +29,10 @@ const SIZE_TO_RADIUS = 0.35;
 const ENGINE_TICK_WAIT = 50;
 /** Duration of camera moves, in milliseconds. */
 const CAMERA_TRANSITION = 600;
-/** Space around the nodes when the camera fits them, in pixels. */
-const FIT_PADDING = 60;
+/** The part of the view that fitted nodes may fill. */
+const FIT_FILL = 0.8;
+/** Smallest radius that a fit shows, so one node does not fill the screen. */
+const MIN_FIT_RADIUS = 40;
 /** Velocity decay of the force simulation while it runs, and while it is paused. */
 const VELOCITY_DECAY = { running: 0.4, paused: 1 };
 
@@ -73,6 +75,44 @@ function applyColor(
 }
 
 /** 3D view: 3d-force-graph on three.js, with a 3D force layout and an orbit camera. */
+/**
+ * Camera position and target that show a bounding box in the middle of the view.
+ * The camera keeps its viewing direction. `fov` is the vertical field of view in degrees.
+ */
+export function fitCamera(
+  box: { x: [number, number]; y: [number, number]; z: [number, number] },
+  direction: Vector3,
+  fov: number,
+  aspect: number,
+) {
+  const lookAt = new Vector3(
+    (box.x[0] + box.x[1]) / 2,
+    (box.y[0] + box.y[1]) / 2,
+    (box.z[0] + box.z[1]) / 2,
+  );
+  const radius = Math.max(
+    new Vector3(
+      box.x[1] - box.x[0],
+      box.y[1] - box.y[0],
+      box.z[1] - box.z[0],
+    ).length() / 2,
+    MIN_FIT_RADIUS,
+  );
+  const verticalHalf = (fov * Math.PI) / 360;
+  const horizontalHalf = Math.atan(Math.tan(verticalHalf) * aspect);
+  const halfAngle = Math.min(verticalHalf, horizontalHalf);
+  const distance = radius / Math.sin(halfAngle) / FIT_FILL;
+  const unit =
+    direction.lengthSq() > 0
+      ? direction.clone().normalize()
+      : new Vector3(0, 0, 1);
+  const position = lookAt.clone().add(unit.multiplyScalar(distance));
+  return {
+    position: { x: position.x, y: position.y, z: position.z },
+    lookAt: { x: lookAt.x, y: lookAt.y, z: lookAt.z },
+  };
+}
+
 export const createThreeView: ViewFactory = ({ graph, container }) => {
   // The library empties its element, so it gets its own. The DOM labels stay a sibling on top.
   const host = document.createElement("div");
@@ -407,11 +447,19 @@ export const createThreeView: ViewFactory = ({ graph, container }) => {
       // The engine applies new data on its next tick and may re-aim the camera then,
       // so the fit waits for that tick.
       if (syncScheduled) pushData();
+      // zoomToFit of the engine always aims at the origin, so the fit is computed here.
       const ids = new Set(fitNodes.map((node) => node.id));
       setTimeout(() => {
-        forceGraph.zoomToFit(CAMERA_TRANSITION, FIT_PADDING, (node) =>
-          ids.has(String(node.id)),
+        const box = forceGraph.getGraphBbox((node) => ids.has(String(node.id)));
+        if (!box) return;
+        const cam = camera();
+        const { position, lookAt } = fitCamera(
+          box,
+          cam.position.clone().sub(controls().target),
+          cam.fov,
+          cam.aspect,
         );
+        forceGraph.cameraPosition(position, lookAt, CAMERA_TRANSITION);
       }, ENGINE_TICK_WAIT);
     },
     moveTo: (x, y, z = 0) => {

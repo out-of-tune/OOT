@@ -18,6 +18,36 @@ import type {
 
 const API = "https://api.spotify.com/v1/";
 
+/** Parallel requests of the calls that fetch one object per id. */
+const PARALLEL_REQUESTS = 8;
+/** The library endpoints take at most 40 URIs. */
+const LIBRARY_BATCH = 40;
+
+/** Runs `fetch` for each id, a few at a time. A missing object (404) gives `null`. */
+async function fetchEach<T>(
+  ids: string[],
+  fetch: (id: string) => Promise<T>,
+): Promise<(T | null)[]> {
+  const results: (T | null)[] = [];
+  for (const batch of chunk(ids, PARALLEL_REQUESTS)) {
+    results.push(
+      ...(await Promise.all(
+        batch.map((id) =>
+          fetch(id).catch((error: unknown) => {
+            if (
+              (error as { response?: { status?: number } })?.response
+                ?.status === 404
+            )
+              return null;
+            throw error;
+          }),
+        ),
+      )),
+    );
+  }
+  return results;
+}
+
 const authHeaders = (token: string) => ({
   "Content-Type": "application/json",
   Authorization: `Bearer ${token}`,
@@ -72,14 +102,25 @@ class SpotifyService {
     return { items: [...result.items, ...nextResult.items] };
   }
 
-  getSongSamplesFromArtist(token: string, artistId: string) {
-    return this.getFromAPI<{ tracks: SpotifyTrack[] }>(
-      `artists/${artistId}/top-tracks`,
+  /**
+   * Songs of an artist. Spotify removed the top tracks endpoint for apps in development
+   * mode, so this searches songs by the artist name and keeps those of the artist.
+   */
+  async getSongSamplesFromArtist(
+    token: string,
+    artistId: string,
+    artistName: string,
+  ) {
+    const result = await this.searchByString(
       token,
-      {
-        country: "AT",
-      },
+      `artist:"${artistName.replaceAll('"', "")}"`,
+      ["track"],
+      10,
     );
+    const tracks = (result.tracks?.items ?? []).filter((track) =>
+      track.artists?.some((artist) => artist.id === artistId),
+    );
+    return { tracks };
   }
 
   getCurrentUserPlaylists(token: string, limit = 50, offset = 0) {
@@ -121,46 +162,44 @@ class SpotifyService {
     );
   }
 
-  getSongsFromPlaylist(token: string, sid: string, offset = 0) {
-    return this.getAllPages<SpotifyPlaylistTrack>(
-      `playlists/${sid}/tracks`,
-      token,
-      {},
-      offset,
-    );
+  /** The playlist items endpoint puts the track in `item`. Older responses use `track`. */
+  async getSongsFromPlaylist(
+    token: string,
+    sid: string,
+    offset = 0,
+  ): Promise<{ items: SpotifyPlaylistTrack[] }> {
+    const result = await this.getAllPages<{
+      item?: SpotifyTrack | null;
+      track?: SpotifyTrack | null;
+    }>(`playlists/${sid}/items`, token, {}, offset);
+    return {
+      items: result.items.map((entry) => ({
+        track: (entry.item ?? entry.track) as SpotifyTrack,
+      })),
+    };
   }
 
-  getFullSongData(token: string, sids: string[]) {
-    return this.getFromAPI<{ tracks: (SpotifyTrack | null)[] }>(
-      "tracks/",
-      token,
-      {
-        ids: sids.join(","),
-      },
+  /** One request per track: Spotify removed the several tracks endpoint for apps in development mode. */
+  async getFullSongData(token: string, sids: string[]) {
+    const tracks = await fetchEach(sids, (id) =>
+      this.getFromAPI<SpotifyTrack>(`tracks/${id}`, token),
     );
+    return { tracks };
   }
 
-  getArtistsById(token: string, sids: string[]) {
-    return this.getFromAPI<{ artists: (SpotifyArtist | null)[] }>(
-      "artists/",
-      token,
-      {
-        ids: sids.join(","),
-      },
+  /** One request per artist, for the same reason as getFullSongData. */
+  async getArtistsById(token: string, sids: string[]) {
+    const artists = await fetchEach(sids, (id) =>
+      this.getFromAPI<SpotifyArtist>(`artists/${id}`, token),
     );
-  }
-
-  addSongToPlaylist(token: string, playlistId: string, song: { uri: string }) {
-    return this.sendToAPI(`playlists/${playlistId}/tracks`, token, {
-      uris: [song.uri],
-    });
+    return { artists };
   }
 
   /** Spotify accepts at most 100 URIs per request. */
   addSongsToPlaylist(token: string, playlistId: string, songUris: string[]) {
     return Promise.all(
       chunk(songUris, 100).map((uris) =>
-        this.sendToAPI(`playlists/${playlistId}/tracks`, token, { uris }),
+        this.sendToAPI(`playlists/${playlistId}/items`, token, { uris }),
       ),
     );
   }
@@ -284,20 +323,44 @@ class SpotifyService {
 
   // Library
 
-  async containsSavedTracks(token: string, ids: string[]) {
-    return (
-      (await this.request<boolean[]>("GET", "me/tracks/contains", token, {
-        params: { ids: ids.join(",") },
-      })) ?? []
+  /** True for each URI (song, album, artist, playlist) in the library of the user. */
+  async libraryContains(token: string, uris: string[]) {
+    const results: boolean[] = [];
+    for (const batch of chunk(uris, LIBRARY_BATCH)) {
+      results.push(
+        ...((await this.request<boolean[]>(
+          "GET",
+          "me/library/contains",
+          token,
+          {
+            params: { uris: batch.join(",") },
+          },
+        )) ?? []),
+      );
+    }
+    return results;
+  }
+
+  /** Saves songs and albums, and follows artists. */
+  saveToLibrary(token: string, uris: string[]) {
+    return Promise.all(
+      chunk(uris, LIBRARY_BATCH).map((batch) =>
+        this.request("PUT", "me/library", token, {
+          params: { uris: batch.join(",") },
+        }),
+      ),
     );
   }
 
-  saveTracks(token: string, ids: string[]) {
-    return this.request("PUT", "me/tracks", token, { body: { ids } });
-  }
-
-  removeSavedTracks(token: string, ids: string[]) {
-    return this.request("DELETE", "me/tracks", token, { body: { ids } });
+  /** Removes songs and albums, and unfollows artists. */
+  removeFromLibrary(token: string, uris: string[]) {
+    return Promise.all(
+      chunk(uris, LIBRARY_BATCH).map((batch) =>
+        this.request("DELETE", "me/library", token, {
+          params: { uris: batch.join(",") },
+        }),
+      ),
+    );
   }
 
   getSavedTracks(token: string, limit = 50, offset = 0) {
@@ -326,28 +389,6 @@ class SpotifyService {
       token,
       { limit },
     );
-  }
-
-  async isFollowingArtists(token: string, ids: string[]) {
-    return (
-      (await this.request<boolean[]>("GET", "me/following/contains", token, {
-        params: { type: "artist", ids: ids.join(",") },
-      })) ?? []
-    );
-  }
-
-  followArtists(token: string, ids: string[]) {
-    return this.request("PUT", "me/following", token, {
-      params: { type: "artist" },
-      body: { ids },
-    });
-  }
-
-  unfollowArtists(token: string, ids: string[]) {
-    return this.request("DELETE", "me/following", token, {
-      params: { type: "artist" },
-      body: { ids },
-    });
   }
 }
 

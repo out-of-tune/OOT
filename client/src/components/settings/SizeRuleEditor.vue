@@ -3,7 +3,7 @@ import { ref } from "vue";
 import SearchQueryInput from "@/components/search/SearchQueryInput.vue";
 import UiButton from "@/components/ui/UiButton.vue";
 import UiSegmented from "@/components/ui/UiSegmented.vue";
-import { generateSearchObject } from "@/lib/search/searchObject";
+import { searchObjectForType } from "@/lib/search/searchObject";
 import { useStore } from "@/store";
 import RuleList from "./RuleList.vue";
 
@@ -32,7 +32,7 @@ function addRule() {
   }
   store.dispatch("addRule", {
     type: "size",
-    searchObject: generateSearchObject(`${props.nodeLabel}: ${query.value}`),
+    searchObject: searchObjectForType(props.nodeLabel, query.value),
     searchString: query.value,
     sizeType: sizeType.value,
     ...(sizeType.value === "compare"

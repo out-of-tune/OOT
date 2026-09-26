@@ -850,9 +850,9 @@ album: name LIKE "Blues Bro"
           <RouterLink :to="{ name: 'Cookie Policy' }">cookie policy</RouterLink
           >). This does not represent any analysis of personal data (e.g., name,
           address or e-mail address). If personal data is collected, this only
-          occurs – to the extent possible – with the prior consent of the user
-          of the website. Any forwarding of the data to third parties without
-          the express consent of the user shall not take place.
+          occurs, to the extent possible, with the prior consent of the user of
+          the website. Any forwarding of the data to third parties without the
+          express consent of the user shall not take place.
         </p>
         <p>
           The use by third parties of all published contact details for the

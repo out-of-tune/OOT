@@ -1,4 +1,4 @@
-import { generateSearchObject } from "../searchObject";
+import { generateSearchObject, searchObjectForType } from "../searchObject";
 
 // Expected values were recorded from the original parser (ANTLR 4.13 JavaScript target)
 // before the port to antlr4ng. The port must keep the exact behavior.
@@ -474,5 +474,16 @@ describe("generateSearchObject", () => {
     expect(JSON.parse(JSON.stringify(generateSearchObject(input)))).toEqual(
       expected,
     );
+  });
+});
+
+describe("searchObjectForType", () => {
+  it("matches all nodes of the type when the condition is empty", () => {
+    expect(searchObjectForType("artist", " ").valid).toBe(true);
+  });
+  it("adds the condition to the type", () => {
+    const searchObject = searchObjectForType("artist", "name=Björk");
+    expect(searchObject.valid).toBe(true);
+    expect(searchObject.nodeType).toBe("artist");
   });
 });

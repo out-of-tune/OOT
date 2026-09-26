@@ -106,11 +106,13 @@ watch(
 );
 async function toggleFollow() {
   if (!sid.value) return;
-  following.value = !following.value;
-  await store.dispatch("followSpotifyArtist", {
+  const follow = !following.value;
+  following.value = follow;
+  const done = await store.dispatch("followSpotifyArtist", {
     sid: sid.value,
-    follow: following.value,
+    follow,
   });
+  if (!done) following.value = !follow;
 }
 
 /** An album track plays in the album, so Spotify goes on with the next track. */
@@ -253,9 +255,7 @@ const focusNode = () => {
       </dl>
 
       <div v-if="tracks.length > 0" class="flex flex-col gap-1">
-        <h3 class="label mb-1">
-          {{ label === "artist" ? "Top songs" : "Songs" }}
-        </h3>
+        <h3 class="label mb-1">Songs</h3>
         <ul class="flex flex-col">
           <li
             v-for="track in tracks"

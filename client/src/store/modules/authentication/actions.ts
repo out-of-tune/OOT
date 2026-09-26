@@ -1,4 +1,5 @@
 import type { ActionTree } from "vuex";
+import { statusOf } from "@/lib/token";
 import AuthenticationService from "@/services/AuthenticationService";
 import SpotifyTokenService from "@/services/SpotifyTokenService";
 import type { Context, RootState } from "@/store/types";
@@ -8,6 +9,8 @@ type Ctx = Context<AuthenticationState>;
 
 /** Refresh the token this many milliseconds before it expires. */
 const REFRESH_MARGIN = 5000;
+/** Wait this many milliseconds before a failed refresh runs again. */
+const RETRY_DELAY = 30000;
 
 /** Only one refresh timer may run. A new token replaces the old timer. */
 let refreshTimer: ReturnType<typeof setTimeout> | undefined;
@@ -28,19 +31,25 @@ export const actions = {
   },
 
   refreshTokenAfterTimeout({ state, dispatch }: Ctx) {
-    clearRefreshTimer();
-    const delay = Math.max(
-      state.expiryTime * 1000 - REFRESH_MARGIN,
-      REFRESH_MARGIN,
+    const schedule = (delay: number) => {
+      clearRefreshTimer();
+      refreshTimer = setTimeout(() => {
+        refreshTimer = undefined;
+        Promise.resolve(dispatch("refreshToken")).catch((error) => {
+          // 401: Spotify refused the session. Anything else is temporary, so try again soon.
+          if (statusOf(error) !== 401) {
+            schedule(RETRY_DELAY);
+            return;
+          }
+          dispatch("setLoginState", false);
+          dispatch("disconnectSpotifyPlayer");
+          dispatch("setInfo", "Your Spotify session ended. Log in again.");
+        });
+      }, delay);
+    };
+    schedule(
+      Math.max(state.expiryTime * 1000 - REFRESH_MARGIN, REFRESH_MARGIN),
     );
-    refreshTimer = setTimeout(() => {
-      refreshTimer = undefined;
-      Promise.resolve(dispatch("refreshToken")).catch(() => {
-        dispatch("setLoginState", false);
-        dispatch("disconnectSpotifyPlayer");
-        dispatch("setInfo", "Your Spotify session ended. Log in again.");
-      });
-    }, delay);
   },
 
   /** Gets a new user access token from the session cookie. Throws when the user is not logged in. */

@@ -1,5 +1,5 @@
 import type { ActionTree, Dispatch } from "vuex";
-import { difference, uniqBy } from "lodash-es";
+import { uniqBy } from "lodash-es";
 import { checkNodesExistence } from "@/lib/graphql";
 import { gqlString } from "@/lib/graphqlString";
 import { getAllNodes, getNodesByLabel, searchGraph } from "@/lib/graph";
@@ -67,8 +67,9 @@ async function searchGraphql(
     dispatch,
     rootState,
   );
+  // A field whose resolver failed is null.
   return Object.keys(result).flatMap((label) =>
-    result[label].map(({ id, ...data }) => ({
+    (result[label] ?? []).map(({ id, ...data }) => ({
       id: String(id),
       data: { label, ...data },
     })),
@@ -168,56 +169,39 @@ async function queryAllNodeTypes(
     endpoint: "graphql" | "spotify",
   ) => nodeType.endpoints?.includes(endpoint) ?? false;
 
-  const spotifyOnlyTypes = nodeTypes
-    .filter(
-      (nodeType) =>
-        hasEndpoint(nodeType, "spotify") && !hasEndpoint(nodeType, "graphql"),
-    )
+  const spotifyTypes = nodeTypes
+    .filter((nodeType) => hasEndpoint(nodeType, "spotify"))
     .map((nodeType) => nodeType.label);
   const graphQlTypes = nodeTypes.filter((nodeType) =>
     hasEndpoint(nodeType, "graphql"),
   );
-  const bothTypes = nodeTypes
-    .filter(
-      (nodeType) =>
-        hasEndpoint(nodeType, "graphql") && hasEndpoint(nodeType, "spotify"),
-    )
-    .map((nodeType) => nodeType.label);
 
-  const spotifyNodes = await searchSpotifyOrSkip(
-    searchString,
-    rootState,
-    dispatch,
-    spotifyOnlyTypes,
-  );
-  const graphQlNodes = await searchGraphql(
-    nameAndLimit(searchString, limit),
-    graphQlTypes,
-    dispatch,
-    rootState,
-  );
-
-  // Types with both endpoints come from Spotify only when the database found none of them.
-  const foundTypes = graphQlNodes.map((node) => node.data.label);
-  const missingTypes = difference(bothTypes, foundTypes);
-  const fallbackNodes =
-    missingTypes.length > 0
-      ? await searchSpotifyOrSkip(
-          searchString,
-          rootState,
-          dispatch,
-          missingTypes,
-        )
-      : [];
-  missingTypes.forEach((type) =>
-    registerArtists(
-      type,
-      fallbackNodes.filter((node) => node.data.label === type),
-      rootState,
+  // Each endpoint keeps its results when the other one fails.
+  const [spotifyNodes, graphQlNodes] = await Promise.all([
+    searchSpotifyOrSkip(searchString, rootState, dispatch, spotifyTypes),
+    searchGraphql(
+      nameAndLimit(searchString, limit),
+      graphQlTypes,
       dispatch,
-    ),
+      rootState,
+    ).catch((error: unknown) => {
+      console.warn("Database search failed", error);
+      return [] as NodeInput[];
+    }),
+  ]);
+
+  // A Spotify result that the database also found shows once, as the database node.
+  const knownSids = new Set(graphQlNodes.map((node) => node.data.sid));
+  const newSpotifyNodes = spotifyNodes.filter(
+    (node) => !knownSids.has(node.data.sid),
   );
-  return [...spotifyNodes, ...graphQlNodes, ...fallbackNodes];
+  registerArtists(
+    "artist",
+    newSpotifyNodes.filter((node) => node.data.label === "artist"),
+    rootState,
+    dispatch,
+  );
+  return [...newSpotifyNodes, ...graphQlNodes];
 }
 
 async function queryNodeType(
@@ -243,7 +227,12 @@ async function queryNodeType(
           [schemaNodeType],
           dispatch,
           rootState,
-        )
+        ).catch((error: unknown) => {
+          // With a Spotify endpoint too, the Spotify results still show.
+          if (!schemaNodeType.endpoints?.includes("spotify")) throw error;
+          console.warn("Database search failed", error);
+          return [] as NodeInput[];
+        })
       : [],
   ]);
   if (schemaNodeType.label === "artist")

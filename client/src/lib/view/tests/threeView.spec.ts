@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import createGraph from "ngraph.graph";
 import { PerspectiveCamera, Vector3 } from "three";
-import { createThreeView } from "../threeView";
+import { createThreeView, fitCamera } from "../threeView";
 
 // A stand-in for 3d-force-graph: it records the calls and needs no WebGL.
 const engine = vi.hoisted(() => ({ instances: [] as FakeForceGraph[] }));
@@ -239,5 +239,39 @@ describe("threeView", () => {
     graph.addNode("late", { label: "genre" });
     await flush();
     expect(fake.data.nodes).toHaveLength(0);
+  });
+});
+
+describe("fitCamera", () => {
+  it("aims at the middle of the nodes, not at the origin", () => {
+    const { lookAt, position } = fitCamera(
+      { x: [290, 310], y: [-10, 10], z: [0, 0] },
+      new Vector3(0, 0, 400),
+      75,
+      16 / 9,
+    );
+    expect(lookAt).toEqual({ x: 300, y: 0, z: 0 });
+    expect(position.x).toBeCloseTo(300);
+    expect(position.y).toBeCloseTo(0);
+    expect(position.z).toBeGreaterThan(0);
+  });
+
+  it("moves back so that a larger box still fits", () => {
+    const direction = new Vector3(0, 0, 1);
+    const near = fitCamera(
+      { x: [0, 100], y: [0, 100], z: [0, 0] },
+      direction,
+      75,
+      1,
+    );
+    const far = fitCamera(
+      { x: [0, 1000], y: [0, 1000], z: [0, 0] },
+      direction,
+      75,
+      1,
+    );
+    expect(far.position.z - far.lookAt.z).toBeGreaterThan(
+      (near.position.z - near.lookAt.z) * 5,
+    );
   });
 });

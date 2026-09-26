@@ -199,11 +199,13 @@ export const actions = {
     } catch {
       return;
     }
+    // 204: no device plays. The next play then goes to this tab again.
     if (!playback) {
       if (!state.isLocal)
         commit("SET_SPOTIFY_PLAYBACK", {
           ...currentUpdate(state),
           paused: true,
+          remoteDeviceName: null,
         });
       return;
     }
@@ -352,9 +354,9 @@ export const actions = {
     const id = state.track?.id;
     if (!id) return;
     try {
-      const [liked] = await SpotifyService.containsSavedTracks(
+      const [liked] = await SpotifyService.libraryContains(
         userToken(rootState),
-        [id],
+        [`spotify:track:${id}`],
       );
       commit("SET_SPOTIFY_LIKED", Boolean(liked));
     } catch {
@@ -367,10 +369,11 @@ export const actions = {
     if (!id) return;
     const liked = !state.liked;
     commit("SET_SPOTIFY_LIKED", liked);
+    const uris = [`spotify:track:${id}`];
     const done = await withUserToken(rootState, dispatch, (token) =>
       liked
-        ? SpotifyService.saveTracks(token, [id])
-        : SpotifyService.removeSavedTracks(token, [id]),
+        ? SpotifyService.saveToLibrary(token, uris)
+        : SpotifyService.removeFromLibrary(token, uris),
     );
     if (done === undefined) commit("SET_SPOTIFY_LIKED", !liked);
     else
@@ -380,11 +383,12 @@ export const actions = {
       );
   },
 
+  /** Returns false when Spotify did not queue the song. */
   async addToSpotifyQueue(
     { rootState, dispatch }: Ctx,
     song: { uri?: string; name?: string },
-  ) {
-    if (!song.uri) return;
+  ): Promise<boolean> {
+    if (!song.uri) return false;
     const done = await withUserToken(rootState, dispatch, (token) =>
       SpotifyService.addToPlaybackQueue(token, song.uri as string),
     );
@@ -393,6 +397,7 @@ export const actions = {
       setTimeout(() => dispatch("setAddToQueueNotifaction", false), 500);
       dispatch("loadSpotifyQueue");
     }
+    return done !== undefined;
   },
 
   async loadSpotifyQueue({ rootState, commit, dispatch }: Ctx) {
@@ -406,20 +411,23 @@ export const actions = {
       );
   },
 
+  /** Returns false when Spotify did not change the follow. */
   async followSpotifyArtist(
     { rootState, dispatch }: Ctx,
     { sid, follow }: { sid: string; follow: boolean },
-  ) {
+  ): Promise<boolean> {
+    const uris = [`spotify:artist:${sid}`];
     const done = await withUserToken(rootState, dispatch, (token) =>
       follow
-        ? SpotifyService.followArtists(token, [sid])
-        : SpotifyService.unfollowArtists(token, [sid]),
+        ? SpotifyService.saveToLibrary(token, uris)
+        : SpotifyService.removeFromLibrary(token, uris),
     );
-    if (done !== undefined)
-      dispatch(
-        "setSuccess",
-        follow ? "Following the artist" : "Unfollowed the artist",
-      );
+    if (done === undefined) return false;
+    dispatch(
+      "setSuccess",
+      follow ? "Following the artist" : "Unfollowed the artist",
+    );
+    return true;
   },
 
   async isFollowingSpotifyArtist(
@@ -427,9 +435,9 @@ export const actions = {
     sid: string,
   ): Promise<boolean> {
     try {
-      const [following] = await SpotifyService.isFollowingArtists(
+      const [following] = await SpotifyService.libraryContains(
         userToken(rootState),
-        [sid],
+        [`spotify:artist:${sid}`],
       );
       return Boolean(following);
     } catch {

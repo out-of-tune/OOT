@@ -56,6 +56,15 @@ const getNodeTypeByName = (schema: Schema, nodeLabel: string | undefined) =>
   schema.nodeTypes.find((nodeType) => nodeType.label === nodeLabel);
 
 /** True when the node type and every searched attribute exist in the schema. */
+/** Search object for the nodes of a type that match a condition. An empty condition matches all of them. */
+export const searchObjectForType = (
+  nodeLabel: string,
+  condition: string,
+): SearchObject =>
+  generateSearchObject(
+    condition.trim() ? `${nodeLabel}: ${condition}` : nodeLabel,
+  );
+
 export function validateSearchObject(
   searchObject: SearchObject,
   schema: Schema,

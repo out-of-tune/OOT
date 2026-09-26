@@ -383,6 +383,59 @@ describe("expandAction", () => {
     });
   });
 
+  it("gets a new token and fetches again when Spotify rejects the token", async () => {
+    rootState.configurations.actionConfiguration.expand = [
+      { nodeType: "album", edges: ["Album_to_Artist"] },
+    ];
+    const node = {
+      id: "album/1",
+      data: { label: "album", sid: "1", artists: [{ id: "2" }] },
+    };
+    dispatch.mockImplementation(async (type) => {
+      if (type === "requireAccessToken")
+        rootState.spotify.accessToken = "fresh";
+    });
+    SpotifyService.getArtistsById
+      .mockRejectedValueOnce({ response: { status: 401 } })
+      .mockResolvedValueOnce({ artists: [{ id: "2", name: "bob" }] });
+    GraphService.getNodes.mockReturnValue({ artist: [] });
+    await expandAction(
+      { rootState, commit, dispatch, state },
+      { nodes: [node] },
+    );
+    expect(dispatch).toHaveBeenCalledWith("requireAccessToken");
+    expect(SpotifyService.getArtistsById).toHaveBeenLastCalledWith("fresh", [
+      "2",
+    ]);
+    const added = dispatch.mock.calls.find(
+      ([type]) => type === "addToGraph",
+    )[1];
+    expect(added.nodes.map((n) => n.id)).toEqual(["artist/2"]);
+  });
+
+  it("keeps the Spotify artists when the database fails", async () => {
+    rootState.configurations.actionConfiguration.expand = [
+      { nodeType: "album", edges: ["Album_to_Artist"] },
+    ];
+    const node = {
+      id: "album/1",
+      data: { label: "album", sid: "1", artists: [{ id: "2" }] },
+    };
+    SpotifyService.getArtistsById.mockResolvedValue({
+      artists: [{ id: "2", name: "bob" }],
+    });
+    GraphService.getNodes.mockRejectedValue(new Error("database down"));
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    await expandAction(
+      { rootState, commit, dispatch, state },
+      { nodes: [node] },
+    );
+    const added = dispatch.mock.calls.find(
+      ([type]) => type === "addToGraph",
+    )[1];
+    expect(added.nodes.map((n) => n.id)).toEqual(["artist/2"]);
+  });
+
   it("adds nothing when the result is empty", async () => {
     const node = {
       id: "Genre/20",

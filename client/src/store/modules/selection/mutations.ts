@@ -7,6 +7,10 @@ import type { SelectionState } from "./index";
 const raw = (nodes: GraphNode[]) => nodes.map((node) => markRaw(node));
 
 export const mutations = {
+  /** Runs with the root CLEAR_GRAPH, so the selection never points at removed nodes. */
+  CLEAR_GRAPH(state) {
+    state.selectedNodes = [];
+  },
   SET_SELECTED_NODES(state, nodes: GraphNode[]) {
     state.selectedNodes = raw(nodes);
   },

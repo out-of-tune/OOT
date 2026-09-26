@@ -32,6 +32,8 @@ const route = useRoute();
 const container = ref<HTMLElement | null>(null);
 /** Number of nodes in the graph. The graph engine is not reactive, so its change events update this. */
 const nodeCount = ref(0);
+/** False while the renderer loads. The hint buttons need a renderer. */
+const graphReady = ref(false);
 const tooltipPosition = ref({ x: 0, y: 0 });
 
 const hoveredNode = computed(() => store.state.mainGraph.hoveredNode);
@@ -80,12 +82,14 @@ function onResize() {
 /** Restores the Spotify session from its cookie, or gets the public token. */
 async function authenticate() {
   if (!store.state.authentication.loginState) {
+    let session = false;
     try {
       await store.dispatch("refreshToken");
-      store.dispatch("getCurrentUser");
+      session = true;
     } catch {
       // No session: the app works with the public token.
     }
+    if (session) await store.dispatch("getCurrentUser");
   }
   try {
     await store.dispatch("requireAccessToken");
@@ -146,6 +150,7 @@ onMounted(async () => {
   });
 
   await store.dispatch("initGraph");
+  graphReady.value = true;
   const graph = store.state.mainGraph.Graph;
   graph.on("changed", () => (nodeCount.value = graph.getNodesCount()));
   container.value.focus();
@@ -192,7 +197,11 @@ onBeforeUnmount(() => {
     </div>
 
     <div
-      v-if="nodeCount === 0 && store.state.appearance.pendingRequestCount === 0"
+      v-if="
+        graphReady &&
+        nodeCount === 0 &&
+        store.state.appearance.pendingRequestCount === 0
+      "
       class="pointer-events-none fixed inset-0 z-[5] flex items-center justify-center"
     >
       <EmptyGraphHint />

@@ -462,6 +462,46 @@ describe("startSimpleGraphSearch", () => {
       links: [],
     });
   });
+  it("searches Spotify artists also when the database found some", async () => {
+    rootState.schema.nodeTypes[0].endpoints = ["graphql", "spotify"];
+    handleGraphqlTokenError.mockReturnValue({
+      genre: [],
+      artist: [{ id: "7", name: "Queens of the Stone Age", sid: "qotsa" }],
+    });
+    handleTokenError.mockReturnValue([
+      {
+        artists: {
+          items: [
+            { id: "queen", name: "Queen" },
+            { id: "qotsa", name: "Queens of the Stone Age" },
+          ],
+        },
+      },
+    ]);
+    await startSimpleGraphSearch(
+      { dispatch, rootState },
+      { nodeType: "any", searchString: "Queen" },
+    );
+    const added = dispatch.mock.calls.find(
+      ([type]) => type === "addToGraph",
+    )[1];
+    expect(added.nodes.map((node) => node.id)).toEqual(["artist/queen", "7"]);
+  });
+  it("keeps the Spotify results when the database fails", async () => {
+    handleGraphqlTokenError.mockRejectedValue(new Error("database down"));
+    handleTokenError.mockReturnValue([
+      { albums: { items: [{ id: "13", name: "frank" }] } },
+    ]);
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    await startSimpleGraphSearch(
+      { dispatch, rootState },
+      { nodeType: "any", searchString: "frank" },
+    );
+    const added = dispatch.mock.calls.find(
+      ([type]) => type === "addToGraph",
+    )[1];
+    expect(added.nodes.map((node) => node.id)).toEqual(["album/13"]);
+  });
   it("calls spotify correctly without nodetype", async () => {
     handleGraphqlTokenError.mockReturnValueOnce({ genre: [] }).mockReturnValue({
       artist: [{ id: "artist/113", name: "frank sinitra" }],

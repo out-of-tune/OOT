@@ -22,8 +22,8 @@ onMounted(async () => {
   } else if (route.query.status === "success") {
     try {
       await store.dispatch("refreshToken");
-      await store.dispatch("getCurrentUser");
       store.dispatch("setSuccess", "Logged in to Spotify");
+      await store.dispatch("getCurrentUser");
     } catch {
       store.dispatch("setError", "Spotify login failed: no session");
     }

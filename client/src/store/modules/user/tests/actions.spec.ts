@@ -33,6 +33,16 @@ describe("getCurrentUser", () => {
     await getCurrentUser({ commit, dispatch, rootState });
     expect(dispatch).toHaveBeenCalledWith("connectSpotifyPlayer");
   });
+  it("connects the player also when the profile does not load", async () => {
+    SpotifyService.getCurrentUserProfile.mockRejectedValue({
+      response: { status: 403 },
+    });
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    await getCurrentUser({ commit, dispatch, rootState });
+    expect(commit).not.toHaveBeenCalled();
+    expect(dispatch).toHaveBeenCalledWith("setError", expect.any(String));
+    expect(dispatch).toHaveBeenCalledWith("connectSpotifyPlayer");
+  });
   it("does nothing when not logged in", async () => {
     rootState.authentication.loginState = false;
     await getCurrentUser({ commit, dispatch, rootState });

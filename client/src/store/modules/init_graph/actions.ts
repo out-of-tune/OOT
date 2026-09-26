@@ -1,30 +1,46 @@
 import type { ActionTree, Commit, Dispatch } from "vuex";
 import { getAllNodes } from "@/lib/graph";
-import type { ViewMode } from "@/lib/view/contract";
-import { loadViewFactory } from "@/lib/view";
+import type { ViewFactory, ViewMode } from "@/lib/view/contract";
+import { depthOf, loadViewFactory } from "@/lib/view";
 import type { Context, RootState } from "@/store/types";
 
 type Ctx = Context<Record<string, never>>;
 
-/** Spread of the random depth that 2D nodes get in the 3D view. */
-const DEPTH_SPREAD = 100;
-
 /**
- * Builds the renderer of the mode. If the 3D view cannot start (for example without WebGL),
- * it falls back to 2D and returns the mode that runs.
+ * Loads the view factory of the mode. The 3D view loads a separate chunk.
+ * `undefined` means the 2D view, also as fallback when the chunk does not load.
  */
-async function buildRenderer(
-  commit: Commit,
+async function loadFactory(
   dispatch: Dispatch,
   mode: ViewMode,
-): Promise<ViewMode> {
-  if (mode === "2d") {
+): Promise<ViewFactory | undefined> {
+  if (mode === "2d") return undefined;
+  try {
+    return await loadViewFactory(mode);
+  } catch (error) {
+    console.error(error);
+    dispatch("setError", new Error("The 3D view could not load."));
+    return undefined;
+  }
+}
+
+/**
+ * Builds the renderer synchronously, so no graph change can land between the old and the
+ * new renderer. If the 3D view cannot start (for example without WebGL), it falls back to
+ * 2D and returns the mode that runs.
+ */
+function buildRenderer(
+  commit: Commit,
+  dispatch: Dispatch,
+  factory: ViewFactory | undefined,
+): ViewMode {
+  if (!factory) {
     commit("SET_RENDERER");
     return "2d";
   }
   try {
-    commit("SET_RENDERER", await loadViewFactory(mode));
-    return mode;
+    commit("SET_RENDERER", factory);
+    return "3d";
   } catch (error) {
     console.error(error);
     dispatch(
@@ -45,9 +61,9 @@ export const actions = {
     commit("CREATE_GRAPH");
     const requested = rootState?.viewMode ?? "2d";
     // The 2D view builds synchronously. Only the 3D view waits for its chunk.
-    let running: ViewMode = "2d";
-    if (requested === "2d") commit("SET_RENDERER");
-    else running = await buildRenderer(commit, dispatch, requested);
+    const factory =
+      requested === "2d" ? undefined : await loadFactory(dispatch, requested);
+    const running = buildRenderer(commit, dispatch, factory);
     if (rootState && running !== rootState.viewMode)
       commit("SET_VIEW_MODE", running);
     dispatch("initEvents");
@@ -64,19 +80,19 @@ export const actions = {
       pinned: layout.isNodePinned(node),
     }));
 
+    // The chunk loads while the old view still runs. From here on, all steps are synchronous.
+    const factory = await loadFactory(dispatch, mode);
+    if (rootState.mainGraph.renderState.Renderer !== current) return;
     dispatch("removeNodeLabels");
     commit("DISPOSE_RENDERER");
-    const running = await buildRenderer(commit, dispatch, mode);
+    const running = buildRenderer(commit, dispatch, factory);
 
     snapshot.forEach(({ node, position, pinned }) => {
       commit("SET_NODE_POSITION", {
         nodeId: node.id,
         xPosition: position.x,
         yPosition: position.y,
-        zPosition:
-          running === "3d"
-            ? (position.z ?? (Math.random() - 0.5) * DEPTH_SPREAD)
-            : undefined,
+        zPosition: running === "3d" ? depthOf(position) : undefined,
       });
       if (pinned) commit("PIN_NODE", node);
     });

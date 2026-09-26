@@ -38,16 +38,18 @@ const spotifyMessage = (error: unknown) =>
   (error instanceof Error ? error.message : "Spotify request failed");
 
 export const actions = {
-  /** Adds the top tracks (artist) or the tracks (album) to the node shown in the info panel. */
+  /** Adds songs of the artist, or the tracks of the album, to the node shown in the info panel. */
   async getSongSamples({ commit, rootState, dispatch }: Ctx, node: NodeRef) {
     const isArtist = node.data.label === "artist";
     try {
       const [result] = await handleTokenError(
         (sid: string, token: string) => [
           isArtist
-            ? SpotifyService.getSongSamplesFromArtist(token, sid).then(
-                (data) => data.tracks,
-              )
+            ? SpotifyService.getSongSamplesFromArtist(
+                token,
+                sid,
+                String(node.data.name ?? ""),
+              ).then((data) => data.tracks)
             : SpotifyService.getSongsFromAlbum(token, sid).then(
                 (data) => data.items,
               ),

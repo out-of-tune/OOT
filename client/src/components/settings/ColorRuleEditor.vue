@@ -2,7 +2,7 @@
 import { ref } from "vue";
 import SearchQueryInput from "@/components/search/SearchQueryInput.vue";
 import UiButton from "@/components/ui/UiButton.vue";
-import { generateSearchObject } from "@/lib/search/searchObject";
+import { searchObjectForType } from "@/lib/search/searchObject";
 import { useStore } from "@/store";
 import RuleList from "./RuleList.vue";
 
@@ -14,7 +14,7 @@ const color = ref("#ffffff");
 function addRule() {
   store.dispatch("addRule", {
     type: "color",
-    searchObject: generateSearchObject(`${props.nodeLabel}: ${query.value}`),
+    searchObject: searchObjectForType(props.nodeLabel, query.value),
     searchString: query.value,
     color: `${color.value.substring(1)}ff`,
   });

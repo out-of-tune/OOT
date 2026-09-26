@@ -97,6 +97,8 @@ describe("storeGraph", () => {
     expect(dispatch).toHaveBeenCalledWith("setError", expect.anything());
   });
 });
+const in2d = { mainGraph: { renderState: { Renderer: { mode: "2d" } } } };
+
 describe("loadGraph", () => {
   let commit;
   let dispatch;
@@ -132,53 +134,43 @@ describe("loadGraph", () => {
     };
   });
   it("errors when graph object is undefined", () => {
-    loadGraph(
-      {
-        commit,
-        dispatch,
-      },
-      undefined,
-    );
+    loadGraph({ commit, dispatch, rootState: in2d }, undefined);
 
     expect(dispatch).toHaveBeenCalledWith("setError", expect.anything());
   });
   it("pins the nodes", () => {
-    loadGraph({ commit, dispatch }, graph);
+    loadGraph({ commit, dispatch, rootState: in2d }, graph);
     expect(commit).toHaveBeenCalledWith(
       "PIN_NODE",
       graph.nodesWithPositions[0].node,
     );
   });
   it("clears graph before adding nodes", () => {
-    loadGraph({ commit, dispatch }, graph);
+    loadGraph({ commit, dispatch, rootState: in2d }, graph);
     expect(commit).toHaveBeenCalledWith("CLEAR_GRAPH");
   });
   it("adds the loaded graph", () => {
-    loadGraph(
-      {
-        commit,
-        dispatch,
-      },
-      graph,
-    );
+    loadGraph({ commit, dispatch, rootState: in2d }, graph);
     expect(commit).toHaveBeenNthCalledWith(2, "ADD_TO_GRAPH", {
       nodes: [graph.nodesWithPositions[0].node],
       links: graph.links,
     });
   });
   it("sets the position of the nodes", () => {
-    loadGraph(
-      {
-        commit,
-        dispatch,
-      },
-      graph,
-    );
+    loadGraph({ commit, dispatch, rootState: in2d }, graph);
     expect(commit).toHaveBeenNthCalledWith(3, "SET_NODE_POSITION", {
       nodeId: graph.nodesWithPositions[0].node.id,
       xPosition: graph.nodesWithPositions[0].position.x,
       yPosition: graph.nodesWithPositions[0].position.y,
     });
+  });
+  it("gives nodes without depth a depth in the 3D view", () => {
+    const in3d = { mainGraph: { renderState: { Renderer: { mode: "3d" } } } };
+    loadGraph({ commit, dispatch, rootState: in3d }, graph);
+    const position = commit.mock.calls.find(
+      ([type]) => type === "SET_NODE_POSITION",
+    )[1];
+    expect(typeof position.zPosition).toBe("number");
   });
 });
 describe("downloadGraph", () => {

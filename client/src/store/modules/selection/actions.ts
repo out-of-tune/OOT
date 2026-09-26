@@ -297,9 +297,13 @@ export const actions = {
       commit("ADD_TO_GRAPH", { nodes: updatedNodes, links: [] });
       dispatch("applyAllConfigurations");
       // One after another, so the Spotify queue keeps the order of the selection.
+      // addToQueue returns false when Spotify refused a song. Its error toast then stays.
+      let queued = 0;
       for (const node of updatedNodes)
-        await dispatch("addToQueue", { ...node.data });
-      dispatch("setSuccess", `Added ${updatedNodes.length} songs to queue`);
+        if ((await dispatch("addToQueue", { ...node.data })) !== false)
+          queued++;
+      if (queued === updatedNodes.length)
+        dispatch("setSuccess", `Added ${queued} songs to queue`);
     } catch (error) {
       dispatch("setError", error);
     }

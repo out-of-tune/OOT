@@ -1,3 +1,4 @@
+import { depthOf } from "@/lib/view";
 import type { ActionTree } from "vuex";
 import { getGraphObject } from "@/lib/graph";
 import IndexedDbService from "@/services/IndexedDbService";
@@ -73,7 +74,10 @@ export const actions = {
     }
   },
 
-  loadGraph({ commit, dispatch }: Ctx, graph: GraphObject | undefined) {
+  loadGraph(
+    { commit, dispatch, rootState }: Ctx,
+    graph: GraphObject | undefined,
+  ) {
     if (!graph) {
       dispatch("setError", new Error("Graph couldn't be loaded"));
       return;
@@ -83,12 +87,13 @@ export const actions = {
       nodes: graph.nodesWithPositions.map((entry) => entry.node),
       links: graph.links,
     });
+    const is3d = rootState.mainGraph.renderState.Renderer?.mode === "3d";
     graph.nodesWithPositions.forEach((entry) => {
       commit("SET_NODE_POSITION", {
         nodeId: entry.node.id,
         xPosition: entry.position.x,
         yPosition: entry.position.y,
-        zPosition: entry.position.z,
+        zPosition: is3d ? depthOf(entry.position) : entry.position.z,
       });
       if (entry.pinned) commit("PIN_NODE", entry.node);
     });

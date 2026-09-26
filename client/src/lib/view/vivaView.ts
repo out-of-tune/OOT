@@ -9,6 +9,15 @@ import type {
   ViewFactory,
 } from "./contract";
 
+const INPUT_EVENTS = [
+  "mouseEnter",
+  "mouseLeave",
+  "click",
+  "mouseDown",
+  "mouseMove",
+  "mouseUp",
+] as const;
+
 /** Largest zoom level that fit-to-nodes uses. */
 const MAX_FIT_SCALE = 2;
 /** Delay between zoom steps of the zoom animation, in milliseconds. */
@@ -116,11 +125,22 @@ export const createVivaView: ViewFactory = ({
     resume: () => renderer.resume(),
     getGraphics: () => graphics,
     getLayout: () => graphLayout,
-    createInputEvents: () =>
-      Viva.Graph.webglInputEvents(
+    createInputEvents: () => {
+      const vivaEvents = Viva.Graph.webglInputEvents(
         webglGraphics,
         graph,
-      ) as unknown as GraphInputEvents,
+      ) as unknown as GraphInputEvents;
+      // Viva reads a truthy callback result as "handled" and then skips its own node drag.
+      // Callbacks often return a Promise (of dispatch), so the result is dropped here.
+      const events = {} as GraphInputEvents;
+      for (const name of INPUT_EVENTS) {
+        events[name] = (callback) => {
+          vivaEvents[name]((node) => void callback(node));
+          return events;
+        };
+      }
+      return events;
+    },
     fitToNodes: (nodes) => {
       if (nodes.length === 0) return;
       const { center, scale } = fitTransform(

@@ -44,3 +44,36 @@ describe("fitTransform", () => {
     expect(scale).toBe(2);
   });
 });
+
+describe("createVivaView input events", () => {
+  it("returns nothing to Viva, so a Promise result does not stop the node drag", async () => {
+    const { default: Viva } = await import("vivagraphjs");
+    const registered: Record<string, (node: unknown) => unknown> = {};
+    const fakeEvents = new Proxy(
+      {},
+      {
+        get:
+          (_target, name: string) => (callback: (node: unknown) => unknown) => {
+            registered[name] = callback;
+            return fakeEvents;
+          },
+      },
+    );
+    vi.spyOn(Viva.Graph, "webglInputEvents").mockReturnValue(
+      fakeEvents as never,
+    );
+    vi.spyOn(Viva.Graph.View, "webglGraphics").mockReturnValue({} as never);
+    vi.spyOn(Viva.Graph.View, "renderer").mockReturnValue({} as never);
+    vi.spyOn(Viva.Graph.Layout, "forceDirected").mockReturnValue({} as never);
+    const { createVivaView } = await import("../vivaView");
+    const view = createVivaView({
+      graph: {} as never,
+      container: {} as never,
+      layoutOptions: {} as never,
+    });
+    const callback = vi.fn(() => Promise.resolve());
+    view.createInputEvents().mouseDown(callback);
+    expect(registered.mouseDown({ id: "a" })).toBeUndefined();
+    expect(callback).toHaveBeenCalledWith({ id: "a" });
+  });
+});

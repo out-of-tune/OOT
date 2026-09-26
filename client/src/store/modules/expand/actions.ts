@@ -3,7 +3,11 @@ import { chunk } from "lodash-es";
 import { checkNodesExistence, mergeGraphQlQueries } from "@/lib/graphql";
 import { gqlString } from "@/lib/graphqlString";
 import { getAllNodes } from "@/lib/graph";
-import { handleGraphqlTokenError, handleTokenError } from "@/lib/token";
+import {
+  handleGraphqlTokenError,
+  handleTokenError,
+  statusOf,
+} from "@/lib/token";
 import GraphService from "@/services/GraphService";
 import SpotifyService from "@/services/SpotifyService";
 import type { ActionRule } from "@/types/configuration";
@@ -362,7 +366,7 @@ async function fetchData(
           )
         : null,
     ]);
-  return {
+  const results: SpotifyResults = {
     getAlbumFromSong: albumFromSong,
     getAlbumsFromArtist: albumsFromArtist,
     getArtistsFromAlbum: artistsFromAlbum
@@ -370,6 +374,17 @@ async function fetchData(
       : null,
     getSongsFromAlbum: songsFromAlbum,
   };
+  // The helpers turn failures into error entries. A rejected token is thrown again,
+  // so handleTokenError gets a new token and runs the whole fetch once more.
+  const tokenError = Object.values(results)
+    .flatMap((entries) => entries ?? [])
+    .map((entry) => entry.error?.reason)
+    .find((reason) => {
+      const status = statusOf(reason);
+      return status === 400 || status === 401;
+    });
+  if (tokenError) throw tokenError;
+  return results;
 }
 
 function categorizeConnections(
@@ -431,7 +446,11 @@ async function generateNodesAndLinks(
           schema,
           dispatch,
           rootState,
-        )
+        ).catch((error: unknown) => {
+          // Without the database, the artists come as Spotify nodes.
+          console.warn("Could not look up the artists in the database", error);
+          return null;
+        })
       : null;
   return itemsWithConnections.map(({ item, connection }, index) => {
     const node = dbNodes?.[index] ?? nodeFromSpotify(connection.to, item);

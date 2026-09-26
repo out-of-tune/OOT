@@ -35,6 +35,38 @@ describe("refreshTokenAfterTimeout", () => {
   });
 });
 
+describe("refreshTokenAfterTimeout after a failed refresh", () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it("tries again later when Spotify is unavailable", async () => {
+    const dispatch = vi.fn((type) =>
+      type === "refreshToken"
+        ? Promise.reject({ response: { status: 503 } })
+        : undefined,
+    );
+    refreshTokenAfterTimeout({ state: { expiryTime: 10 }, dispatch });
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect(dispatch).not.toHaveBeenCalledWith("setLoginState", false);
+    await vi.advanceTimersByTimeAsync(30_000);
+    expect(
+      dispatch.mock.calls.filter(([type]) => type === "refreshToken"),
+    ).toHaveLength(2);
+  });
+
+  it("ends the session when Spotify refuses it", async () => {
+    const dispatch = vi.fn((type) =>
+      type === "refreshToken"
+        ? Promise.reject({ response: { status: 401 } })
+        : undefined,
+    );
+    refreshTokenAfterTimeout({ state: { expiryTime: 10 }, dispatch });
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect(dispatch).toHaveBeenCalledWith("setLoginState", false);
+    expect(dispatch).toHaveBeenCalledWith("disconnectSpotifyPlayer");
+  });
+});
+
 describe("setExpiryTime", () => {
   let commit;
   let time;

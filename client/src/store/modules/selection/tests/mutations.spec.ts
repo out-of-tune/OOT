@@ -57,3 +57,11 @@ describe("SET_TEMPORARY_SELECTED", () => {
     expect(state.temporarySelectedNodes).toEqual([{ id: "1" }]);
   });
 });
+
+describe("CLEAR_GRAPH", () => {
+  it("empties the selection together with the graph", () => {
+    const state = { selectedNodes: [{ id: "a" }] };
+    mutations.CLEAR_GRAPH(state);
+    expect(state.selectedNodes).toEqual([]);
+  });
+});

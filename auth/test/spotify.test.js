@@ -14,7 +14,12 @@ AuthorizationCode.prototype.getToken = async () => ({
 AuthorizationCode.prototype.createToken = function (token) {
     return {
         refresh: async () => {
-            if (token.refresh_token !== 'refresh-1') throw new Error('invalid_grant')
+            if (token.refresh_token === 'refresh-down') {
+                throw Object.assign(new Error('Response Error: 503'), { data: { payload: 'Service Unavailable' } })
+            }
+            if (token.refresh_token !== 'refresh-1') {
+                throw Object.assign(new Error('Response Error: 400'), { data: { payload: { error: 'invalid_grant' } } })
+            }
             return { token: { access_token: 'access-2', refresh_token: 'refresh-2', expires_in: 3600, scope: 'streaming' } }
         }
     }
@@ -86,6 +91,24 @@ describe('Spotify login', () => {
         const response = await fetch(`${base}/refresh`, { headers: { cookie: 'oot_refresh=expired' } })
         assert.equal(response.status, 401)
         assert.match(response.headers.getSetCookie().join('\n'), /oot_refresh=;/)
+    })
+
+    it('keeps the session when Spotify is unavailable', async () => {
+        const response = await fetch(`${base}/refresh`, { headers: { cookie: 'oot_refresh=refresh-down' } })
+        assert.equal(response.status, 503)
+        assert.doesNotMatch(response.headers.getSetCookie().join('\n'), /oot_refresh=;/)
+    })
+
+    it('ignores a malformed cookie', async () => {
+        const response = await fetch(`${base}/refresh`, { headers: { cookie: 'oot_refresh=%E0%A4%A' } })
+        assert.equal(response.status, 401)
+    })
+
+    it('scopes the cookies to the path prefix of the app', () => {
+        const { cookiePath } = require('../routes/oauth2/spotify')
+        assert.equal(cookiePath('http://oot.test'), '/auth/oauth2/spotify')
+        assert.equal(cookiePath('https://d.out-of-tune.org/app'), '/app/auth/oauth2/spotify')
+        assert.equal(cookiePath('https://d.out-of-tune.org/app/'), '/app/auth/oauth2/spotify')
     })
 
     it('logs out by deleting the cookie', async () => {

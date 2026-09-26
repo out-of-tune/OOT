@@ -195,6 +195,45 @@ describe("refreshPlaybackState", () => {
   });
 });
 
+describe("refreshPlaybackState without playback", () => {
+  it("forgets the other device, so the next play goes to this tab", async () => {
+    const { ctx, state } = setup();
+    state.remoteDeviceName = "Phone";
+    vi.mocked(SpotifyService.getPlaybackState).mockResolvedValue(null);
+    await actions.refreshPlaybackState(ctx);
+    expect(state.remoteDeviceName).toBeNull();
+    expect(state.paused).toBe(true);
+  });
+});
+
+describe("library", () => {
+  it("likes the song by its URI", async () => {
+    const { ctx, state } = setup();
+    state.track = { id: "t1" } as never;
+    vi.mocked(SpotifyService.saveToLibrary).mockResolvedValue([null]);
+    await actions.toggleSpotifyLiked(ctx);
+    expect(SpotifyService.saveToLibrary).toHaveBeenCalledWith("token", [
+      "spotify:track:t1",
+    ]);
+    expect(state.liked).toBe(true);
+  });
+
+  it("follows an artist by its URI and reports a failure", async () => {
+    const { ctx } = setup();
+    vi.mocked(SpotifyService.saveToLibrary).mockRejectedValue({
+      response: { status: 403 },
+    });
+    const done = await actions.followSpotifyArtist(ctx, {
+      sid: "a1",
+      follow: true,
+    });
+    expect(SpotifyService.saveToLibrary).toHaveBeenCalledWith("token", [
+      "spotify:artist:a1",
+    ]);
+    expect(done).toBe(false);
+  });
+});
+
 describe("controls", () => {
   async function connected() {
     const context = setup();
@@ -279,7 +318,7 @@ describe("controls", () => {
   it("takes the like back when saving fails", async () => {
     const { ctx, state } = setup();
     state.track = { id: "t1" } as never;
-    vi.mocked(SpotifyService.saveTracks).mockRejectedValue({
+    vi.mocked(SpotifyService.saveToLibrary).mockRejectedValue({
       response: { status: 500 },
     });
     await actions.toggleSpotifyLiked(ctx);

@@ -13,7 +13,9 @@ const STATE_MAX_AGE = 600
 const REFRESH_COOKIE = 'oot_refresh'
 /** How long a login is remembered, in seconds. */
 const REFRESH_MAX_AGE = 60 * 60 * 24 * 30
-const COOKIE_PATH = '/auth/oauth2/spotify'
+/** Path of the auth routes as the browser sees them. The app may run under a prefix, for example https://host/app. */
+const cookiePath = proxyUri => `${new URL(proxyUri).pathname.replace(/\/$/, '')}/auth/oauth2/spotify`
+const COOKIE_PATH = cookiePath(settings.PROXY_URI)
 
 const cookieOptions = maxAge => ({
     httpOnly: true,
@@ -42,9 +44,19 @@ function readCookie(req, name) {
     const header = req.headers.cookie ?? ''
     for (const part of header.split(';')) {
         const [key, ...value] = part.trim().split('=')
-        if (key === name) return decodeURIComponent(value.join('='))
+        if (key !== name) continue
+        try {
+            return decodeURIComponent(value.join('='))
+        } catch {
+            return undefined
+        }
     }
     return undefined
+}
+
+/** True when Spotify refused the refresh token itself. simple-oauth2 puts the response body in err.data.payload. */
+function isRejectedToken(err) {
+    return err?.data?.payload?.error === 'invalid_grant'
 }
 
 function redirectToClient(res, params) {
@@ -100,8 +112,13 @@ router.get('/refresh', async (req, res) => {
         res.status(200).json({ access_token, expires_in, scope })
     } catch (err) {
         console.error('Spotify Refresh Token Error', err.message)
-        res.clearCookie(REFRESH_COOKIE, { path: COOKIE_PATH })
-        res.status(401).json('refresh_token_failed')
+        // Only a rejected refresh token ends the session. Other failures (429, 5xx, network)
+        // keep the cookie, so a later refresh can work.
+        if (isRejectedToken(err)) {
+            res.clearCookie(REFRESH_COOKIE, { path: COOKIE_PATH })
+            return res.status(401).json('refresh_token_failed')
+        }
+        res.status(503).json('spotify_unavailable')
     }
 })
 
@@ -111,3 +128,4 @@ router.post('/logout', (req, res) => {
 })
 
 module.exports = router
+module.exports.cookiePath = cookiePath

@@ -40,7 +40,8 @@ export async function checkNodesExistence(
   const nodes = Object.values(
     response as Record<string, Record<string, unknown>[]>,
   ).map((results) => {
-    const first = results[0];
+    // A field whose resolver failed is null.
+    const first = results?.[0];
     if (!first) return null;
     const { id, ...data } = first;
     return { id: String(id), data: { ...data, label: nodeLabel } };
