@@ -1,4 +1,7 @@
 import { randomUUID } from 'node:crypto'
+import { readFileSync } from 'node:fs'
+import { ApolloServer } from '@apollo/server'
+import { makeExecutableSchema } from '@graphql-tools/schema'
 
 // Random test values.
 const casual = {
@@ -180,5 +183,14 @@ describe('unknown artist by sid', () => {
         const { context } = makeContext(async () => { throw new SpotifyRequestError(400, 'invalid id') })
         expect(await resolvers.Query.artist({}, { sid: 'bad' }, context)).toEqual([])
         expect(await resolvers.Mutation.addArtist({}, { sid: 'bad' }, context)).toEqual({ success: false, message: 'invalid id' })
+    })
+
+    test('does not let the response cache keep the empty result', async () => {
+        const { context } = makeContext(async () => { throw new SpotifyRequestError(503, 'unavailable') })
+        const typeDefs = readFileSync(new URL('../../../../schema/schema.graphql', import.meta.url), 'utf-8')
+        const server = new ApolloServer({ schema: makeExecutableSchema({ typeDefs, resolvers: { Query: resolvers.Query } }) })
+        const response = await server.executeOperation({ query: '{ artist(sid: "abc") { name } }' }, { contextValue: context })
+        expect(response.body.kind === 'single' && response.body.singleResult.data).toEqual({ artist: [] })
+        expect(response.http.headers.get('cache-control')).toBe('no-store')
     })
 })

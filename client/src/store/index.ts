@@ -15,7 +15,6 @@ import feedback from "./modules/feedback";
 import graph_camera from "./modules/graph_camera";
 import graph_io from "./modules/graph_io";
 import history from "./modules/history";
-import inception_graph from "./modules/inception_graph";
 import init_config from "./modules/init_config";
 import init_graph from "./modules/init_graph";
 import modes from "./modules/modes";
@@ -142,7 +141,6 @@ export const store = createStore<RootState>({
     modes,
     init_graph,
     init_config,
-    inception_graph,
     music_player,
     authentication,
     user,

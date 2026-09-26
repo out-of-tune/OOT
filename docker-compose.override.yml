@@ -22,6 +22,7 @@ services:
     entrypoint: ["/bin/sh", "-c", "npm install --include=dev && npm run serve"]
     environment:
       - VITE_PROXY_URI=${VITE_PROXY_URI}
+      - DEV_ALLOWED_HOSTS=${DEV_ALLOWED_HOSTS:-}
     volumes:
       - "./client:/app"
       - "/app/node_modules"
@@ -33,6 +34,8 @@ services:
   auth:
     user: root
     entrypoint: ["/bin/sh", "-c", "npm install --include=dev && npm run serve"]
+    environment:
+      - AUTH_CORS_ORIGINS=${AUTH_CORS_ORIGINS:-http://localhost:8080 http://127.0.0.1:8080}
     volumes:
       - "./auth:/usr/src/app"
       - "/usr/src/app/node_modules"
@@ -51,5 +54,7 @@ services:
     volumes:
       - "./services/share:/usr/src/app"
       - "/usr/src/app/node_modules"
+      # The shared objects stay in the source folder instead of the share_data volume.
+      - "./services/share/data:/usr/src/app/data"
     ports:
       - "4444:4444"

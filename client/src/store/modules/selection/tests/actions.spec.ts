@@ -15,10 +15,6 @@ const {
   expandSelectedNodes,
   collapseSelectedNodes,
   removeSelectedNodes,
-  moveToNextNode,
-  moveToFirstNode,
-  moveToPreviousNode,
-  moveToLastNode,
   handleAreaSelected,
   setEdgesTransparent,
   selectionFinished,
@@ -427,103 +423,6 @@ describe("setNodeOpactity", () => {
       node: "a node",
       color: parseInt("ffffff12", 16),
     });
-  });
-});
-
-describe("moveToNextNode", () => {
-  let dispatch;
-  let commit;
-  let state;
-  beforeEach(() => {
-    dispatch = vi.fn();
-    commit = vi.fn();
-    state = {
-      selectedNodeIndex: 0,
-      selectedNodes: [{ id: "1" }, { id: "2" }],
-    };
-  });
-  it("dispatches moveToNode and sets the new index when a next node exists", () => {
-    moveToNextNode({ dispatch, commit, state });
-    expect(dispatch).toHaveBeenCalledWith("moveToNode", { id: "2" });
-    expect(commit).toHaveBeenCalledWith("SET_SELECTED_INDEX", 1);
-  });
-  it("dispatches moveToFirstNode when the current node is the last", () => {
-    state.selectedNodeIndex = 1;
-    moveToNextNode({ dispatch, commit, state });
-    expect(dispatch).toHaveBeenCalledWith("moveToFirstNode");
-  });
-});
-
-describe("moveToPreviousNode", () => {
-  let dispatch;
-  let commit;
-  let state;
-  beforeEach(() => {
-    dispatch = vi.fn();
-    commit = vi.fn();
-  });
-  it("dispatches moveToNode and sets the new index when a next node exists", () => {
-    state = {
-      selectedNodeIndex: 1,
-      selectedNodes: [{ id: "1" }, { id: "2" }],
-    };
-    moveToPreviousNode({ dispatch, commit, state });
-    expect(dispatch).toHaveBeenCalledWith("moveToNode", { id: "1" });
-    expect(commit).toHaveBeenCalledWith("SET_SELECTED_INDEX", 0);
-  });
-  it("dispatches moveToLastNode when the current node is the last", () => {
-    state = {
-      selectedNodeIndex: 0,
-      selectedNodes: [{ id: "1" }, { id: "2" }],
-    };
-    moveToPreviousNode({ dispatch, commit, state });
-    expect(dispatch).toHaveBeenCalledWith("moveToLastNode");
-  });
-});
-
-describe("moveToFirstNode", () => {
-  let commit;
-  let dispatch;
-  let state;
-  beforeEach(() => {
-    commit = vi.fn();
-    dispatch = vi.fn();
-    state = {
-      selectedNodes: [{ id: "1" }],
-    };
-  });
-  it("dispatches moveToNode with first node when selectedNodes is not empty", () => {
-    moveToFirstNode({ dispatch, commit, state });
-    expect(dispatch).toHaveBeenCalledWith("moveToNode", { id: "1" });
-    expect(commit).toHaveBeenCalledWith("SET_SELECTED_INDEX", 0);
-  });
-  it("does not do anything when no node is selected", () => {
-    state.selectedNodes = [];
-    moveToFirstNode({ dispatch, commit, state });
-    expect(dispatch).not.toHaveBeenCalled();
-  });
-});
-
-describe("moveToLastNode", () => {
-  let commit;
-  let dispatch;
-  let state;
-  beforeEach(() => {
-    commit = vi.fn();
-    dispatch = vi.fn();
-    state = {
-      selectedNodes: [{ id: "1" }, { id: "2" }],
-    };
-  });
-  it("dispatches moveToNode with last node when selectedNodes is not empty", () => {
-    moveToLastNode({ dispatch, commit, state });
-    expect(dispatch).toHaveBeenCalledWith("moveToNode", { id: "2" });
-    expect(commit).toHaveBeenCalledWith("SET_SELECTED_INDEX", 1);
-  });
-  it("does not do anything when no node is selected", () => {
-    state.selectedNodes = [];
-    moveToLastNode({ dispatch, commit, state });
-    expect(dispatch).not.toHaveBeenCalled();
   });
 });
 

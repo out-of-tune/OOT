@@ -258,31 +258,6 @@ function findNodesInGraph(
 }
 
 export const actions = {
-  generateSearchObject: (_context: Ctx, input: string) =>
-    searchObjectHelper.generateSearchObject(input),
-
-  /** Adds the database nodes that match the advanced search to the graph. */
-  async startGraphQlSearch({ commit, rootState, dispatch }: Ctx) {
-    if (!rootState.searchObject.valid) return;
-    try {
-      const nodeType = rootState.schema.nodeTypes.find(
-        (type) => type.label === rootState.searchObject.nodeType,
-      );
-      if (!nodeType) return;
-      const nodes = nodeType.endpoints?.includes("graphql")
-        ? await searchGraphql(
-            rootState.searchObject.attributes,
-            [nodeType],
-            dispatch,
-            rootState,
-          )
-        : [];
-      commit("ADD_TO_GRAPH", { nodes, links: [] });
-    } catch (error) {
-      dispatch("setError", error);
-    }
-  },
-
   /** Selects the graph nodes that match the advanced search. */
   startAdvancedGraphSearch(
     { dispatch, rootState }: Ctx,
@@ -367,15 +342,6 @@ export const actions = {
 
   setSearchObject({ commit }: Ctx, searchObject: SearchObject) {
     commit("SET_SEARCH_OBJECT", searchObject);
-  },
-
-  setAdvancedOpen({ commit }: Ctx, advancedOpen: boolean) {
-    commit("SET_ADVANCED_OPEN", advancedOpen);
-  },
-
-  setSearch({ commit }: Ctx, input: string) {
-    commit("SET_SEARCH_STRING", input);
-    commit("SET_SEARCH_OBJECT", searchObjectHelper.generateSearchObject(input));
   },
 } satisfies ActionTree<SearchState, RootState>;
 

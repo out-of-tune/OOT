@@ -55,30 +55,30 @@ const authHeaders = (token: string) => ({
 
 /** Client for the Spotify Web API. Each call takes the access token to use. */
 class SpotifyService {
-  async getFromAPI<T>(
+  /** Any Web API call. Returns `null` for "204 No Content". */
+  private async request<T>(
+    method: "GET" | "POST" | "PUT" | "DELETE",
     url: string,
     token: string,
-    params: Record<string, unknown> | null = null,
+    { params, body }: { params?: Record<string, unknown>; body?: unknown } = {},
+  ): Promise<T | null> {
+    const response = await axios.request<T>({
+      method,
+      url: API + url,
+      headers: authHeaders(token),
+      params,
+      data: body,
+    });
+    return response.status === 204 ? null : response.data;
+  }
+
+  /** A GET of an endpoint that always answers with content. */
+  private async get<T>(
+    url: string,
+    token: string,
+    params?: Record<string, unknown>,
   ) {
-    const response = await axios.get<T>(API + url, {
-      headers: authHeaders(token),
-      ...(params ? { params } : {}),
-    });
-    return response.data;
-  }
-
-  async sendToAPI<T>(url: string, token: string, body: unknown) {
-    const response = await axios.post<T>(encodeURI(API + url), body, {
-      headers: authHeaders(token),
-    });
-    return response.data;
-  }
-
-  async putToApi<T>(url: string, token: string, body: unknown) {
-    const response = await axios.put<T>(encodeURI(API + url), body, {
-      headers: authHeaders(token),
-    });
-    return response.data;
+    return (await this.request<T>("GET", url, token, { params })) as T;
   }
 
   /** Follows the `next` links of a paged endpoint and returns all items. */
@@ -88,7 +88,7 @@ class SpotifyService {
     params: Record<string, unknown> = {},
     offset = 0,
   ): Promise<{ items: T[] }> {
-    const result = await this.getFromAPI<SpotifyPage<T>>(url, token, {
+    const result = await this.get<SpotifyPage<T>>(url, token, {
       ...params,
       offset,
     });
@@ -124,19 +124,14 @@ class SpotifyService {
   }
 
   getCurrentUserPlaylists(token: string, limit = 50, offset = 0) {
-    return this.getFromAPI<SpotifyPage<SpotifyPlaylist>>(
-      "me/playlists",
-      token,
-      { limit, offset },
-    );
-  }
-
-  getPlaylist(token: string, uri: string) {
-    return this.getFromAPI<SpotifyPlaylist>(`playlists/${uri}`, token);
+    return this.get<SpotifyPage<SpotifyPlaylist>>("me/playlists", token, {
+      limit,
+      offset,
+    });
   }
 
   getCurrentUserProfile(token: string) {
-    return this.getFromAPI<SpotifyUser>("me", token);
+    return this.get<SpotifyUser>("me", token);
   }
 
   getAlbumsFromArtist(
@@ -182,7 +177,7 @@ class SpotifyService {
   /** One request per track: Spotify removed the several tracks endpoint for apps in development mode. */
   async getFullSongData(token: string, sids: string[]) {
     const tracks = await fetchEach(sids, (id) =>
-      this.getFromAPI<SpotifyTrack>(`tracks/${id}`, token),
+      this.get<SpotifyTrack>(`tracks/${id}`, token),
     );
     return { tracks };
   }
@@ -190,7 +185,7 @@ class SpotifyService {
   /** One request per artist, for the same reason as getFullSongData. */
   async getArtistsById(token: string, sids: string[]) {
     const artists = await fetchEach(sids, (id) =>
-      this.getFromAPI<SpotifyArtist>(`artists/${id}`, token),
+      this.get<SpotifyArtist>(`artists/${id}`, token),
     );
     return { artists };
   }
@@ -199,7 +194,9 @@ class SpotifyService {
   addSongsToPlaylist(token: string, playlistId: string, songUris: string[]) {
     return Promise.all(
       chunk(songUris, 100).map((uris) =>
-        this.sendToAPI(`playlists/${playlistId}/items`, token, { uris }),
+        this.request("POST", `playlists/${playlistId}/items`, token, {
+          body: { uris },
+        }),
       ),
     );
   }
@@ -210,32 +207,11 @@ class SpotifyService {
     types: string[],
     limit?: number,
   ) {
-    return this.getFromAPI<SpotifySearchResult>("search", token, {
+    return this.get<SpotifySearchResult>("search", token, {
       q: searchString,
       type: types.join(","),
       limit,
     });
-  }
-
-  play(token: string, uris: string[]) {
-    return this.putToApi("me/player/play", token, { uris });
-  }
-
-  /** Any Web API call. Returns `null` for "204 No Content". */
-  private async request<T>(
-    method: "GET" | "POST" | "PUT" | "DELETE",
-    url: string,
-    token: string,
-    { params, body }: { params?: Record<string, unknown>; body?: unknown } = {},
-  ): Promise<T | null> {
-    const response = await axios.request<T>({
-      method,
-      url: API + url,
-      headers: authHeaders(token),
-      params,
-      data: body,
-    });
-    return response.status === 204 ? null : response.data;
   }
 
   // Player (Spotify Connect). Without a device id the calls act on the active device.
@@ -364,11 +340,10 @@ class SpotifyService {
   }
 
   getSavedTracks(token: string, limit = 50, offset = 0) {
-    return this.getFromAPI<SpotifyPage<{ track: SpotifyTrack }>>(
-      "me/tracks",
-      token,
-      { limit, offset },
-    );
+    return this.get<SpotifyPage<{ track: SpotifyTrack }>>("me/tracks", token, {
+      limit,
+      offset,
+    });
   }
 
   getTopArtists(
@@ -376,15 +351,14 @@ class SpotifyService {
     limit = 50,
     timeRange: "short_term" | "medium_term" | "long_term" = "medium_term",
   ) {
-    return this.getFromAPI<SpotifyPage<SpotifyArtist>>(
-      "me/top/artists",
-      token,
-      { limit, time_range: timeRange },
-    );
+    return this.get<SpotifyPage<SpotifyArtist>>("me/top/artists", token, {
+      limit,
+      time_range: timeRange,
+    });
   }
 
   getRecentlyPlayed(token: string, limit = 50) {
-    return this.getFromAPI<{ items: { track: SpotifyTrack }[] }>(
+    return this.get<{ items: { track: SpotifyTrack }[] }>(
       "me/player/recently-played",
       token,
       { limit },

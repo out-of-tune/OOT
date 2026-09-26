@@ -11,8 +11,12 @@ import type {
   StartPlaybackOptions,
 } from "@/types/spotify";
 import type { Context, RootState } from "@/store/types";
-import { addSongsWithNeighbors } from "../playlists/actions";
-import type { NowPlaying, SpotifyPlayerState } from "./index";
+import { addSongsWithNeighbors, replaceGraphWith } from "../playlists/actions";
+import {
+  playbackPosition,
+  type NowPlaying,
+  type SpotifyPlayerState,
+} from "./index";
 import type { PlaybackUpdate } from "./mutations";
 
 type Ctx = Context<SpotifyPlayerState>;
@@ -24,6 +28,8 @@ const REPEAT_ORDER: RepeatState[] = ["off", "context", "track"];
 // The SDK player and the poll timer are not state: they must not become reactive or persisted.
 let player: SpotifySdkPlayer | null = null;
 let pollTimer: ReturnType<typeof setInterval> | undefined;
+/** Goes up on each connect and each disconnect. A connect that sees another number was cancelled. */
+let connection = 0;
 
 const userToken = (rootState: RootState) =>
   rootState.authentication.accessToken;
@@ -105,6 +111,14 @@ function stopPolling() {
   pollTimer = undefined;
 }
 
+/** Stops the SDK player and cancels a connect that still runs. */
+function dropPlayer() {
+  stopPolling();
+  player?.disconnect();
+  player = null;
+  connection += 1;
+}
+
 export const actions = {
   /**
    * Makes this tab a Spotify Connect device ("out-of-tune") with the Web Playback SDK.
@@ -123,43 +137,60 @@ export const actions = {
       return;
     }
     commit("SET_SPOTIFY_PLAYER_STATUS", "connecting");
+    const attempt = ++connection;
+    const current = () => attempt === connection;
     const onError = (kind: PlayerErrorKind, message: string) => {
+      if (!current()) return;
       if (kind === "account")
         commit("SET_SPOTIFY_PLAYER_STATUS", "premium_required");
       else if (kind === "initialization")
         commit("SET_SPOTIFY_PLAYER_STATUS", "unavailable");
-      else if (kind === "authentication")
+      else if (kind === "authentication") {
         dispatch("refreshToken").catch(() => undefined);
-      else if (kind === "autoplay")
+        // The SDK does not retry a failed login, so this connect never becomes ready.
+        if (state.status === "connecting") {
+          dropPlayer();
+          commit("SET_SPOTIFY_PLAYER_STATUS", "unavailable");
+          dispatch(
+            "setError",
+            new Error("Spotify did not accept the login of the player"),
+          );
+        }
+      } else if (kind === "autoplay")
         dispatch("setInfo", "Press play to start the music");
       else dispatch("setError", new Error(`Spotify: ${message}`));
     };
     try {
-      player = await createSpotifyPlayer(
+      const created = await createSpotifyPlayer(
         () => userToken(rootState),
         {
           onReady: (deviceId) => {
+            if (!current()) return;
             commit("SET_SPOTIFY_DEVICE_ID", deviceId);
             commit("SET_SPOTIFY_PLAYER_STATUS", "ready");
             dispatch("startRemotePolling");
           },
-          onNotReady: () => commit("SET_SPOTIFY_DEVICE_ID", null),
-          onState: (sdkState) => dispatch("applySdkState", sdkState),
+          onNotReady: () => {
+            if (current()) commit("SET_SPOTIFY_DEVICE_ID", null);
+          },
+          onState: (sdkState) => {
+            if (current()) dispatch("applySdkState", sdkState);
+          },
           onError,
         },
         state.volume / 100,
       );
+      if (current()) player = created;
+      else created.disconnect();
     } catch (error) {
+      if (!current()) return;
       console.error(error);
-      player = null;
       commit("SET_SPOTIFY_PLAYER_STATUS", "unavailable");
     }
   },
 
   disconnectSpotifyPlayer({ commit }: Ctx) {
-    stopPolling();
-    player?.disconnect();
-    player = null;
+    dropPlayer();
     commit("RESET_SPOTIFY_PLAYER");
   },
 
@@ -463,32 +494,39 @@ export const actions = {
     const page = await withUserToken(rootState, dispatch, (token) =>
       SpotifyService.getTopArtists(token),
     );
-    if (!page || page.items.length === 0) {
-      dispatch("setInfo", "Spotify has no top artists for you yet");
-      return;
-    }
-    commit("CLEAR_GRAPH");
-    dispatch("setMessage", "Loading your top artists");
-    const sids = page.items.map((artist) => artist.id);
-    // Known artists keep their database id, so their genres can load.
-    const dbNodes = await checkNodesExistence(
-      "artist",
-      sids,
-      rootState.schema,
-      dispatch,
-      rootState,
-    ).catch(() => null);
-    const nodes: NodeInput[] = page.items.map(
-      (artist, index) =>
-        dbNodes?.[index] ??
-        nodeFromSpotify("artist", artist as unknown as Record<string, unknown>),
+    await replaceGraphWith(
+      { commit, dispatch },
+      page?.items,
+      {
+        loading: "Loading your top artists",
+        empty: "Spotify has no top artists for you yet",
+      },
+      async (artists) => {
+        // Known artists keep their database id, so their genres can load.
+        const dbNodes = await checkNodesExistence(
+          "artist",
+          artists.map((artist) => artist.id),
+          rootState.schema,
+          dispatch,
+          rootState,
+        ).catch(() => null);
+        const nodes: NodeInput[] = artists.map(
+          (artist, index) =>
+            dbNodes?.[index] ??
+            nodeFromSpotify(
+              "artist",
+              artist as unknown as Record<string, unknown>,
+            ),
+        );
+        dispatch("addToGraph", { nodes, links: [] });
+        await dispatch("expandAction", {
+          nodes,
+          expandConfiguration: [
+            { nodeType: "artist", edges: ["Artist_to_Genre"] },
+          ],
+        });
+      },
     );
-    dispatch("addToGraph", { nodes, links: [] });
-    await dispatch("expandAction", {
-      nodes,
-      expandConfiguration: [{ nodeType: "artist", edges: ["Artist_to_Genre"] }],
-    });
-    dispatch("fitGraphToScreen");
   },
 
   /** Replaces the graph with the liked songs of the user and their albums, artists and genres. */
@@ -496,17 +534,15 @@ export const actions = {
     const page = await withUserToken(rootState, dispatch, (token) =>
       SpotifyService.getSavedTracks(token),
     );
-    if (!page || page.items.length === 0) {
-      dispatch("setInfo", "You have no liked songs yet");
-      return;
-    }
-    commit("CLEAR_GRAPH");
-    dispatch("setMessage", "Loading your liked songs");
-    await addSongsWithNeighbors(
-      dispatch,
-      page.items.map((item) => item.track),
+    await replaceGraphWith(
+      { commit, dispatch },
+      page?.items.map((item) => item.track),
+      {
+        loading: "Loading your liked songs",
+        empty: "You have no liked songs yet",
+      },
+      (tracks) => addSongsWithNeighbors(dispatch, tracks),
     );
-    dispatch("fitGraphToScreen");
   },
 
   /** Replaces the graph with the recently played songs of the user. */
@@ -514,17 +550,15 @@ export const actions = {
     const page = await withUserToken(rootState, dispatch, (token) =>
       SpotifyService.getRecentlyPlayed(token),
     );
-    if (!page || page.items.length === 0) {
-      dispatch("setInfo", "Spotify has no recently played songs for you");
-      return;
-    }
-    commit("CLEAR_GRAPH");
-    dispatch("setMessage", "Loading your recently played songs");
-    await addSongsWithNeighbors(
-      dispatch,
-      page.items.map((item) => item.track),
+    await replaceGraphWith(
+      { commit, dispatch },
+      page?.items.map((item) => item.track),
+      {
+        loading: "Loading your recently played songs",
+        empty: "Spotify has no recently played songs for you",
+      },
+      (tracks) => addSongsWithNeighbors(dispatch, tracks),
     );
-    dispatch("fitGraphToScreen");
   },
 } satisfies ActionTree<SpotifyPlayerState, RootState>;
 
@@ -533,7 +567,7 @@ function currentUpdate(state: SpotifyPlayerState): PlaybackUpdate {
   return {
     track: state.track,
     paused: state.paused,
-    positionMs: state.positionMs,
+    positionMs: playbackPosition(state),
     shuffle: state.shuffle,
     repeat: state.repeat,
     isLocal: state.isLocal,

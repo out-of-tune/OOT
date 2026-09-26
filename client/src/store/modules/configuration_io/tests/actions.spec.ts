@@ -219,17 +219,26 @@ describe("loadConfiguration", () => {
     dispatch = vi.fn();
   });
   it("sets success message", () => {
-    loadConfiguration({ dispatch, commit }, { name: "a config" });
+    loadConfiguration({ dispatch, commit }, schemaExample);
     expect(dispatch).toHaveBeenCalledWith(
       "setSuccess",
       "Loaded configuration successfully",
     );
   });
   it("calls SET_CONFIGURATION", () => {
-    loadConfiguration({ dispatch, commit }, { name: "a config" });
-    expect(commit).toHaveBeenCalledWith("SET_CONFIGURATION", {
-      name: "a config",
-    });
+    loadConfiguration({ dispatch, commit }, schemaExample);
+    expect(commit).toHaveBeenCalledWith("SET_CONFIGURATION", schemaExample);
+  });
+  it("adds the fields that the schema lets a file leave out", () => {
+    const configuration = structuredClone(schemaExample);
+    delete configuration.appearanceConfiguration.nodeConfiguration.tooltip;
+    delete configuration.appearanceConfiguration.edgeConfiguration.size;
+    loadConfiguration({ dispatch, commit }, configuration);
+    const loaded = commit.mock.calls[0][1];
+    expect(loaded.appearanceConfiguration.nodeConfiguration.tooltip).toEqual(
+      [],
+    );
+    expect(loaded.appearanceConfiguration.edgeConfiguration.size).toEqual([]);
   });
 });
 

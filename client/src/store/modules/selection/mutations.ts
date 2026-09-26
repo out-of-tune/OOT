@@ -17,9 +17,6 @@ export const mutations = {
   SET_SELECTION_MODAL_STATE(state, open: boolean) {
     state.modalOpen = open;
   },
-  SET_SELECTED_INDEX(state, index: number) {
-    state.selectedNodeIndex = index;
-  },
   SET_TEMPORARY_SELECTED(state, nodes: GraphNode[]) {
     state.temporarySelectedNodes = raw(nodes);
   },

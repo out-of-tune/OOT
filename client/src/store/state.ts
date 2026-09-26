@@ -16,7 +16,7 @@ export const createRootState = (): BaseState => ({
     Graph: markRaw(createGraph()),
     currentNode: { id: 0, data: {} },
     hoveredNode: { id: 0, data: {} },
-    displayState: { displayEdges: true, showTooltip: false },
+    displayState: { showTooltip: false },
     renderState: {
       Renderer: null,
       isRendered: true,

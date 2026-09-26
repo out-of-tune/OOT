@@ -31,19 +31,30 @@ function toPromise<T>(request: IDBRequest<T>): Promise<T> {
   });
 }
 
-async function put(location: StoreLocation, record: object): Promise<void> {
+/** Runs a write and resolves once the transaction has committed. */
+async function write(
+  location: StoreLocation,
+  change: (store: IDBObjectStore) => void,
+): Promise<void> {
   const db = await openDb(location);
   try {
-    await toPromise(
-      db
-        .transaction(location.store, "readwrite")
-        .objectStore(location.store)
-        .put(record),
-    );
+    const transaction = db.transaction(location.store, "readwrite");
+    const committed = new Promise<void>((resolve, reject) => {
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () =>
+        reject(transaction.error ?? new Error("IndexedDB write failed"));
+      transaction.onabort = () =>
+        reject(transaction.error ?? new Error("IndexedDB write was aborted"));
+    });
+    change(transaction.objectStore(location.store));
+    await committed;
   } finally {
     db.close();
   }
 }
+
+const put = (location: StoreLocation, record: object) =>
+  write(location, (store) => store.put(record));
 
 async function get<T>(
   location: StoreLocation,
@@ -62,19 +73,8 @@ async function get<T>(
   }
 }
 
-async function remove(location: StoreLocation, name: string): Promise<void> {
-  const db = await openDb(location);
-  try {
-    await toPromise(
-      db
-        .transaction(location.store, "readwrite")
-        .objectStore(location.store)
-        .delete(name),
-    );
-  } finally {
-    db.close();
-  }
-}
+const remove = (location: StoreLocation, name: string) =>
+  write(location, (store) => store.delete(name));
 
 /** Stores graphs and configurations in the browser, by name. */
 class IndexedDbService {

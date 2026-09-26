@@ -1,3 +1,5 @@
+import { maybeCacheControlFromInfo } from "@apollo/cache-control-types";
+import type { GraphQLResolveInfo } from "graphql";
 import { InvalidInputError } from "../../../errors/errors.js";
 import { SpotifyRequestError } from "../../../datasources/spotify/index.js";
 
@@ -35,7 +37,12 @@ export async function addArtist(sid: string, dataSources) {
 
 const resolvers = {
   Query: {
-    artist: async (_parent: unknown, { id, sid, mbid, name, limit }: ArtistQuery, { dataSources }) => {
+    artist: async (
+      _parent: unknown,
+      { id, sid, mbid, name, limit }: ArtistQuery,
+      { dataSources },
+      info?: GraphQLResolveInfo,
+    ) => {
       const filters = { id, sid, mbid, name };
       if (Object.values(filters).filter((value) => value).length !== 1) {
         throw new InvalidInputError("Set exactly one of id, sid, mbid and name.", {
@@ -49,8 +56,11 @@ const resolvers = {
         if (found.length !== 0) return found;
         // Unknown artists are loaded from Spotify on first request.
         const added = await addArtist(sid, dataSources);
-        if (!added.success) console.log(`Could not add artist ${sid}: ${added.message}`);
-        return added.success ? [added.artist] : [];
+        if (added.success) return [added.artist];
+        console.log(`Could not add artist ${sid}: ${added.message}`);
+        // The failure may be temporary, so the empty result must not stay in the response cache.
+        if (info) maybeCacheControlFromInfo(info)?.setCacheHint({ maxAge: 0 });
+        return [];
       }
       if (mbid) return dataSources.arango.artist.search(mbid, "mbid");
       if (name) return dataSources.arango.artist.byName(name, limit);

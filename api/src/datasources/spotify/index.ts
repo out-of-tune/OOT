@@ -5,6 +5,13 @@ const API_URL = "https://api.spotify.com/v1";
 /** First wait before a failed token request is retried, in milliseconds. It doubles up to the maximum. */
 const TOKEN_RETRY_DELAY = 1000;
 const TOKEN_RETRY_MAX_DELAY = 60_000;
+/** A failed API request is sent again this many times when the failure may be temporary. */
+const API_RETRIES = 2;
+/** First wait before an API request is sent again, in milliseconds. It doubles with each retry. */
+const API_RETRY_DELAY = 500;
+/** Longest Retry-After that a request waits for, in milliseconds. A longer one fails the request. */
+const API_MAX_RETRY_AFTER = 10_000;
+const RETRY_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
 
 export interface ArtistInfo {
   name: string;
@@ -89,11 +96,34 @@ class SpotifyAPI {
     return { token: this.accessToken };
   }
 
+  /**
+   * GET request to the Web API. Network errors, rate limits (429, with its Retry-After) and
+   * server errors are retried up to API_RETRIES times.
+   */
+  private async get(path: string): Promise<Response> {
+    for (let attempt = 0; ; attempt++) {
+      const retryDelay = API_RETRY_DELAY * 2 ** attempt;
+      let response: Response;
+      try {
+        response = await fetch(`${API_URL}${path}`, { headers: { Authorization: `Bearer ${this.accessToken}` } });
+      } catch (error) {
+        if (attempt >= API_RETRIES) throw error;
+        await delay(retryDelay);
+        continue;
+      }
+      if (response.ok) return response;
+      const body = await response.text();
+      const retryAfter = Number(response.headers.get("retry-after")) * 1000;
+      const wait = retryAfter > 0 ? retryAfter : retryDelay;
+      if (attempt >= API_RETRIES || !RETRY_STATUSES.has(response.status) || wait > API_MAX_RETRY_AFTER) {
+        throw new SpotifyRequestError(response.status, body);
+      }
+      await delay(wait);
+    }
+  }
+
   async artist_info(sid: string): Promise<ArtistInfo> {
-    const response = await fetch(`${API_URL}/artists/${encodeURIComponent(sid)}`, {
-      headers: { Authorization: `Bearer ${this.accessToken}` },
-    });
-    if (!response.ok) throw new SpotifyRequestError(response.status, await response.text());
+    const response = await this.get(`/artists/${encodeURIComponent(sid)}`);
     const artist = (await response.json()) as SpotifyArtistResponse;
     return {
       name: artist.name,

@@ -1,16 +1,12 @@
 import type { Module } from "vuex";
 import type { RootState } from "@/store/types";
 import actions from "./actions";
-import mutations from "./mutations";
 
-export interface SearchState {
-  advancedOpen: boolean;
-}
+export type SearchState = Record<string, never>;
 
 export const search: Module<SearchState, RootState> = {
-  state: () => ({ advancedOpen: false }),
+  state: () => ({}),
   actions,
-  mutations,
 };
 
 export default search;

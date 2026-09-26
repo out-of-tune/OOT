@@ -30,50 +30,7 @@ function gaussianRand() {
 const calculateJitter = (value: number, jitter: number) =>
   gaussianRand() * jitter + value - jitter / 2;
 
-/** Parses a form value. An empty value becomes 0. */
-const toNumber = (value: unknown) =>
-  value === "" || value == null ? 0 : parseFloat(String(value));
-
-function parseLayoutConfiguration(
-  configuration: LayoutConfiguration,
-): LayoutConfiguration {
-  if (configuration.layoutType === "line") {
-    const options = configuration.layoutTypeOptions;
-    return {
-      ...configuration,
-      layoutTypeOptions: {
-        ...options,
-        xOffset: toNumber(options.xOffset),
-        yOffset: toNumber(options.yOffset),
-        slope: toNumber(options.slope),
-        distance: toNumber(options.distance),
-      },
-    };
-  }
-  const options = configuration.layoutTypeOptions;
-  return {
-    ...configuration,
-    layoutTypeOptions: {
-      ...options,
-      xOffset: toNumber(options.xOffset),
-      yOffset: toNumber(options.yOffset),
-      mapXLength: toNumber(options.mapXLength),
-      mapYLength: toNumber(options.mapYLength),
-      xBoundaryMin: toNumber(options.xBoundaryMin),
-      yBoundaryMin: toNumber(options.yBoundaryMin),
-      xBoundaryMax: toNumber(options.xBoundaryMax),
-      yBoundaryMax: toNumber(options.yBoundaryMax),
-    },
-  };
-}
-
 export const actions = {
-  removePinnedStateFromNodeType({ commit, rootState }: Ctx, label: string) {
-    getNodesByLabel(label, rootState).forEach((node) =>
-      commit("UNPIN_NODE", node),
-    );
-  },
-
   /** Moves the unpinned neighbors of a node close to the given position. */
   setConnectedNodesNearby(
     { commit, rootState }: Ctx,
@@ -213,25 +170,6 @@ export const actions = {
       (configuration) => {
         dispatch("applyNodeCoordinateSystem", configuration);
       },
-    );
-  },
-
-  setCoordinateSystemConfiguration(
-    { rootState, commit }: Ctx,
-    configuration:
-      LayoutConfiguration | { nodeLabel: string; layoutType: "force" },
-  ) {
-    if (configuration.layoutType === "force") {
-      commit("DELETE_LAYOUT_CONFIGURATION", configuration.nodeLabel);
-      return;
-    }
-    const parsed = parseLayoutConfiguration(configuration);
-    const exists = (rootState.configurations.layoutConfiguration ?? []).some(
-      (entry) => entry.nodeLabel === parsed.nodeLabel,
-    );
-    commit(
-      exists ? "CHANGE_LAYOUT_CONFIGURATION" : "ADD_LAYOUT_CONFIGURATION",
-      parsed,
     );
   },
 } satisfies ActionTree<Record<string, never>, RootState>;

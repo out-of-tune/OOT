@@ -24,7 +24,6 @@ const {
   updateEdgeRules,
   updateTooltipRules,
   applyNodeConfiguration,
-  setConfiguratedEdgeColor,
   markClickedNodes,
 } = actions;
 
@@ -846,83 +845,6 @@ describe("applyEdgeColorConfiguration", () => {
     expect(commit).toHaveBeenNthCalledWith(3, "SET_EDGE_COLOR", {
       link: links[2],
       color: parseInt(expectedColors[2], 16),
-    });
-  });
-});
-
-describe("setConfiguratedEdgeColor", () => {
-  let rootState;
-  let commit;
-  let links;
-  beforeEach(() => {
-    commit = vi.fn();
-    rootState = {
-      mainGraph: {
-        Graph: new Viva.Graph.graph(),
-      },
-      configurations: {
-        appearanceConfiguration: {
-          edgeConfiguration: {
-            color: [
-              {
-                edgeLabel: "a",
-                color: "00ffffff",
-              },
-              {
-                edgeLabel: "b",
-                color: "00ffffff",
-              },
-              {
-                edgeLabel: "c",
-                color: "00fffff1",
-              },
-            ],
-          },
-        },
-      },
-    };
-    links = [
-      {
-        fromId: "a1",
-        toId: "a2",
-        id: "a1👉 a2",
-        linkTypes: ["a"],
-      },
-      {
-        fromId: "b1",
-        toId: "b2",
-        id: "b1👉 b2",
-        linkTypes: ["b"],
-      },
-      {
-        fromId: "c1",
-        toId: "c2",
-        id: "c1👉 c2",
-        linkTypes: ["c", "a"],
-      },
-    ];
-    links.forEach((link) => {
-      const graphLink = rootState.mainGraph.Graph.addLink(
-        link.fromId,
-        link.toId,
-      );
-      graphLink.linkTypes = link.linkTypes;
-    });
-  });
-  it("commits SET_EDGE_COLOR for all links", () => {
-    setConfiguratedEdgeColor(
-      { rootState, commit },
-      {
-        fromId: "a1",
-        toId: "a2",
-        id: "a1👉 a2",
-        linkTypes: ["a"],
-      },
-    );
-    const expectedColor = "00ffffff";
-    expect(commit).toHaveBeenNthCalledWith(1, "SET_EDGE_COLOR", {
-      link: links[0],
-      color: parseInt(expectedColor, 16),
     });
   });
 });

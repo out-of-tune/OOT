@@ -8,6 +8,25 @@ import { parseJsonWithSchema } from "@/lib/json";
 
 type Ctx = Context<ConfigurationIoState>;
 
+/** The schema allows a configuration without tooltip rules or edge sizes. The app reads both. */
+function withDefaults(configuration: Configuration): Configuration {
+  const { nodeConfiguration, edgeConfiguration } =
+    configuration.appearanceConfiguration;
+  return {
+    ...configuration,
+    appearanceConfiguration: {
+      nodeConfiguration: {
+        ...nodeConfiguration,
+        tooltip: nodeConfiguration.tooltip ?? [],
+      },
+      edgeConfiguration: {
+        ...edgeConfiguration,
+        size: edgeConfiguration.size ?? [],
+      },
+    },
+  };
+}
+
 export const actions = {
   importConfiguration(
     { dispatch }: Ctx,
@@ -26,7 +45,7 @@ export const actions = {
 
   loadConfiguration({ commit, dispatch }: Ctx, configuration: Configuration) {
     dispatch("setSuccess", "Loaded configuration successfully");
-    commit("SET_CONFIGURATION", configuration);
+    commit("SET_CONFIGURATION", withDefaults(configuration));
   },
 
   downloadConfiguration({ commit, rootState }: Ctx) {

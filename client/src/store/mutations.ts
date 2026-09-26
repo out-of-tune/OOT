@@ -56,8 +56,8 @@ function layoutConfigurations(state: State): LayoutConfiguration[] {
 }
 
 export const mutations = {
-  SET_GRAPHCONTAINER(state, graphContainer: HTMLElement) {
-    state.mainGraph.graphContainer = markRaw(graphContainer);
+  SET_GRAPHCONTAINER(state, graphContainer: HTMLElement | null) {
+    state.mainGraph.graphContainer = graphContainer && markRaw(graphContainer);
   },
 
   SET_CURRENTNODE(state, node: NodeRef) {
@@ -118,15 +118,6 @@ export const mutations = {
     requireRenderer(state).rerender();
   },
 
-  DELETE_NODES_FROM_GRAPH(state, { label }: { label: string }) {
-    const graph = state.mainGraph.Graph;
-    const ids: NodeId[] = [];
-    graph.forEachNode((node) => {
-      if (node.data.label === label) ids.push(node.id);
-    });
-    ids.forEach((id) => graph.removeNode(id));
-  },
-
   REMOVE_LINK(state, link: Pick<GraphLink, "fromId" | "toId">) {
     const graph = state.mainGraph.Graph;
     const existing = graph.getLink(link.fromId, link.toId);
@@ -142,8 +133,12 @@ export const mutations = {
     state.mainGraph.renderState.Renderer?.rerender();
   },
 
+  /** Stops and removes the renderer, if there is one. */
   DISPOSE_RENDERER(state) {
-    requireRenderer(state).dispose();
+    const renderState = state.mainGraph.renderState;
+    renderState.Renderer?.dispose();
+    renderState.Renderer = null;
+    renderState.layout = undefined;
   },
 
   RESUME_RENDERING(state) {
@@ -154,22 +149,6 @@ export const mutations = {
   PAUSE_RENDERING(state) {
     requireRenderer(state).pause();
     state.mainGraph.renderState.isRendered = false;
-  },
-
-  SHOW_EDGES(state) {
-    const ui = graphics(state);
-    state.mainGraph.Graph.forEachLink((link) => {
-      ui.getLinkUI(link.id).color = 0xffffffff;
-    });
-    state.mainGraph.displayState.displayEdges = true;
-  },
-
-  HIDE_EDGES(state) {
-    const ui = graphics(state);
-    state.mainGraph.Graph.forEachLink((link) => {
-      ui.getLinkUI(link.id).color = 0x00000000;
-    });
-    state.mainGraph.displayState.displayEdges = false;
   },
 
   SET_NODE_COLOR(state, { node, color }: { node: NodeId; color: number }) {

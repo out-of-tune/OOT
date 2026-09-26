@@ -12,9 +12,15 @@ export interface MusicPlayerState {
   songAction: "playSong" | "addToQueue";
 }
 
+export const emptySong = (): Song => ({
+  name: "",
+  images: [],
+  preview_url: "",
+});
+
 export const music_player: Module<MusicPlayerState, RootState> = {
   state: () => ({
-    currentSong: { name: "", images: [], preview_url: "" },
+    currentSong: emptySong(),
     queue: [],
     queueIndex: 0,
     songAction: "playSong",

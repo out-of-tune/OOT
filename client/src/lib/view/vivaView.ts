@@ -55,6 +55,30 @@ export function fitTransform(
   };
 }
 
+/**
+ * Runs the function and returns the window "resize" listeners that it adds. Viva input events
+ * add one that its dispose does not remove.
+ */
+function collectResizeListeners(run: () => void) {
+  const listeners: EventListenerOrEventListenerObject[] = [];
+  const add = window.addEventListener;
+  window.addEventListener = function (
+    this: Window,
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions,
+  ) {
+    if (type === "resize") listeners.push(listener);
+    add.call(this, type, listener, options);
+  } as typeof window.addEventListener;
+  try {
+    run();
+  } finally {
+    window.addEventListener = add;
+  }
+  return listeners;
+}
+
 /** 2D view: VivaGraphJS with a WebGL renderer and a force directed layout. */
 export const createVivaView: ViewFactory = ({
   graph,
@@ -97,18 +121,26 @@ export const createVivaView: ViewFactory = ({
     isNodePinned: (node) => layout.isNodePinned(node as GraphNode),
   };
 
-  /** Zooms step by step until the renderer reaches the scale. */
+  const resizeListeners: EventListenerOrEventListenerObject[] = [];
+  /** Runs Viva code that may create its input events, and keeps their resize listener. */
+  function trackResizeListeners(run: () => void) {
+    resizeListeners.push(...collectResizeListeners(run));
+  }
+
+  let zoomTimer: ReturnType<typeof setTimeout> | undefined;
+  /** Zooms step by step until the renderer reaches the scale. A new zoom stops the previous one. */
   function zoomToScale(desiredScale: number) {
+    clearTimeout(zoomTimer);
     const zoomIn = (currentScale: number) => {
       if (desiredScale > currentScale) {
         const next = renderer.zoomIn();
-        setTimeout(() => zoomIn(next), ZOOM_STEP_DELAY);
+        zoomTimer = setTimeout(() => zoomIn(next), ZOOM_STEP_DELAY);
       }
     };
     const zoomOut = (currentScale: number) => {
       if (desiredScale < currentScale) {
         const next = renderer.zoomOut();
-        setTimeout(() => zoomOut(next), ZOOM_STEP_DELAY);
+        zoomTimer = setTimeout(() => zoomOut(next), ZOOM_STEP_DELAY);
       }
     };
     const current = renderer.getTransform().scale;
@@ -118,18 +150,27 @@ export const createVivaView: ViewFactory = ({
 
   const view: GraphRenderer = {
     mode: "2d",
-    run: () => void renderer.run(),
+    run: () => trackResizeListeners(() => void renderer.run()),
     rerender: () => renderer.rerender(),
-    dispose: () => renderer.dispose(),
+    dispose: () => {
+      clearTimeout(zoomTimer);
+      renderer.dispose();
+      resizeListeners
+        .splice(0)
+        .forEach((listener) => window.removeEventListener("resize", listener));
+    },
     pause: () => renderer.pause(),
     resume: () => renderer.resume(),
     getGraphics: () => graphics,
     getLayout: () => graphLayout,
     createInputEvents: () => {
-      const vivaEvents = Viva.Graph.webglInputEvents(
-        webglGraphics,
-        graph,
-      ) as unknown as GraphInputEvents;
+      let vivaEvents = {} as GraphInputEvents;
+      trackResizeListeners(() => {
+        vivaEvents = Viva.Graph.webglInputEvents(
+          webglGraphics,
+          graph,
+        ) as unknown as GraphInputEvents;
+      });
       // Viva reads a truthy callback result as "handled" and then skips its own node drag.
       // Callbacks often return a Promise (of dispatch), so the result is dropped here.
       const events = {} as GraphInputEvents;

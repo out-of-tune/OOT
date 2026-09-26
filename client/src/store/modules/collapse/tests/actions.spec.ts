@@ -486,3 +486,39 @@ describe("collapseAction", () => {
     );
   });
 });
+
+describe("collapse history", () => {
+  it("records the removed edge types of a link that stays", () => {
+    const Graph = Viva.Graph.graph();
+    Graph.addNode(1, { label: "abc" });
+    Graph.addNode(2, { label: "cde" });
+    Graph.addLink(1, 2).linkTypes = ["Soup", "Stew"];
+    const rootState = {
+      mainGraph: { Graph },
+      configurations: {
+        actionConfiguration: {
+          collapse: [{ nodeType: "abc", edges: ["Soup"] }],
+        },
+      },
+    };
+    const commit = vi.fn();
+    const dispatch = vi.fn();
+    collapseAction(
+      { commit, rootState, dispatch } as never,
+      {
+        id: 1,
+        data: { label: "abc" },
+      } as never,
+    );
+
+    expect(commit).toHaveBeenCalledWith(
+      "UPDATE_LINKTYPES",
+      expect.objectContaining({ linkTypes: ["Stew"] }),
+    );
+    // Redo removes these types again and undo adds them back, so the link keeps "Stew".
+    const change = dispatch.mock.calls[0][1];
+    expect(change.data.links).toEqual([
+      expect.objectContaining({ fromId: 1, toId: 2, linkTypes: ["Soup"] }),
+    ]);
+  });
+});

@@ -63,6 +63,21 @@ export const initialSpotifyPlayerState = (): SpotifyPlayerState => ({
   queue: [],
 });
 
+/** The position of the playback at time `now`: it moves on from `positionMs` while the song plays. */
+export function playbackPosition(
+  state: Pick<
+    SpotifyPlayerState,
+    "positionMs" | "positionAt" | "paused" | "track"
+  >,
+  now = Date.now(),
+) {
+  const elapsed = state.paused ? 0 : Math.max(now - state.positionAt, 0);
+  return Math.min(
+    state.positionMs + elapsed,
+    state.track?.durationMs || Infinity,
+  );
+}
+
 export const spotify_player: Module<SpotifyPlayerState, RootState> = {
   state: initialSpotifyPlayerState,
   actions,

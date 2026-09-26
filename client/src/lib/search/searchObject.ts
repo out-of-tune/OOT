@@ -55,7 +55,6 @@ export const generateSearchObject = (input: string): SearchObject => {
 const getNodeTypeByName = (schema: Schema, nodeLabel: string | undefined) =>
   schema.nodeTypes.find((nodeType) => nodeType.label === nodeLabel);
 
-/** True when the node type and every searched attribute exist in the schema. */
 /** Search object for the nodes of a type that match a condition. An empty condition matches all of them. */
 export const searchObjectForType = (
   nodeLabel: string,
@@ -65,6 +64,18 @@ export const searchObjectForType = (
     condition.trim() ? `${nodeLabel}: ${condition}` : nodeLabel,
   );
 
+/** Search object of a map size rule: every node of the type, sized by one attribute. */
+export const searchObjectForAttribute = (
+  nodeLabel: string,
+  attribute: string,
+): SearchObject => ({
+  valid: true,
+  errors: [],
+  nodeType: nodeLabel,
+  attributes: [{ attributeSearch: attribute, operator: "", attributeData: "" }],
+});
+
+/** True when the node type and every searched attribute exist in the schema. */
 export function validateSearchObject(
   searchObject: SearchObject,
   schema: Schema,

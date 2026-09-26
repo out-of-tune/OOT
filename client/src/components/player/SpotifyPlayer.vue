@@ -24,6 +24,7 @@ import UiPopover from "@/components/ui/UiPopover.vue";
 import UiSlider from "@/components/ui/UiSlider.vue";
 import { formatDuration } from "@/lib/formatDuration";
 import { useStore } from "@/store";
+import { playbackPosition } from "@/store/modules/spotify_player";
 import CurrentSongInfo from "./CurrentSongInfo.vue";
 
 /** How long a slider must rest before its value goes to Spotify, in milliseconds. */
@@ -52,12 +53,9 @@ onBeforeUnmount(() => clearInterval(clock));
 
 /** Slider value while the user drags it. */
 const seeking = ref<number | null>(null);
-const positionMs = computed(() => {
-  if (seeking.value !== null) return seeking.value;
-  const { positionMs: position, positionAt, paused } = player.value;
-  const elapsed = paused ? 0 : Math.max(now.value - positionAt, 0);
-  return Math.min(position + elapsed, durationMs.value || Infinity);
-});
+const positionMs = computed(
+  () => seeking.value ?? playbackPosition(player.value, now.value),
+);
 
 let seekTimer: ReturnType<typeof setTimeout> | undefined;
 function seek(value: number) {
@@ -226,7 +224,7 @@ function transfer(deviceId: string | null) {
       </p>
     </div>
 
-    <div class="hidden items-center gap-1 text-fg-muted sm:flex sm:w-44">
+    <div class="flex items-center gap-1 text-fg-muted sm:w-44">
       <UiPopover v-model:open="devicesOpen" label="Devices" placement="top">
         <template #trigger="{ toggle }">
           <IconButton

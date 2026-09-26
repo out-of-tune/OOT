@@ -1,4 +1,9 @@
-import { generateSearchObject, searchObjectForType } from "../searchObject";
+import {
+  generateSearchObject,
+  searchObjectForAttribute,
+  searchObjectForType,
+  validateSearchObject,
+} from "../searchObject";
 
 // Expected values were recorded from the original parser (ANTLR 4.13 JavaScript target)
 // before the port to antlr4ng. The port must keep the exact behavior.
@@ -485,5 +490,18 @@ describe("searchObjectForType", () => {
     const searchObject = searchObjectForType("artist", "name=Björk");
     expect(searchObject.valid).toBe(true);
     expect(searchObject.nodeType).toBe("artist");
+  });
+});
+
+describe("searchObjectForAttribute", () => {
+  it("builds a map size rule that the rule check accepts", () => {
+    const schema = {
+      nodeTypes: [{ label: "artist", attributes: ["name", "popularity"] }],
+      edgeTypes: [],
+    };
+    const searchObject = searchObjectForAttribute("artist", "popularity");
+    expect(searchObject.valid).toBe(true);
+    expect(searchObject.attributes[0].attributeSearch).toBe("popularity");
+    expect(validateSearchObject(searchObject, schema as never)).toBe(true);
   });
 });

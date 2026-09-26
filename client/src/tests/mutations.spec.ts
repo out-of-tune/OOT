@@ -7,11 +7,10 @@ const {
   CREATE_GRAPH,
   SET_RENDERER,
   ADD_TO_GRAPH,
-  DELETE_NODES_FROM_GRAPH,
-  SHOW_EDGES,
   START_RENDERER,
   ADD_NODE_RULE,
   UPDATE_NODE_RULESET,
+  DISPOSE_RENDERER,
 } = mutations;
 
 const getState = () => {
@@ -28,7 +27,6 @@ const getState = () => {
         data: {},
       },
       displayState: {
-        displayEdges: true,
         showTooltip: false,
       },
       renderState: {
@@ -278,49 +276,6 @@ describe("ADD_TO_GRAPH", () => {
 
     const actual = link.linkTypes.length;
     const expected = 2;
-
-    expect(actual).toBe(expected);
-  });
-});
-
-describe("DELETE_NODES_FROM_GRAPH", () => {
-  it("deletes all nodes with certain label", () => {
-    const state = getState();
-    const nodes = [
-      {
-        id: 1,
-        data: {
-          name: "bob",
-          label: "Artist",
-        },
-      },
-      {
-        id: 2,
-        data: {
-          name: "karl",
-          label: "Artist",
-        },
-      },
-      {
-        id: 3,
-        data: {
-          name: "Pop",
-          label: "Genre",
-        },
-      },
-    ];
-    CREATE_GRAPH(state);
-
-    ADD_TO_GRAPH(state, {
-      nodes,
-    });
-
-    DELETE_NODES_FROM_GRAPH(state, {
-      label: "Artist",
-    });
-
-    const actual = state.mainGraph.Graph.getNodesCount();
-    const expected = 1;
 
     expect(actual).toBe(expected);
   });
@@ -586,5 +541,23 @@ describe("UPDATE_NODE_RULESET", () => {
         ],
       },
     ]);
+  });
+});
+
+describe("DISPOSE_RENDERER", () => {
+  it("disposes the renderer and forgets it", () => {
+    const dispose = vi.fn();
+    const state = {
+      mainGraph: { renderState: { Renderer: { dispose }, layout: {} } },
+    };
+    DISPOSE_RENDERER(state);
+    expect(dispose).toHaveBeenCalled();
+    expect(state.mainGraph.renderState.Renderer).toBeNull();
+    expect(state.mainGraph.renderState.layout).toBeUndefined();
+  });
+
+  it("does nothing without a renderer, as during the first 3D load", () => {
+    const state = { mainGraph: { renderState: { Renderer: null } } };
+    expect(() => DISPOSE_RENDERER(state)).not.toThrow();
   });
 });

@@ -1,5 +1,5 @@
 import type { ActionTree, Commit, Dispatch } from "vuex";
-import { getNodePosition, getPinnedState } from "@/lib/graph";
+import { getNodePosition } from "@/lib/graph";
 import { startMultiSelect } from "@/lib/select";
 import type { GraphNode } from "@/types/graph";
 import type { Context, NodeRef, RootState } from "@/store/types";
@@ -139,10 +139,6 @@ export const actions = {
     size: { width: number; height: number },
   ) {
     commit("RESIZE_GRAPH", size);
-  },
-
-  changePinStatus({ commit, rootState }: Ctx, node: GraphNode) {
-    commit(getPinnedState(rootState, node) ? "UNPIN_NODE" : "PIN_NODE", node);
   },
 
   /** Connects the mouse events of the WebGL graph to the store. */

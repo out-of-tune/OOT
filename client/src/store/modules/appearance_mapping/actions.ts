@@ -223,15 +223,6 @@ export const actions = {
     if (rootState.appearance.highlight) dispatch("storeColors");
   },
 
-  setConfiguratedEdgeColor({ rootState, commit }: Ctx, link: GraphLink) {
-    const configuration =
-      rootState.configurations.appearanceConfiguration.edgeConfiguration.color;
-    commit("SET_EDGE_COLOR", {
-      link,
-      color: parseInt(configuredLinkColor(link, configuration), 16),
-    });
-  },
-
   /** Adds a color or size rule after it checks the search against the schema. */
   addRule(
     { commit, rootState, dispatch }: Ctx,

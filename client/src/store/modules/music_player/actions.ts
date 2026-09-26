@@ -65,10 +65,6 @@ export const actions = {
     }
   },
 
-  setCurrentSong({ commit }: Ctx, song: Song) {
-    commit("SET_CURRENT_SONG", song);
-  },
-
   insertInQueue(
     { commit }: Ctx,
     { song, position }: { song: Song; position: number },
@@ -171,7 +167,9 @@ export const actions = {
     }
     dispatch("setMessage", "Trying to play queue on Spotify");
     try {
-      await SpotifyService.play(rootState.authentication.accessToken, uris);
+      await SpotifyService.startPlayback(rootState.authentication.accessToken, {
+        uris,
+      });
       dispatch("setSuccess", "Playing the queue on Spotify");
     } catch (error) {
       dispatch("setError", new Error(spotifyMessage(error)));

@@ -333,3 +333,87 @@ describe("controls", () => {
     expect(state.deviceId).toBeNull();
   });
 });
+
+describe("connect and disconnect", () => {
+  it("drops a player that connects after a logout", async () => {
+    const { ctx, state, dispatch } = setup();
+    const player = fakePlayer();
+    let finish: () => void = () => undefined;
+    vi.mocked(createSpotifyPlayer).mockImplementation(
+      (_token, callbacks) =>
+        new Promise((resolve) => {
+          finish = () => {
+            callbacks.onReady("device-1");
+            resolve(player as never);
+          };
+        }),
+    );
+    const connecting = actions.connectSpotifyPlayer(ctx);
+    await actions.disconnectSpotifyPlayer(ctx);
+    finish();
+    await connecting;
+    expect(player.disconnect).toHaveBeenCalled();
+    expect(state.status).toBe("off");
+    expect(dispatch).not.toHaveBeenCalledWith("startRemotePolling");
+  });
+
+  it("gives up after an authentication error, so a later connect can try again", async () => {
+    const { ctx, state, dispatch } = setup();
+    dispatch.mockResolvedValue(undefined);
+    const player = fakePlayer();
+    vi.mocked(createSpotifyPlayer).mockImplementationOnce(
+      async (_token, callbacks) => {
+        callbacks.onError("authentication", "Invalid token scopes.");
+        return player as never;
+      },
+    );
+    await actions.connectSpotifyPlayer(ctx);
+    expect(state.status).toBe("unavailable");
+    expect(player.disconnect).toHaveBeenCalled();
+    expect(dispatch).toHaveBeenCalledWith("refreshToken");
+
+    vi.mocked(createSpotifyPlayer).mockResolvedValueOnce(fakePlayer() as never);
+    await actions.connectSpotifyPlayer(ctx);
+    expect(createSpotifyPlayer).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("position", () => {
+  it("keeps the position that was reached when another device pauses", () => {
+    vi.useFakeTimers();
+    const { state, commit } = setup();
+    state.track = { id: "t1", durationMs: 200000 } as never;
+    commit("SET_SPOTIFY_PLAYBACK", {
+      ...state,
+      paused: false,
+      positionMs: 10000,
+    });
+    vi.advanceTimersByTime(3000);
+    commit("SET_SPOTIFY_PAUSED", true);
+    expect(state.positionMs).toBe(13000);
+  });
+});
+
+describe("library graphs", () => {
+  it("keeps the graph when Spotify fails", async () => {
+    const { ctx, commit, dispatch } = setup();
+    vi.mocked(SpotifyService.getSavedTracks).mockRejectedValue({
+      response: { status: 500 },
+    });
+    await actions.loadLikedSongsGraph(ctx);
+    expect(commit).not.toHaveBeenCalledWith("CLEAR_GRAPH");
+    expect(dispatch).toHaveBeenCalledWith("setError", expect.any(Error));
+    expect(dispatch).not.toHaveBeenCalledWith("setInfo", expect.anything());
+  });
+
+  it("replaces the graph and fits it", async () => {
+    const { ctx, commit, dispatch } = setup();
+    vi.mocked(SpotifyService.getRecentlyPlayed).mockResolvedValue({
+      items: [{ track: { id: "s1", name: "Song" } }],
+    } as never);
+    await actions.loadRecentlyPlayedGraph(ctx);
+    expect(commit).toHaveBeenCalledWith("CLEAR_GRAPH");
+    expect(dispatch).toHaveBeenCalledWith("addToGraph", expect.anything());
+    expect(dispatch).toHaveBeenLastCalledWith("fitGraphToScreen");
+  });
+});

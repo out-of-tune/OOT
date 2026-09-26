@@ -202,16 +202,24 @@ export const createThreeView: ViewFactory = ({ graph, container }) => {
     links.delete(linkId);
   }
 
-  const forceGraph = new ForceGraph3D(host, { controlType: "orbit" })
-    .backgroundColor("#000000")
-    .showNavInfo(false)
-    .width(container.clientWidth)
-    .height(container.clientHeight)
-    .nodeLabel(() => "")
-    .nodeThreeObject((node) => (node as unknown as ViewNode).mesh)
-    .linkMaterial((link) => (link as unknown as ViewLink).material)
-    .linkWidth(0)
-    .d3VelocityDecay(VELOCITY_DECAY.running);
+  const forceGraph = (() => {
+    try {
+      return new ForceGraph3D(host, { controlType: "orbit" })
+        .backgroundColor("#000000")
+        .showNavInfo(false)
+        .width(container.clientWidth)
+        .height(container.clientHeight)
+        .nodeLabel(() => "")
+        .nodeThreeObject((node) => (node as unknown as ViewNode).mesh)
+        .linkMaterial((link) => (link as unknown as ViewLink).material)
+        .linkWidth(0)
+        .d3VelocityDecay(VELOCITY_DECAY.running);
+    } catch (error) {
+      // Without WebGL the engine throws. The 2D view then takes the container, so the host goes.
+      host.remove();
+      throw error;
+    }
+  })();
 
   // After a node drag, 3d-force-graph sends a fake touch "pointerup" to reset the orbit controls.
   // The controls then look for a touch pointer that never existed and throw. This replaces the fake
@@ -318,11 +326,16 @@ export const createThreeView: ViewFactory = ({ graph, container }) => {
   let placeNodeCallback: ((ui: NodeUI, position: Position) => void) | null =
     null;
   let frame = 0;
+  // The host rectangle of the current frame, so toScreen does not measure it for each node.
+  let frameRect: DOMRect | undefined;
   const onFrame = () => {
-    if (placeNodeCallback)
+    if (placeNodeCallback) {
+      frameRect = host.getBoundingClientRect();
       nodes.forEach((viewNode) =>
         placeNodeCallback?.(viewNode.ui, viewNode.ui.position),
       );
+      frameRect = undefined;
+    }
     frame = requestAnimationFrame(onFrame);
   };
   frame = requestAnimationFrame(onFrame);
@@ -346,7 +359,7 @@ export const createThreeView: ViewFactory = ({ graph, container }) => {
         position.y,
         position.z ?? 0,
       ).project(camera());
-      const rect = host.getBoundingClientRect();
+      const rect = frameRect ?? host.getBoundingClientRect();
       return {
         x: rect.left + ((projected.x + 1) / 2) * rect.width,
         y: rect.top + ((1 - projected.y) / 2) * rect.height,
@@ -420,13 +433,22 @@ export const createThreeView: ViewFactory = ({ graph, container }) => {
         .onNodeClick((node) =>
           handlers.click?.((node as unknown as ViewNode).node),
         )
-        .onNodeDrag((node) => {
-          const graphNode = (node as unknown as ViewNode).node;
+        .onNodeDrag((node, translate) => {
+          const viewNode = node as unknown as ViewNode;
           if (!dragging) {
             dragging = true;
-            handlers.mouseDown?.(graphNode);
+            // The engine has already moved the node by the first step. The mouse down
+            // handlers see the node where the drag started, as in the 2D view.
+            const moved = { x: viewNode.x, y: viewNode.y, z: viewNode.z };
+            Object.assign(viewNode, {
+              x: (moved.x ?? 0) - translate.x,
+              y: (moved.y ?? 0) - translate.y,
+              z: (moved.z ?? 0) - translate.z,
+            });
+            handlers.mouseDown?.(viewNode.node);
+            Object.assign(viewNode, moved);
           }
-          handlers.mouseMove?.(graphNode);
+          handlers.mouseMove?.(viewNode.node);
         })
         .onNodeDragEnd((node) => {
           dragging = false;

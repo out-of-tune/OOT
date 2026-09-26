@@ -1,9 +1,9 @@
-import type { ActionTree, Commit } from "vuex";
-import type { NodeUI, ScreenPoint } from "@/lib/view/contract";
+import type { ActionTree } from "vuex";
+import type { GraphRenderer, NodeUI, ScreenPoint } from "@/lib/view/contract";
 import { getAllNodes } from "@/lib/graph";
-import type { GraphNode, Position } from "@/types/graph";
+import type { GraphNode, NodeId, Position } from "@/types/graph";
 import type { Context, NodeRef, RootState } from "@/store/types";
-import type { GraphCameraState } from "./index";
+import type { GraphCameraState, NodeLabel } from "./index";
 import { toHexColor } from "@/lib/color";
 
 type Ctx = Context<GraphCameraState>;
@@ -35,28 +35,37 @@ function generateColorObject(ui: NodeUI) {
   };
 }
 
-export function placeNodeLabel(
-  position: Position,
+/** The label of the node at the position, or undefined when the node is off screen. */
+export function nodeLabelAt(
+  renderer: GraphRenderer,
   ui: NodeUI,
-  rootState: RootState,
-  commit: Commit,
-) {
-  const renderer = rootState.mainGraph.renderState.Renderer;
-  if (!renderer) return;
+  position: Position,
+): NodeLabel | undefined {
   const point = renderer.getGraphics().toScreen(position);
-  if (isOnScreen(point)) {
-    commit("ADD_NODE_LABEL", {
-      coordinates: { x: point.x, y: point.y },
-      colors: generateColorObject(ui),
-      id: ui.node.id,
-      data: ui.node.data,
-      dataKey: "name",
-    });
-  } else {
-    const nodeLabel = rootState.graph_camera.nodeLabels[ui.node.id];
-    if (nodeLabel) commit("REMOVE_NODE_LABEL", nodeLabel);
-  }
+  if (!isOnScreen(point)) return undefined;
+  return {
+    coordinates: { x: point.x, y: point.y },
+    colors: generateColorObject(ui),
+    id: ui.node.id,
+    data: ui.node.data,
+    dataKey: "name",
+  };
 }
+
+function sameLabel(a: NodeLabel | undefined, b: NodeLabel | undefined) {
+  if (!a || !b) return a === b;
+  return (
+    a.coordinates.x === b.coordinates.x &&
+    a.coordinates.y === b.coordinates.y &&
+    a.colors.textColor === b.colors.textColor &&
+    a.colors.backgroundColor === b.colors.backgroundColor &&
+    a.data === b.data &&
+    a.dataKey === b.dataKey
+  );
+}
+
+/** The label pass that displayNodeLabels started last. An older pass stops committing. */
+let activeLabelPass: object | undefined;
 
 export const actions = {
   moveToNode({ commit, rootState }: Ctx, node: NodeRef) {
@@ -84,16 +93,45 @@ export const actions = {
     }
   },
 
-  /** Draws a text label over each node on screen, and updates it while the graph moves. */
+  /**
+   * Draws a text label over each node on screen, and updates it while the graph moves.
+   * The renderer places each node on each frame. Only changed labels go to the store,
+   * in one commit per frame.
+   */
   displayNodeLabels({ rootState, commit }: Ctx) {
-    rootState.mainGraph.renderState.Renderer?.getGraphics().placeNode(
-      (ui, position) => {
-        placeNodeLabel(position, ui, rootState, commit);
-      },
-    );
+    const renderer = rootState.mainGraph.renderState.Renderer;
+    if (!renderer) return;
+    const pass = {};
+    activeLabelPass = pass;
+    let changes: Map<NodeId, NodeLabel | undefined> | undefined;
+    const flush = () => {
+      const pending = changes;
+      changes = undefined;
+      if (!pending || activeLabelPass !== pass) return;
+      const labels = { ...rootState.graph_camera.nodeLabels };
+      pending.forEach((label, id) => {
+        if (label) labels[id] = label;
+        else delete labels[id];
+      });
+      commit("SET_NODE_LABELS", labels);
+    };
+    renderer.getGraphics().placeNode((ui, position) => {
+      const id = ui.node.id;
+      const label = nodeLabelAt(renderer, ui, position);
+      const current = changes?.has(id)
+        ? changes.get(id)
+        : rootState.graph_camera.nodeLabels[id];
+      if (sameLabel(current, label)) return;
+      if (!changes) {
+        changes = new Map();
+        queueMicrotask(flush);
+      }
+      changes.set(id, label);
+    });
   },
 
   removeNodeLabels({ rootState, dispatch }: Ctx) {
+    activeLabelPass = undefined;
     rootState.mainGraph.renderState.Renderer?.getGraphics().placeNode(() => {});
     dispatch("setNodeLabels", {});
   },

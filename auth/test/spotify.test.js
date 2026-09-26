@@ -2,6 +2,7 @@ const { after, before, describe, it } = require('node:test')
 const assert = require('node:assert/strict')
 
 process.env.VITE_PROXY_URI = 'http://oot.test'
+process.env.AUTH_CORS_ORIGINS = 'http://localhost:8080/'
 process.env.SPOTIFY_CLIENT_ID = 'client-id'
 process.env.SPOTIFY_CLIENT_SECRET = 'client-secret'
 process.env.SPOTIFY_SCOPE = 'user-read-private'
@@ -115,5 +116,25 @@ describe('Spotify login', () => {
         const response = await fetch(`${base}/logout`, { method: 'POST' })
         assert.equal(response.status, 204)
         assert.match(response.headers.getSetCookie().join('\n'), /oot_refresh=;/)
+    })
+})
+
+describe('CORS', () => {
+    const preflight = origin => fetch(`${base}/refresh`, {
+        method: 'OPTIONS',
+        headers: { origin, 'access-control-request-method': 'GET' }
+    })
+
+    it('lets the app and the configured origins send cookies', async () => {
+        for (const origin of ['http://oot.test', 'http://localhost:8080']) {
+            const response = await preflight(origin)
+            assert.equal(response.headers.get('access-control-allow-origin'), origin)
+            assert.equal(response.headers.get('access-control-allow-credentials'), 'true')
+        }
+    })
+
+    it('does not allow other origins', async () => {
+        const response = await preflight('http://evil.test')
+        assert.equal(response.headers.get('access-control-allow-origin'), null)
     })
 })

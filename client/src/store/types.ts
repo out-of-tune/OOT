@@ -38,7 +38,6 @@ export interface MainGraphState {
   currentNode: NodeRef;
   hoveredNode: NodeRef;
   displayState: {
-    displayEdges: boolean;
     showTooltip: boolean;
   };
   renderState: {

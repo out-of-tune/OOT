@@ -49,6 +49,13 @@ services:
     build:
       context: ./services/share
     env_file: .env
+    environment:
+      - SHARE_LOC=/usr/src/app/data
+    volumes:
+      - share_data:/usr/src/app/data
+
+volumes:
+  share_data:
 
 networks:
   default:

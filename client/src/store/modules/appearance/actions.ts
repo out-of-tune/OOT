@@ -36,14 +36,6 @@ export const actions = {
     });
   },
 
-  toggleEdgeVisibility({ rootState, commit }: Ctx) {
-    commit(
-      rootState.mainGraph.displayState.displayEdges
-        ? "HIDE_EDGES"
-        : "SHOW_EDGES",
-    );
-  },
-
   switchRendering({ rootState, commit }: Ctx) {
     commit(
       rootState.mainGraph.renderState.isRendered

@@ -17,7 +17,6 @@ import expandActions from "@/store/modules/expand/actions";
 import feedbackActions from "@/store/modules/feedback/actions";
 import musicPlayerMutations from "@/store/modules/music_player/mutations";
 import playlistActions from "@/store/modules/playlists/actions";
-import search from "@/store/modules/search";
 import searchActions from "@/store/modules/search/actions";
 import snackbarActions from "@/store/modules/snackbar/actions";
 import snackbarMutations from "@/store/modules/snackbar/mutations";
@@ -28,12 +27,6 @@ vi.mock("axios");
 afterEach(() => {
   vi.restoreAllMocks();
   vi.useRealTimers();
-});
-
-describe("3. search module registers its mutations", () => {
-  it("has SET_ADVANCED_OPEN", () => {
-    expect(search.mutations).toHaveProperty("SET_ADVANCED_OPEN");
-  });
 });
 
 describe("4. layout configuration mutations exist", () => {
@@ -94,12 +87,12 @@ describe("14. IndexedDbService", () => {
   });
 });
 
-describe("15. SpotifyService.putToApi", () => {
+describe("15. SpotifyService player commands", () => {
   it("resolves when the request succeeds", async () => {
-    vi.mocked(axios.put).mockResolvedValue({ data: "" });
+    vi.mocked(axios.request).mockResolvedValue({ status: 204, data: "" });
     await expect(
-      SpotifyService.play("token", ["spotify:track:1"]),
-    ).resolves.toBe("");
+      SpotifyService.startPlayback("token", { uris: ["spotify:track:1"] }),
+    ).resolves.toBeNull();
   });
 });
 

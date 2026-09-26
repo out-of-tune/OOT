@@ -7,9 +7,6 @@ export const actions = {
   deleteGraph({ commit }: Ctx) {
     commit("CLEAR_GRAPH");
   },
-  deleteNodes({ commit }: Ctx, label: string) {
-    commit("DELETE_NODES_FROM_GRAPH", { label });
-  },
 } satisfies ActionTree<Record<string, never>, RootState>;
 
 export default actions;

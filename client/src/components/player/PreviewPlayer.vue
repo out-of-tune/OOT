@@ -138,7 +138,7 @@ function seek(value: number) {
       </div>
     </div>
 
-    <div class="hidden items-center gap-2 text-fg-muted sm:flex sm:w-36">
+    <div class="flex items-center gap-2 text-fg-muted sm:w-36">
       <VolumeX v-if="volume === 0" class="size-4 shrink-0" />
       <Volume1 v-else-if="volume < 50" class="size-4 shrink-0" />
       <Volume2 v-else class="size-4 shrink-0" />

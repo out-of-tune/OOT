@@ -15,6 +15,8 @@ class AuthenticationService {
   private readonly http = axios.create({
     baseURL: `${import.meta.env.VITE_PROXY_URI}/auth/oauth2/spotify`,
     timeout: 5000,
+    // The page may run on another origin than the auth service, for example the Vite dev server.
+    withCredentials: true,
     headers: { "Content-Type": "application/json" },
   });
 

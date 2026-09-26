@@ -2,12 +2,10 @@ import { actions, testActions } from "../actions";
 import Viva from "vivagraphjs";
 
 const {
-  removePinnedStateFromNodeType,
   setConnectedNodesNearby,
   applyNodeCoordinateSystemLine,
   applyCoordinateSystems,
   applyNodeCoordinateSystem,
-  setCoordinateSystemConfiguration,
   unpinAllNodes,
   applyNodeCoordinateSystemMap,
 } = actions;
@@ -102,82 +100,6 @@ describe("unpinAllNodes", () => {
       commit,
     });
     expect(commit).toHaveBeenCalledTimes(5);
-  });
-});
-describe("removePinnedStateFromNodeType", () => {
-  let commit;
-  let rootState;
-  beforeEach(() => {
-    commit = vi.fn();
-    rootState = {
-      mainGraph: {
-        graphContainer: {},
-        Graph: Viva.Graph.graph(),
-      },
-    };
-    const nodes = [
-      {
-        id: "Werk/1",
-        data: {
-          Location: "1020",
-          label: "Werk",
-        },
-      },
-      {
-        id: "Werk/2",
-        data: {
-          Location: "3333",
-          label: "Werk",
-        },
-      },
-      {
-        id: "Werk/3",
-        data: {
-          Location: "1010",
-          label: "Werk",
-        },
-      },
-      {
-        id: "Material/2",
-        data: {
-          name: "karl",
-          label: "Material",
-        },
-      },
-      {
-        id: "Material/1",
-        data: {
-          name: "franz",
-          label: "Material",
-        },
-      },
-    ];
-    const edges = [
-      {
-        fromId: "Werk/1",
-        toId: "Material/2",
-      },
-      {
-        fromId: "Werk/1",
-        toId: "Material/1",
-      },
-    ];
-    nodes.forEach((node) => {
-      rootState.mainGraph.Graph.addNode(node.id, node.data);
-    });
-    edges.forEach((edge) => {
-      const lonk = rootState.mainGraph.Graph.addLink(edge.fromId, edge.toId);
-    });
-  });
-  it("calls UNPIN_NODE for Each node with the corresponding label", () => {
-    removePinnedStateFromNodeType(
-      {
-        rootState,
-        commit,
-      },
-      "Werk",
-    );
-    expect(commit).toHaveBeenCalledTimes(3);
   });
 });
 describe("setConnectedNodesNearby", () => {

@@ -4,7 +4,11 @@ import { PerspectiveCamera, Vector3 } from "three";
 import { createThreeView, fitCamera } from "../threeView";
 
 // A stand-in for 3d-force-graph: it records the calls and needs no WebGL.
-const engine = vi.hoisted(() => ({ instances: [] as FakeForceGraph[] }));
+const engine = vi.hoisted(() => ({
+  instances: [] as FakeForceGraph[],
+  /** Makes the next constructor throw, as the real one does without WebGL. */
+  failNext: false,
+}));
 
 interface FakeForceGraph {
   data: { nodes: Record<string, unknown>[]; links: Record<string, unknown>[] };
@@ -24,6 +28,10 @@ vi.mock("3d-force-graph", () => {
     cameraObject = new PerspectiveCamera(75, 1, 0.1, 10000);
     controlsObject = { target: new Vector3(), addEventListener: vi.fn() };
     constructor() {
+      if (engine.failNext) {
+        engine.failNext = false;
+        throw new Error("WebGL is not available");
+      }
       this.cameraObject.position.set(0, 0, 400);
       // The real engine updates the camera matrices on every frame.
       this.cameraObject.updateMatrixWorld();
@@ -214,11 +222,12 @@ describe("threeView", () => {
       .mouseMove((node) => calls.push(`move ${node.id}`))
       .mouseUp((node) => calls.push(`up ${node.id}`));
     const viewNode = { node: graphNode };
+    const step = { x: 0, y: 0, z: 0 };
     fake.handlers.hover(viewNode, null);
     fake.handlers.hover(null, viewNode);
     fake.handlers.click(viewNode);
-    fake.handlers.drag(viewNode);
-    fake.handlers.drag(viewNode);
+    fake.handlers.drag(viewNode, step);
+    fake.handlers.drag(viewNode, step);
     fake.handlers.dragEnd(viewNode);
     expect(calls).toEqual([
       "enter a",
@@ -229,6 +238,47 @@ describe("threeView", () => {
       "move a",
       "up a",
     ]);
+  });
+
+  it("reports the mouse down at the position where the drag started", async () => {
+    const { graph, view, fake } = setup();
+    const graphNode = graph.addNode("a", { label: "genre" });
+    view.getLayout().setNodePosition("a", 1, 2, 3);
+    await flush();
+    const positions: string[] = [];
+    const record = (event: string) => () => {
+      const { x, y, z } = view.getLayout().getNodePosition("a");
+      positions.push(`${event} ${x},${y},${z}`);
+    };
+    view
+      .createInputEvents()
+      .mouseDown(record("down"))
+      .mouseMove(record("move"));
+    const viewNode = fake.data.nodes.find((node) => node.id === "a");
+    if (!viewNode) throw new Error("The engine has no node a");
+    // The engine moves the node before it reports the drag.
+    Object.assign(viewNode, { x: 11, y: 22, z: 33 });
+    fake.handlers.drag(viewNode, { x: 10, y: 20, z: 30 });
+    expect(graphNode).toBe(viewNode.node);
+    expect(positions).toEqual(["down 1,2,3", "move 11,22,33"]);
+  });
+
+  it("removes its element when the engine cannot start", () => {
+    const container = document.createElement("div");
+    engine.failNext = true;
+    expect(() =>
+      createThreeView({
+        graph: createGraph(),
+        container,
+        layoutOptions: {
+          springLength: 5,
+          springCoeff: 0.00005,
+          dragCoeff: 0.01,
+          gravity: -10.2,
+        },
+      }),
+    ).toThrow("WebGL");
+    expect(container.children).toHaveLength(0);
   });
 
   it("stops listening to the graph and removes its element on dispose", async () => {

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { getAllNodes } from "@/lib/graph";
-import { actions, placeNodeLabel } from "../actions";
+import { actions } from "../actions";
 vi.mock("@/lib/graph");
 
 const {
@@ -8,6 +8,7 @@ const {
   fitGraphToScreen,
   fitGraphToSelection,
   fitGraphToNodes,
+  displayNodeLabels,
   removeNodeLabels,
   setNodeLabels,
 } = actions;
@@ -137,25 +138,33 @@ describe("setNodeLabels", () => {
   });
 });
 
-describe("placeNodeLabels", () => {
+describe("displayNodeLabels", () => {
   let commit;
   let rootState;
+  let placeNode;
   const toScreen = vi.fn();
+  const flush = () => Promise.resolve();
+  const ui = (id, color = 0xffffffff) => ({
+    node: { id, data: { name: id } },
+    color,
+  });
+  // Calls the installed callback once per node, like one renderer frame.
+  const frame = (...uis) =>
+    uis.forEach((nodeUI) => placeNode.mock.calls.at(-1)[0](nodeUI, {}));
   beforeEach(() => {
-    commit = vi.fn();
+    placeNode = vi.fn();
     toScreen.mockReset();
     rootState = {
       mainGraph: {
         renderState: {
-          Renderer: {
-            getGraphics: () => ({ toScreen }),
-          },
+          Renderer: { getGraphics: () => ({ toScreen, placeNode }) },
         },
       },
-      graph_camera: {
-        nodeLabels: {},
-      },
+      graph_camera: { nodeLabels: {} },
     };
+    commit = vi.fn((type, labels) => {
+      rootState.graph_camera.nodeLabels = labels;
+    });
     Object.defineProperty(window, "innerWidth", {
       value: 1000,
       configurable: true,
@@ -164,53 +173,53 @@ describe("placeNodeLabels", () => {
       value: 1000,
       configurable: true,
     });
+    displayNodeLabels({ rootState, commit });
   });
-  it("doesn't do anything when node label doesn't exist", () => {
-    toScreen.mockReturnValue({ x: -50, y: 20, visible: true });
-    const ui = { node: { id: "Genre/123" } };
-    placeNodeLabel({ x: 1, y: 1 }, ui, rootState, commit);
-    expect(commit).not.toHaveBeenCalled();
-  });
-  it("deletes nodeLabel when the node leaves the screen", () => {
-    toScreen.mockReturnValue({ x: 20, y: 20, visible: false });
-    rootState.graph_camera.nodeLabels["Genre/123"] = {
-      id: "Genre/123",
-      data: "someData",
-    };
-    const ui = { node: { id: "Genre/123" } };
-    placeNodeLabel({ x: 20, y: 20 }, ui, rootState, commit);
-    expect(commit).toHaveBeenCalledWith("REMOVE_NODE_LABEL", {
-      id: "Genre/123",
-      data: "someData",
-    });
-  });
-  it("adds label when node is on screen", () => {
+
+  it("commits the labels of one frame at once", async () => {
     toScreen.mockReturnValue({ x: 150, y: 150, visible: true });
-    const ui = {
-      node: {
-        id: "Genre/125",
-        data: {
-          name: "someData",
-        },
+    frame(ui("Genre/1"), ui("Genre/2"));
+    await flush();
+    expect(commit).toHaveBeenCalledTimes(1);
+    expect(commit).toHaveBeenCalledWith("SET_NODE_LABELS", {
+      "Genre/1": {
+        colors: { backgroundColor: "#ffffffff", textColor: "black" },
+        coordinates: { x: 150, y: 150 },
+        dataKey: "name",
+        id: "Genre/1",
+        data: { name: "Genre/1" },
       },
-      color: Number.parseInt("ffffffff", 16),
-    };
-    placeNodeLabel({ x: 200, y: 200 }, ui, rootState, commit);
-    expect(commit).toHaveBeenCalledWith("ADD_NODE_LABEL", {
-      colors: {
-        backgroundColor: "#ffffffff",
-        textColor: "black",
-      },
-      coordinates: {
-        x: 150,
-        y: 150,
-      },
-      dataKey: "name",
-      id: "Genre/125",
-      data: {
-        name: "someData",
-      },
+      "Genre/2": expect.objectContaining({ id: "Genre/2" }),
     });
+  });
+
+  it("commits nothing while no label changes", async () => {
+    toScreen.mockReturnValue({ x: 150, y: 150, visible: true });
+    const still = ui("Genre/1");
+    frame(still);
+    await flush();
+    frame(still);
+    frame(still);
+    await flush();
+    expect(commit).toHaveBeenCalledTimes(1);
+  });
+
+  it("removes the label when the node leaves the screen", async () => {
+    toScreen.mockReturnValue({ x: 150, y: 150, visible: true });
+    frame(ui("Genre/1"), ui("Genre/2"));
+    await flush();
+    toScreen.mockReturnValue({ x: 150, y: 150, visible: false });
+    frame(ui("Genre/1"));
+    await flush();
+    expect(Object.keys(rootState.graph_camera.nodeLabels)).toEqual(["Genre/2"]);
+  });
+
+  it("does not add labels back after removeNodeLabels", async () => {
+    toScreen.mockReturnValue({ x: 150, y: 150, visible: true });
+    frame(ui("Genre/1"));
+    removeNodeLabels({ rootState, dispatch: vi.fn() });
+    await flush();
+    expect(commit).not.toHaveBeenCalled();
   });
 });
 

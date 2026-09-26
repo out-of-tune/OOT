@@ -42,6 +42,13 @@ function getConnectedNodesAndLinksToChange(
       ...entry.link,
       linkTypes: remainingTypes(entry, edgeTypesToRemove),
     })),
+    // History records what went away, so undo adds these types back and redo removes only them.
+    typesRemovedFromKept: kept.map((entry) => ({
+      ...entry.link,
+      linkTypes: entry.link.linkTypes.filter((linkType) =>
+        edgeTypesToRemove.includes(linkType),
+      ),
+    })),
     // A neighbor goes away too when the removed link was its only link.
     nodesToRemove: removed
       .filter(
@@ -56,15 +63,19 @@ function getConnectedNodesAndLinksToChange(
 export const actions = {
   /** Removes the configured edges of a node, and the neighbors that have no other link. */
   collapseAction({ commit, rootState, dispatch }: Ctx, node: GraphNode) {
-    const { linksToUpdate, linksToRemove, nodesToRemove } =
-      getConnectedNodesAndLinksToChange(rootState, node);
+    const {
+      linksToUpdate,
+      linksToRemove,
+      nodesToRemove,
+      typesRemovedFromKept,
+    } = getConnectedNodesAndLinksToChange(rootState, node);
     linksToUpdate.forEach((link) => commit("UPDATE_LINKTYPES", link));
     linksToRemove.forEach((link) => commit("REMOVE_LINK", link));
     nodesToRemove.forEach((removedNode) => commit("REMOVE_NODE", removedNode));
     dispatch("addChange", {
       data: {
         nodes: nodesToRemove,
-        links: [...linksToRemove, ...linksToUpdate],
+        links: [...linksToRemove, ...typesRemovedFromKept],
       },
       type: "remove",
     });

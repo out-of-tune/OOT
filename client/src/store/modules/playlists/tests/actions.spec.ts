@@ -217,3 +217,22 @@ describe("loadPlaylist", () => {
     );
   });
 });
+
+describe("loadPlaylist failure", () => {
+  it("keeps the graph and reports the error", async () => {
+    const dispatch = vi.fn();
+    const commit = vi.fn();
+    SpotifyService.getSongsFromPlaylist = vi
+      .fn()
+      .mockRejectedValue({ response: { status: 404 } });
+    await loadPlaylist(
+      { dispatch, commit, rootState: { authentication: { accessToken: "t" } } },
+      { id: "p1", name: "Mix" },
+    );
+    expect(commit).not.toHaveBeenCalledWith("CLEAR_GRAPH");
+    expect(dispatch).toHaveBeenCalledWith(
+      "setError",
+      new Error("The playlist Mix could not be loaded (404)"),
+    );
+  });
+});

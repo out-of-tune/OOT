@@ -2,7 +2,6 @@ import { mutations } from "../mutations";
 const {
   SET_SELECTED_NODES,
   SET_SELECTION_MODAL_STATE,
-  SET_SELECTED_INDEX,
   SET_TEMPORARY_SELECTED,
 } = mutations;
 
@@ -29,19 +28,6 @@ describe("SET_SELECTION_MODAL_STATE", () => {
   it("sets modalOpen", () => {
     SET_SELECTION_MODAL_STATE(state, true);
     expect(state.modalOpen).toEqual(true);
-  });
-});
-
-describe("SET_SELECTED_INDEX", () => {
-  let state;
-  beforeEach(() => {
-    state = {
-      selectedNodeIndex: 0,
-    };
-  });
-  it("sets selected index", () => {
-    SET_SELECTED_INDEX(state, 1);
-    expect(state.selectedNodeIndex).toEqual(1);
   });
 });
 

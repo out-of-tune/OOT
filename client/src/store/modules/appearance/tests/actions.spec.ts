@@ -10,7 +10,6 @@ import Viva from "vivagraphjs";
 
 const {
   clusterNodes,
-  toggleEdgeVisibility,
   switchRendering,
   rerenderGraph,
   addPendingRequest,
@@ -24,41 +23,6 @@ const {
 } = actions;
 
 //MISSING cluster nodes
-
-describe("toggleEdgeVisibility", () => {
-  it("calls the hide edges function when displayEdges is true", () => {
-    const commit = vi.fn();
-
-    const rootState = {
-      mainGraph: {
-        displayState: {
-          displayEdges: true,
-        },
-      },
-    };
-    toggleEdgeVisibility({
-      rootState,
-      commit,
-    });
-    expect(commit).toHaveBeenCalledWith("HIDE_EDGES");
-  });
-  it("calls the show edges function when displayEdges is false", () => {
-    const commit = vi.fn();
-
-    const rootState = {
-      mainGraph: {
-        displayState: {
-          displayEdges: false,
-        },
-      },
-    };
-    toggleEdgeVisibility({
-      rootState,
-      commit,
-    });
-    expect(commit).toHaveBeenCalledWith("SHOW_EDGES");
-  });
-});
 
 describe("switchRendering", () => {
   it("calls the pause rendering mutation when isRendered is true", () => {

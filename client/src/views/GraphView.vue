@@ -119,6 +119,7 @@ const LAYOUT_MUTATIONS = [
 ];
 
 let unsubscribe: (() => void) | undefined;
+let unmounted = false;
 
 onMounted(async () => {
   if (!container.value) return;
@@ -150,6 +151,7 @@ onMounted(async () => {
   });
 
   await store.dispatch("initGraph");
+  if (unmounted) return;
   graphReady.value = true;
   const graph = store.state.mainGraph.Graph;
   graph.on("changed", () => (nodeCount.value = graph.getNodesCount()));
@@ -165,9 +167,10 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
+  unmounted = true;
   window.removeEventListener("resize", onResize);
   unsubscribe?.();
-  store.commit("DISPOSE_RENDERER");
+  store.dispatch("disposeGraph");
 });
 </script>
 

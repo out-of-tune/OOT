@@ -52,6 +52,12 @@ function buildRenderer(
   }
 }
 
+/** A new renderer runs its layout. This pauses it again when the user had paused the layout. */
+function keepPaused(commit: Commit, rootState: RootState | undefined) {
+  if (rootState && !rootState.mainGraph.renderState.isRendered)
+    commit("PAUSE_RENDERING");
+}
+
 export const actions = {
   setGraphContainer({ commit }: Ctx, graphContainer: HTMLElement) {
     commit("SET_GRAPHCONTAINER", graphContainer);
@@ -59,15 +65,25 @@ export const actions = {
 
   async initGraph({ commit, dispatch, rootState }: Ctx) {
     commit("CREATE_GRAPH");
+    const container = rootState?.mainGraph.graphContainer;
     const requested = rootState?.viewMode ?? "2d";
     // The 2D view builds synchronously. Only the 3D view waits for its chunk.
     const factory =
       requested === "2d" ? undefined : await loadFactory(dispatch, requested);
+    // The graph view closed while the chunk loaded.
+    if (rootState && rootState.mainGraph.graphContainer !== container) return;
     const running = buildRenderer(commit, dispatch, factory);
     if (rootState && running !== rootState.viewMode)
       commit("SET_VIEW_MODE", running);
     dispatch("initEvents");
     commit("START_RENDERER");
+    keepPaused(commit, rootState);
+  },
+
+  /** Stops the renderer and forgets the container, when the graph view closes. */
+  disposeGraph({ commit }: Ctx) {
+    commit("DISPOSE_RENDERER");
+    commit("SET_GRAPHCONTAINER", null);
   },
 
   /** Switches between the 2D and the 3D view. The nodes keep their positions and pins. */
@@ -99,6 +115,7 @@ export const actions = {
     commit("SET_VIEW_MODE", running);
     dispatch("initEvents");
     commit("START_RENDERER");
+    keepPaused(commit, rootState);
     dispatch("applyAllConfigurations");
     const selected = rootState.selection.selectedNodes;
     if (selected.length > 0) dispatch("updateSelectionUI", selected);

@@ -2,6 +2,7 @@ import type { MutationTree } from "vuex";
 import type { RepeatState, SpotifyDevice } from "@/types/spotify";
 import {
   initialSpotifyPlayerState,
+  playbackPosition,
   type NowPlaying,
   type SpotifyPlayerState,
   type SpotifyPlayerStatus,
@@ -28,6 +29,7 @@ export const mutations = {
     Object.assign(state, update, { positionAt: Date.now() });
   },
   SET_SPOTIFY_PAUSED(state, paused: boolean) {
+    state.positionMs = playbackPosition(state);
     state.paused = paused;
     state.positionAt = Date.now();
   },

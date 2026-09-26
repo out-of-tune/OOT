@@ -39,7 +39,6 @@ const {
   globalMouseUpFunctions,
   keyUpFunctions,
   keyDownFunctions,
-  changePinStatus,
   initEvents,
   resizeGraphContainer,
   initSelectionEvents,
@@ -400,44 +399,6 @@ describe("mouseClickFunctionality", () => {
       clickedNode,
     );
     expect(dispatch).not.toHaveBeenCalledWith("songAction", clickedNode);
-  });
-});
-describe("changePinStatus", () => {
-  let commit;
-  let rootState;
-  beforeEach(() => {
-    commit = vi.fn();
-    rootState = {
-      mainGraph: {
-        renderState: {
-          layout: {
-            isNodePinned: vi.fn(),
-          },
-        },
-      },
-    };
-  });
-  it("calls PIN_NODE when a node is unpinned", () => {
-    getPinnedState.mockReturnValue(false);
-    changePinStatus(
-      { commit, rootState },
-      { id: "Werk/1", data: { label: "Werk" } },
-    );
-    expect(commit).toHaveBeenCalledWith("PIN_NODE", {
-      id: "Werk/1",
-      data: { label: "Werk" },
-    });
-  });
-  it("calls UNPIN_NODE when a node is pinned", () => {
-    getPinnedState.mockReturnValue(true);
-    changePinStatus(
-      { commit, rootState },
-      { id: "Werk/1", data: { label: "Werk" } },
-    );
-    expect(commit).toHaveBeenCalledWith("UNPIN_NODE", {
-      id: "Werk/1",
-      data: { label: "Werk" },
-    });
   });
 });
 describe("keyUpFunctions", () => {

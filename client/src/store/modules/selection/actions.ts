@@ -174,36 +174,6 @@ export const actions = {
     commit("SET_SELECTION_MODAL_STATE", open ?? !state.modalOpen);
   },
 
-  moveToNextNode({ dispatch, commit, state }: Ctx) {
-    if (state.selectedNodeIndex < state.selectedNodes.length - 1) {
-      dispatch("moveToNode", state.selectedNodes[state.selectedNodeIndex + 1]);
-      commit("SET_SELECTED_INDEX", state.selectedNodeIndex + 1);
-    } else {
-      dispatch("moveToFirstNode");
-    }
-  },
-
-  moveToPreviousNode({ dispatch, commit, state }: Ctx) {
-    if (state.selectedNodeIndex > 0) {
-      dispatch("moveToNode", state.selectedNodes[state.selectedNodeIndex - 1]);
-      commit("SET_SELECTED_INDEX", state.selectedNodeIndex - 1);
-    } else {
-      dispatch("moveToLastNode");
-    }
-  },
-
-  moveToFirstNode({ dispatch, commit, state }: Ctx) {
-    if (state.selectedNodes.length === 0) return;
-    dispatch("moveToNode", state.selectedNodes[0]);
-    commit("SET_SELECTED_INDEX", 0);
-  },
-
-  moveToLastNode({ dispatch, commit, state }: Ctx) {
-    if (state.selectedNodes.length === 0) return;
-    dispatch("moveToNode", state.selectedNodes[state.selectedNodes.length - 1]);
-    commit("SET_SELECTED_INDEX", state.selectedNodes.length - 1);
-  },
-
   updateSelectionUI({ dispatch }: Ctx, nodes: GraphNode[]) {
     dispatch("markNodes", nodes);
     dispatch("setEdgesTransparent");

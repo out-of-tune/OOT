@@ -5,7 +5,6 @@ vi.mock("@/services/SpotifyService");
 
 const {
   getSongSamples,
-  setCurrentSong,
   addToQueue,
   playNextInQueue,
   playPreviousInQueue,
@@ -66,17 +65,6 @@ describe("getSongSamples", () => {
     });
     await getSongSamples({ commit, rootState, dispatch }, node);
     expect(SpotifyService.getSongsFromAlbum).toHaveBeenCalled();
-  });
-});
-describe("setCurrentSong", () => {
-  let commit;
-  beforeEach(() => {
-    commit = vi.fn();
-  });
-  it("commits SET_CURRENT_SONG", () => {
-    const song = { id: "12" };
-    setCurrentSong({ commit }, song);
-    expect(commit).toHaveBeenCalledWith("SET_CURRENT_SONG", song);
   });
 });
 describe("insertInQueue", () => {

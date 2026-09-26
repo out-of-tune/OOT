@@ -485,7 +485,7 @@ function scrollToSection(id: string) {
         </p>
         <p>
           In the center are the controls: You can pause, play, skip to the next
-          song in the <a href="queue">queue</a> or change the progress of the
+          song in the <a href="#queue">queue</a> or change the progress of the
           song.
         </p>
         <p>
@@ -580,7 +580,7 @@ function scrollToSection(id: string) {
           You can do several things with selected nodes:
           <ul>
             <li>
-              <a href="expandcollapse">Expand and collapse</a> all of them
+              <a href="#expandcollapse">Expand and collapse</a> all of them
             </li>
             <li>Pin and unpin them</li>
             <li>Sort them</li>

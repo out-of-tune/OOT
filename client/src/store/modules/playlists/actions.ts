@@ -1,10 +1,11 @@
-import type { ActionTree, Dispatch } from "vuex";
+import type { ActionTree, Commit, Dispatch } from "vuex";
 import SpotifyService from "@/services/SpotifyService";
 import type { GraphItems, NodeInput } from "@/types/graph";
 import type { SpotifyPlaylist, SpotifyTrack } from "@/types/spotify";
 import type { Context, RootState } from "@/store/types";
 import type { PlaylistsState } from "./index";
 import { nodeFromSpotify } from "@/lib/spotifyNode";
+import { statusOf } from "@/lib/token";
 
 type Ctx = Context<PlaylistsState>;
 
@@ -43,6 +44,27 @@ export async function addSongsWithNeighbors(
     nodes: nodesOf(artists).filter((node) => node.data.label === "artist"),
     expandConfiguration: [{ nodeType: "artist", edges: ["Artist_to_Genre"] }],
   });
+}
+
+/**
+ * Replaces the graph with the nodes that `add` builds from `items`. The graph stays when
+ * the items could not be loaded (`undefined`) or there are none.
+ */
+export async function replaceGraphWith<T>(
+  { commit, dispatch }: { commit: Commit; dispatch: Dispatch },
+  items: T[] | undefined,
+  messages: { loading: string; empty: string },
+  add: (items: T[]) => Promise<unknown>,
+) {
+  if (!items) return;
+  if (items.length === 0) {
+    dispatch("setInfo", messages.empty);
+    return;
+  }
+  commit("CLEAR_GRAPH");
+  dispatch("setMessage", messages.loading);
+  await add(items);
+  dispatch("fitGraphToScreen");
 }
 
 export const actions = {
@@ -122,16 +144,29 @@ export const actions = {
       dispatch("setInfo", "Choose a playlist first");
       return;
     }
-    commit("CLEAR_GRAPH");
-    dispatch("setMessage", `loading playlist ${playlist.name}`);
-
-    const result = await SpotifyService.getSongsFromPlaylist(
-      rootState.authentication.accessToken,
-      playlist.id,
-    );
-    await addSongsWithNeighbors(
-      dispatch,
-      result.items.map((item) => item.track),
+    let tracks: SpotifyTrack[] | undefined;
+    try {
+      const result = await SpotifyService.getSongsFromPlaylist(
+        rootState.authentication.accessToken,
+        playlist.id,
+      );
+      tracks = result.items.map((item) => item.track);
+    } catch (error) {
+      dispatch(
+        "setError",
+        new Error(
+          `The playlist ${playlist.name} could not be loaded (${statusOf(error) ?? "network"})`,
+        ),
+      );
+    }
+    await replaceGraphWith(
+      { commit, dispatch },
+      tracks,
+      {
+        loading: `loading playlist ${playlist.name}`,
+        empty: `The playlist ${playlist.name} has no songs`,
+      },
+      (songs) => addSongsWithNeighbors(dispatch, songs),
     );
   },
 } satisfies ActionTree<PlaylistsState, RootState>;
