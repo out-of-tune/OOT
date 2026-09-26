@@ -1,0 +1,369 @@
+import axios from "axios";
+import { chunk } from "lodash-es";
+import type {
+  RepeatState,
+  SpotifyDevice,
+  SpotifyPlaybackState,
+  SpotifyQueue,
+  StartPlaybackOptions,
+  SpotifyAlbum,
+  SpotifyArtist,
+  SpotifyPage,
+  SpotifyPlaylist,
+  SpotifyPlaylistTrack,
+  SpotifySearchResult,
+  SpotifyTrack,
+  SpotifyUser,
+} from "@/types/spotify";
+
+const API = "https://api.spotify.com/v1/";
+
+/** Parallel requests of the calls that fetch one object per id. */
+const PARALLEL_REQUESTS = 8;
+/** The library endpoints take at most 40 URIs. */
+const LIBRARY_BATCH = 40;
+
+/** Runs `fetch` for each id, a few at a time. A missing object (404) gives `null`. */
+async function fetchEach<T>(
+  ids: string[],
+  fetch: (id: string) => Promise<T>,
+): Promise<(T | null)[]> {
+  const results: (T | null)[] = [];
+  for (const batch of chunk(ids, PARALLEL_REQUESTS)) {
+    results.push(
+      ...(await Promise.all(
+        batch.map((id) =>
+          fetch(id).catch((error: unknown) => {
+            if (
+              (error as { response?: { status?: number } })?.response
+                ?.status === 404
+            )
+              return null;
+            throw error;
+          }),
+        ),
+      )),
+    );
+  }
+  return results;
+}
+
+const authHeaders = (token: string) => ({
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${token}`,
+});
+
+/** Client for the Spotify Web API. Each call takes the access token to use. */
+class SpotifyService {
+  /** Any Web API call. Returns `null` for "204 No Content". */
+  private async request<T>(
+    method: "GET" | "POST" | "PUT" | "DELETE",
+    url: string,
+    token: string,
+    { params, body }: { params?: Record<string, unknown>; body?: unknown } = {},
+  ): Promise<T | null> {
+    const response = await axios.request<T>({
+      method,
+      url: API + url,
+      headers: authHeaders(token),
+      params,
+      data: body,
+    });
+    return response.status === 204 ? null : response.data;
+  }
+
+  /** A GET of an endpoint that always answers with content. */
+  private async get<T>(
+    url: string,
+    token: string,
+    params?: Record<string, unknown>,
+  ) {
+    return (await this.request<T>("GET", url, token, { params })) as T;
+  }
+
+  /** Follows the `next` links of a paged endpoint and returns all items. */
+  private async getAllPages<T>(
+    url: string,
+    token: string,
+    params: Record<string, unknown> = {},
+    offset = 0,
+  ): Promise<{ items: T[] }> {
+    const result = await this.get<SpotifyPage<T>>(url, token, {
+      ...params,
+      offset,
+    });
+    if (!result.next) return result;
+    const nextResult = await this.getAllPages<T>(
+      url,
+      token,
+      params,
+      offset + result.limit,
+    );
+    return { items: [...result.items, ...nextResult.items] };
+  }
+
+  /**
+   * Songs of an artist. Spotify removed the top tracks endpoint for apps in development
+   * mode, so this searches songs by the artist name and keeps those of the artist.
+   */
+  async getSongSamplesFromArtist(
+    token: string,
+    artistId: string,
+    artistName: string,
+  ) {
+    const result = await this.searchByString(
+      token,
+      `artist:"${artistName.replaceAll('"', "")}"`,
+      ["track"],
+      10,
+    );
+    const tracks = (result.tracks?.items ?? []).filter((track) =>
+      track.artists?.some((artist) => artist.id === artistId),
+    );
+    return { tracks };
+  }
+
+  getCurrentUserPlaylists(token: string, limit = 50, offset = 0) {
+    return this.get<SpotifyPage<SpotifyPlaylist>>("me/playlists", token, {
+      limit,
+      offset,
+    });
+  }
+
+  getCurrentUserProfile(token: string) {
+    return this.get<SpotifyUser>("me", token);
+  }
+
+  getAlbumsFromArtist(
+    token: string,
+    sid: string,
+    offset = 0,
+    includeGroups = "single,album",
+  ) {
+    return this.getAllPages<SpotifyAlbum>(
+      `artists/${sid}/albums`,
+      token,
+      { include_groups: includeGroups },
+      offset,
+    );
+  }
+
+  getSongsFromAlbum(token: string, sid: string, offset = 0) {
+    return this.getAllPages<SpotifyTrack>(
+      `albums/${sid}/tracks`,
+      token,
+      {},
+      offset,
+    );
+  }
+
+  /** The playlist items endpoint puts the track in `item`. Older responses use `track`. */
+  async getSongsFromPlaylist(
+    token: string,
+    sid: string,
+    offset = 0,
+  ): Promise<{ items: SpotifyPlaylistTrack[] }> {
+    const result = await this.getAllPages<{
+      item?: SpotifyTrack | null;
+      track?: SpotifyTrack | null;
+    }>(`playlists/${sid}/items`, token, {}, offset);
+    return {
+      items: result.items.map((entry) => ({
+        track: (entry.item ?? entry.track) as SpotifyTrack,
+      })),
+    };
+  }
+
+  /** One request per track: Spotify removed the several tracks endpoint for apps in development mode. */
+  async getFullSongData(token: string, sids: string[]) {
+    const tracks = await fetchEach(sids, (id) =>
+      this.get<SpotifyTrack>(`tracks/${id}`, token),
+    );
+    return { tracks };
+  }
+
+  /** One request per artist, for the same reason as getFullSongData. */
+  async getArtistsById(token: string, sids: string[]) {
+    const artists = await fetchEach(sids, (id) =>
+      this.get<SpotifyArtist>(`artists/${id}`, token),
+    );
+    return { artists };
+  }
+
+  /** Spotify accepts at most 100 URIs per request. */
+  addSongsToPlaylist(token: string, playlistId: string, songUris: string[]) {
+    return Promise.all(
+      chunk(songUris, 100).map((uris) =>
+        this.request("POST", `playlists/${playlistId}/items`, token, {
+          body: { uris },
+        }),
+      ),
+    );
+  }
+
+  searchByString(
+    token: string,
+    searchString: string,
+    types: string[],
+    limit?: number,
+  ) {
+    return this.get<SpotifySearchResult>("search", token, {
+      q: searchString,
+      type: types.join(","),
+      limit,
+    });
+  }
+
+  // Player (Spotify Connect). Without a device id the calls act on the active device.
+
+  getPlaybackState(token: string) {
+    return this.request<SpotifyPlaybackState>("GET", "me/player", token);
+  }
+
+  startPlayback(
+    token: string,
+    { deviceId, uris, contextUri, offset, positionMs }: StartPlaybackOptions,
+  ) {
+    return this.request("PUT", "me/player/play", token, {
+      params: deviceId ? { device_id: deviceId } : undefined,
+      body: {
+        ...(uris ? { uris } : {}),
+        ...(contextUri ? { context_uri: contextUri } : {}),
+        ...(offset !== undefined ? { offset } : {}),
+        ...(positionMs !== undefined ? { position_ms: positionMs } : {}),
+      },
+    });
+  }
+
+  pausePlayback(token: string) {
+    return this.request("PUT", "me/player/pause", token);
+  }
+
+  skipToNext(token: string) {
+    return this.request("POST", "me/player/next", token);
+  }
+
+  skipToPrevious(token: string) {
+    return this.request("POST", "me/player/previous", token);
+  }
+
+  seek(token: string, positionMs: number) {
+    return this.request("PUT", "me/player/seek", token, {
+      params: { position_ms: Math.round(positionMs) },
+    });
+  }
+
+  setVolume(token: string, percent: number) {
+    return this.request("PUT", "me/player/volume", token, {
+      params: { volume_percent: Math.round(percent) },
+    });
+  }
+
+  setShuffle(token: string, state: boolean) {
+    return this.request("PUT", "me/player/shuffle", token, {
+      params: { state },
+    });
+  }
+
+  setRepeat(token: string, state: RepeatState) {
+    return this.request("PUT", "me/player/repeat", token, {
+      params: { state },
+    });
+  }
+
+  transferPlayback(token: string, deviceId: string, play: boolean) {
+    return this.request("PUT", "me/player", token, {
+      body: { device_ids: [deviceId], play },
+    });
+  }
+
+  async getDevices(token: string) {
+    return (
+      (
+        await this.request<{ devices: SpotifyDevice[] }>(
+          "GET",
+          "me/player/devices",
+          token,
+        )
+      )?.devices ?? []
+    );
+  }
+
+  getQueue(token: string) {
+    return this.request<SpotifyQueue>("GET", "me/player/queue", token);
+  }
+
+  addToPlaybackQueue(token: string, uri: string) {
+    return this.request("POST", "me/player/queue", token, { params: { uri } });
+  }
+
+  // Library
+
+  /** True for each URI (song, album, artist, playlist) in the library of the user. */
+  async libraryContains(token: string, uris: string[]) {
+    const results: boolean[] = [];
+    for (const batch of chunk(uris, LIBRARY_BATCH)) {
+      results.push(
+        ...((await this.request<boolean[]>(
+          "GET",
+          "me/library/contains",
+          token,
+          {
+            params: { uris: batch.join(",") },
+          },
+        )) ?? []),
+      );
+    }
+    return results;
+  }
+
+  /** Saves songs and albums, and follows artists. */
+  saveToLibrary(token: string, uris: string[]) {
+    return Promise.all(
+      chunk(uris, LIBRARY_BATCH).map((batch) =>
+        this.request("PUT", "me/library", token, {
+          params: { uris: batch.join(",") },
+        }),
+      ),
+    );
+  }
+
+  /** Removes songs and albums, and unfollows artists. */
+  removeFromLibrary(token: string, uris: string[]) {
+    return Promise.all(
+      chunk(uris, LIBRARY_BATCH).map((batch) =>
+        this.request("DELETE", "me/library", token, {
+          params: { uris: batch.join(",") },
+        }),
+      ),
+    );
+  }
+
+  getSavedTracks(token: string, limit = 50, offset = 0) {
+    return this.get<SpotifyPage<{ track: SpotifyTrack }>>("me/tracks", token, {
+      limit,
+      offset,
+    });
+  }
+
+  getTopArtists(
+    token: string,
+    limit = 50,
+    timeRange: "short_term" | "medium_term" | "long_term" = "medium_term",
+  ) {
+    return this.get<SpotifyPage<SpotifyArtist>>("me/top/artists", token, {
+      limit,
+      time_range: timeRange,
+    });
+  }
+
+  getRecentlyPlayed(token: string, limit = 50) {
+    return this.get<{ items: { track: SpotifyTrack }[] }>(
+      "me/player/recently-played",
+      token,
+      { limit },
+    );
+  }
+}
+
+export default new SpotifyService();

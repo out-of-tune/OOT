@@ -9,10 +9,13 @@ npm install
 ```
 
 ### Start
-To start the API run the following command in the 'api' directory:
+To build and start the API run the following commands in the 'api' directory:
 ```
+npm run build
 npm start
 ```
+
+For development, `npm run serve` restarts the API when a file changes. `npm test` runs the tests, `npm run typecheck` checks the types.
 
 ## Usage
 The following endpoints are available for requesting:

@@ -1,12 +1,31 @@
+const crypto = require('node:crypto')
 const express = require('express')
-const simpleOauth = require('simple-oauth2')
-const qs = require('querystring')
-const router = express.Router()
+const { AuthorizationCode } = require('simple-oauth2')
 const settings = require('../../../settings')
 
-const callbackUrl = `${settings.PROXY_URI}/auth/oauth2/spotify/callback`
+const router = express.Router()
 
-const spotify_oauth = simpleOauth.create({
+const callbackUrl = `${settings.PROXY_URI}/auth/oauth2/spotify/callback`
+const STATE_COOKIE = 'oot_oauth_state'
+/** How long a login may take, in seconds. */
+const STATE_MAX_AGE = 600
+/** The refresh token lives in this httpOnly cookie, so page scripts cannot read it. */
+const REFRESH_COOKIE = 'oot_refresh'
+/** How long a login is remembered, in seconds. */
+const REFRESH_MAX_AGE = 60 * 60 * 24 * 30
+/** Path of the auth routes as the browser sees them. The app may run under a prefix, for example https://host/app. */
+const cookiePath = proxyUri => `${new URL(proxyUri).pathname.replace(/\/$/, '')}/auth/oauth2/spotify`
+const COOKIE_PATH = cookiePath(settings.PROXY_URI)
+
+const cookieOptions = maxAge => ({
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: settings.PROXY_URI.startsWith('https://'),
+    maxAge: maxAge * 1000,
+    path: COOKIE_PATH
+})
+
+const spotifyOAuth = new AuthorizationCode({
     client: {
         id: settings.SPOTIFY_CLIENT_ID,
         secret: settings.SPOTIFY_CLIENT_SECRET
@@ -21,52 +40,92 @@ const spotify_oauth = simpleOauth.create({
     }
 })
 
-const authorizationUrl = spotify_oauth.authorizationCode.authorizeURL({
-    redirect_uri: callbackUrl,
-    scope: settings.SPOTIFY_SCOPE
-})
+function readCookie(req, name) {
+    const header = req.headers.cookie ?? ''
+    for (const part of header.split(';')) {
+        const [key, ...value] = part.trim().split('=')
+        if (key !== name) continue
+        try {
+            return decodeURIComponent(value.join('='))
+        } catch {
+            return undefined
+        }
+    }
+    return undefined
+}
 
+/** True when Spotify refused the refresh token itself. simple-oauth2 puts the response body in err.data.payload. */
+function isRejectedToken(err) {
+    return err?.data?.payload?.error === 'invalid_grant'
+}
+
+function redirectToClient(res, params) {
+    res.redirect(`${settings.PROXY_URI}/#/login?${new URLSearchParams(params)}`)
+}
+
+/**
+ * Returns the Spotify login URL. The random `state` also goes into a cookie,
+ * so the callback can reject requests that did not start here (CSRF protection).
+ */
 router.get('/', (req, res) => {
-    console.log('returning spotify authorization page')
-    res.send(authorizationUrl)
+    const state = crypto.randomBytes(16).toString('hex')
+    res.cookie(STATE_COOKIE, state, cookieOptions(STATE_MAX_AGE))
+    res.set('Cache-Control', 'no-store')
+    res.send(spotifyOAuth.authorizeURL({
+        redirect_uri: callbackUrl,
+        scope: settings.SPOTIFY_SCOPE,
+        state
+    }))
 })
 
 router.get('/callback', async (req, res) => {
-    const code = req.query.code
-    const options = {
-        code,
-        redirect_uri: callbackUrl
+    const { code, state, error } = req.query
+    const expectedState = readCookie(req, STATE_COOKIE)
+    res.clearCookie(STATE_COOKIE, { path: COOKIE_PATH })
+
+    if (error) return redirectToClient(res, { error: String(error) })
+    if (!state || !expectedState || state !== expectedState) {
+        return redirectToClient(res, { error: 'invalid_state' })
     }
 
     try {
-        const result = await spotify_oauth.authorizationCode.getToken(options)
-        res.redirect(`${settings.PROXY_URI}/#/login?${qs.stringify(result)}`)
-    } catch(error) {
-        console.error('Spotify Access Token Error', error.message)
-        res.redirect(`${settings.PROXY_URI}/#/login?${qs.stringify({
-            error: 'authorization_failed'
-        })}`)
+        const accessToken = await spotifyOAuth.getToken({ code: String(code), redirect_uri: callbackUrl })
+        // No token goes into the URL. The client asks /refresh for an access token.
+        res.cookie(REFRESH_COOKIE, accessToken.token.refresh_token, cookieOptions(REFRESH_MAX_AGE))
+        redirectToClient(res, { status: 'success' })
+    } catch (err) {
+        console.error('Spotify Access Token Error', err.message)
+        redirectToClient(res, { error: 'authorization_failed' })
     }
-
 })
 
+/** Returns a new access token for the refresh token in the cookie. 401 means: not logged in. */
 router.get('/refresh', async (req, res) => {
-    const refresh_token = req.query.refresh_token
-    const tokenObj = spotify_oauth.accessToken.create({ refresh_token })
+    res.set('Cache-Control', 'no-store')
+    const refresh_token = readCookie(req, REFRESH_COOKIE)
+    if (!refresh_token) return res.status(401).json('not_logged_in')
     try {
-        const { token } = await tokenObj.refresh()
-        res.status(200).json({
-            refresh_token,
-            ...token
-        })
-    } catch(error) {
-        console.error('Spotify Refresh Token Error', error.message)
-        res.status(500).json('refresh_token_failed')
+        const { token } = await spotifyOAuth.createToken({ refresh_token }).refresh()
+        // Spotify may rotate the refresh token. The cookie always keeps the newest one.
+        res.cookie(REFRESH_COOKIE, token.refresh_token ?? refresh_token, cookieOptions(REFRESH_MAX_AGE))
+        const { access_token, expires_in, scope } = token
+        res.status(200).json({ access_token, expires_in, scope })
+    } catch (err) {
+        console.error('Spotify Refresh Token Error', err.message)
+        // Only a rejected refresh token ends the session. Other failures (429, 5xx, network)
+        // keep the cookie, so a later refresh can work.
+        if (isRejectedToken(err)) {
+            res.clearCookie(REFRESH_COOKIE, { path: COOKIE_PATH })
+            return res.status(401).json('refresh_token_failed')
+        }
+        res.status(503).json('spotify_unavailable')
     }
 })
 
-router.get('/test', (req, res) => {
-    res.send('Hello<br><a href="/oauth2/spotify">Log in with Spotify</a>')
+router.post('/logout', (req, res) => {
+    res.clearCookie(REFRESH_COOKIE, { path: COOKIE_PATH })
+    res.status(204).end()
 })
 
 module.exports = router
+module.exports.cookiePath = cookiePath

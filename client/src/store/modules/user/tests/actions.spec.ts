@@ -1,0 +1,63 @@
+import SpotifyService from "@/services/SpotifyService";
+
+vi.mock("@/services/SpotifyService");
+import { actions } from "../actions";
+
+const { getCurrentUser, deleteCurrentUser } = actions;
+
+describe("getCurrentUser", () => {
+  let commit;
+  let dispatch;
+  let rootState;
+  beforeEach(() => {
+    commit = vi.fn();
+    dispatch = vi.fn();
+    rootState = {
+      authentication: {
+        loginState: true,
+        accessToken: "12345",
+      },
+    };
+    SpotifyService.getCurrentUserProfile = vi.fn();
+    SpotifyService.getCurrentUserProfile.mockReturnValue({ id: "userID" });
+  });
+  it("calls Spotify API", () => {
+    getCurrentUser({ commit, dispatch, rootState });
+    expect(SpotifyService.getCurrentUserProfile).toHaveBeenCalledWith("12345");
+  });
+  it("sets user when logged in", async () => {
+    await getCurrentUser({ commit, dispatch, rootState });
+    expect(commit).toHaveBeenCalledWith("SET_CURRENT_USER", { id: "userID" });
+  });
+  it("connects the Spotify player after the profile loads", async () => {
+    await getCurrentUser({ commit, dispatch, rootState });
+    expect(dispatch).toHaveBeenCalledWith("connectSpotifyPlayer");
+  });
+  it("connects the player also when the profile does not load", async () => {
+    SpotifyService.getCurrentUserProfile.mockRejectedValue({
+      response: { status: 403 },
+    });
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    await getCurrentUser({ commit, dispatch, rootState });
+    expect(commit).not.toHaveBeenCalled();
+    expect(dispatch).toHaveBeenCalledWith("setError", expect.any(String));
+    expect(dispatch).toHaveBeenCalledWith("connectSpotifyPlayer");
+  });
+  it("does nothing when not logged in", async () => {
+    rootState.authentication.loginState = false;
+    await getCurrentUser({ commit, dispatch, rootState });
+    expect(commit).not.toHaveBeenCalled();
+  });
+});
+
+describe("deleteCurrentUser", () => {
+  let commit;
+
+  beforeEach(() => {
+    commit = vi.fn();
+  });
+  it("deletes current user", () => {
+    deleteCurrentUser({ commit });
+    expect(commit).toHaveBeenCalledWith("SET_CURRENT_USER", {});
+  });
+});

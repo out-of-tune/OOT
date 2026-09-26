@@ -1,0 +1,915 @@
+// @vitest-environment jsdom
+import { actions } from "../actions";
+
+import GraphService from "@/services/GraphService";
+vi.mock("@/services/GraphService");
+import _ from "lodash";
+import Viva from "vivagraphjs";
+import SpotifyService from "@/services/SpotifyService";
+vi.mock("@/services/SpotifyService");
+import searchObjectHelper from "@/lib/search/searchObject";
+vi.mock("@/lib/search/searchObject");
+import "@/lib/graphql";
+vi.mock("@/lib/graphql");
+import { handleGraphqlTokenError, handleTokenError } from "@/lib/token";
+vi.mock("@/lib/token");
+
+const {
+  startAdvancedGraphSearch,
+  startSimpleGraphSearch,
+  setSearchString,
+  setSearchObject,
+} = actions;
+
+describe("startSimpleGraphSearch", () => {
+  let dispatch;
+  let rootState;
+  let commit;
+  beforeEach(() => {
+    dispatch = vi.fn();
+    commit = vi.fn();
+    rootState = {
+      searchObject: {
+        valid: false,
+        errors: [],
+        attributes: [],
+        tip: { type: "nodeType", text: "" },
+      },
+      schema: {
+        nodeTypes: [
+          {
+            label: "artist",
+            attributes: ["name", "id", "popularity", "sid", "mbid", "images"],
+            endpoints: ["graphql"],
+          },
+          {
+            label: "genre",
+            attributes: ["name", "id"],
+            endpoints: ["graphql"],
+          },
+          {
+            label: "album",
+            attributes: ["name", "id"],
+            endpoints: ["spotify"],
+          },
+          { label: "song", attributes: ["name", "id"], endpoints: ["spotify"] },
+        ],
+        edgeTypes: [
+          {
+            label: "Genre_to_Genre",
+            inbound: {
+              from: "genre",
+              to: "genre",
+              connectionName: "subgenres",
+              endpoint: "graphQl",
+            },
+            outbound: {
+              from: "genre",
+              to: "genre",
+              connectionName: "supergenres",
+              endpoint: "graphQl",
+            },
+          },
+          {
+            label: "Artist_to_Genre",
+            inbound: {
+              from: "artist",
+              to: "genre",
+              connectionName: "genres",
+              endpoint: "graphQl",
+            },
+            outbound: {
+              from: "genre",
+              to: "artist",
+              connectionName: "artists",
+              endpoint: "graphQl",
+            },
+          },
+          {
+            label: "Album_to_Artist",
+            inbound: {
+              from: "album",
+              to: "artist",
+              connectionName: "artists",
+              endpoint: "spotify",
+            },
+            outbound: {
+              from: "artist",
+              to: "album",
+              connectionName: "albums",
+              endpoint: "spotify",
+            },
+          },
+          {
+            label: "Song_to_Album",
+            inbound: {
+              from: "song",
+              to: "album",
+              connectionName: "albums",
+              endpoint: "spotify",
+            },
+            outbound: {
+              from: "album",
+              to: "song",
+              connectionName: "songs",
+              endpoint: "spotify",
+            },
+          },
+        ],
+      },
+      mainGraph: {
+        Graph: new Viva.Graph.graph(),
+      },
+      authentication: {
+        loginState: false,
+      },
+      spotify: {
+        accessToken: "asdklmsklm",
+      },
+    };
+    const nodes = [
+      {
+        id: "artist/1",
+        data: {
+          name: "bob",
+          label: "artist",
+        },
+      },
+      {
+        id: "artist/2",
+        data: {
+          name: "karl",
+          label: "artist",
+        },
+      },
+      {
+        id: "album/1",
+        data: {
+          name: "franz",
+          label: "album",
+        },
+      },
+    ];
+    nodes.forEach((node) => {
+      rootState.mainGraph.Graph.addNode(node.id, node.data);
+    });
+    handleGraphqlTokenError.mockReset();
+    handleTokenError.mockReset();
+    vi.clearAllMocks();
+  });
+  it("selects nodes of nodeType", async () => {
+    await startSimpleGraphSearch(
+      { commit, dispatch, rootState },
+      { nodeType: "artist", searchString: "" },
+    );
+    const expectedNodes = [
+      {
+        id: "artist/1",
+        links: null,
+        data: {
+          name: "bob",
+          label: "artist",
+        },
+      },
+      {
+        id: "artist/2",
+        data: {
+          name: "karl",
+          label: "artist",
+        },
+        links: null,
+      },
+    ];
+    expect(dispatch).toHaveBeenCalledWith("selectNodes", expectedNodes);
+  });
+  it("selects all nodes if no searchString or nodeType is defined", async () => {
+    await startSimpleGraphSearch(
+      { commit, dispatch, rootState },
+      { nodeType: "any", searchString: "" },
+    );
+    const expectedNodes = [
+      {
+        id: "artist/1",
+        links: null,
+        data: {
+          name: "bob",
+          label: "artist",
+        },
+      },
+      {
+        id: "artist/2",
+        data: {
+          name: "karl",
+          label: "artist",
+        },
+        links: null,
+      },
+      {
+        id: "album/1",
+        data: {
+          name: "franz",
+          label: "album",
+        },
+        links: null,
+      },
+    ];
+    expect(dispatch).toHaveBeenCalledWith("selectNodes", expectedNodes);
+  });
+  it("adds nodes from spotify and graphql without certain nodetype", async () => {
+    handleGraphqlTokenError.mockReturnValue({
+      genre: [],
+      artist: [{ id: "artist/113", name: "frank sinitra" }],
+    });
+    handleTokenError.mockReturnValue([
+      {
+        albums: { items: [{ id: "13", name: "frank" }] },
+        tracks: { items: [{ id: "144", name: "in a lake" }] },
+      },
+    ]);
+    await startSimpleGraphSearch(
+      { dispatch, rootState },
+      { nodeType: "any", searchString: "frank" },
+    );
+    const expectedNodes = [
+      {
+        id: "album/13",
+        data: {
+          sid: "13",
+          name: "frank",
+          label: "album",
+        },
+      },
+      {
+        id: "song/144",
+        data: {
+          name: "in a lake",
+          label: "song",
+          sid: "144",
+        },
+      },
+      {
+        id: "artist/113",
+        data: {
+          name: "frank sinitra",
+          label: "artist",
+        },
+      },
+    ];
+    expect(dispatch).toHaveBeenCalledWith("addToGraph", {
+      nodes: expectedNodes,
+      links: [],
+    });
+  });
+  it("searches Spotify artists also when the database found some", async () => {
+    rootState.schema.nodeTypes[0].endpoints = ["graphql", "spotify"];
+    handleGraphqlTokenError.mockReturnValue({
+      genre: [],
+      artist: [{ id: "7", name: "Queens of the Stone Age", sid: "qotsa" }],
+    });
+    handleTokenError.mockReturnValue([
+      {
+        artists: {
+          items: [
+            { id: "queen", name: "Queen" },
+            { id: "qotsa", name: "Queens of the Stone Age" },
+          ],
+        },
+      },
+    ]);
+    await startSimpleGraphSearch(
+      { dispatch, rootState },
+      { nodeType: "any", searchString: "Queen" },
+    );
+    const added = dispatch.mock.calls.find(
+      ([type]) => type === "addToGraph",
+    )[1];
+    expect(added.nodes.map((node) => node.id)).toEqual(["artist/queen", "7"]);
+  });
+  it("keeps the Spotify results when the database fails", async () => {
+    handleGraphqlTokenError.mockRejectedValue(new Error("database down"));
+    handleTokenError.mockReturnValue([
+      { albums: { items: [{ id: "13", name: "frank" }] } },
+    ]);
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    await startSimpleGraphSearch(
+      { dispatch, rootState },
+      { nodeType: "any", searchString: "frank" },
+    );
+    const added = dispatch.mock.calls.find(
+      ([type]) => type === "addToGraph",
+    )[1];
+    expect(added.nodes.map((node) => node.id)).toEqual(["album/13"]);
+  });
+  it("calls spotify correctly without nodetype", async () => {
+    handleGraphqlTokenError.mockReturnValueOnce({ genre: [] }).mockReturnValue({
+      artist: [{ id: "artist/113", name: "frank sinitra" }],
+    });
+    handleTokenError.mockReturnValue([
+      {
+        albums: { items: [{ id: "13", name: "frank" }] },
+        tracks: { items: [{ id: "113", name: "frank goes fishing" }] },
+      },
+    ]);
+
+    await startSimpleGraphSearch(
+      { dispatch, rootState },
+      { nodeType: "any", searchString: "frank" },
+    );
+    expect(handleTokenError).toHaveBeenCalledWith(
+      expect.anything(),
+      ["frank", ["album", "song"]],
+      dispatch,
+      rootState,
+    );
+  });
+  it("calls graphql correctly without nodetype", async () => {
+    handleGraphqlTokenError.mockReturnValueOnce({ genre: [] }).mockReturnValue({
+      artist: [{ id: "artist/113", name: "frank sinitra" }],
+    });
+    handleTokenError.mockReturnValue([
+      {
+        albums: { items: [{ id: "13", name: "frank" }] },
+        tracks: { items: [{ id: "113", name: "frank goes fishing" }] },
+      },
+    ]);
+
+    await startSimpleGraphSearch(
+      { dispatch, rootState },
+      { nodeType: "any", searchString: "frank" },
+    );
+    expect(handleGraphqlTokenError).toHaveBeenCalledTimes(1);
+  });
+  it("adds and selects nodes from spotify with certain nodeType", async () => {
+    handleGraphqlTokenError.mockReturnValue({ genre: [] });
+    handleTokenError.mockReturnValue([
+      { tracks: { items: [{ id: "13", name: "josef" }] } },
+    ]);
+
+    await startSimpleGraphSearch(
+      { dispatch, rootState },
+      { nodeType: "song", searchString: "josef" },
+    );
+    const expectedNodes = [
+      {
+        id: "song/13",
+        data: {
+          sid: "13",
+          name: "josef",
+          label: "song",
+        },
+        links: [],
+      },
+    ];
+    expect(dispatch).toHaveBeenCalledWith("selectNodes", expectedNodes);
+    expect(dispatch).toHaveBeenLastCalledWith("fitGraphToSelection");
+  });
+  it("adds nodes from graphql with certain nodetype", async () => {
+    handleGraphqlTokenError.mockReturnValue({
+      artist: [{ id: "artist/113", name: "frank sinitra" }],
+    });
+    await startSimpleGraphSearch(
+      { dispatch, rootState },
+      { nodeType: "artist", searchString: "chilliartist" },
+    );
+    const expectedNodes = [
+      {
+        id: "artist/113",
+        data: {
+          name: "frank sinitra",
+          label: "artist",
+        },
+      },
+    ];
+    expect(dispatch).toHaveBeenCalledWith("addToGraph", {
+      nodes: expectedNodes,
+      links: [],
+    });
+  });
+  it("selects node where searchString matches id", async () => {
+    handleGraphqlTokenError.mockReturnValue({
+      artist: [{ id: "artist/2", name: "karl" }],
+    });
+    await startSimpleGraphSearch(
+      { dispatch, rootState },
+      { nodeType: "artist", searchString: "artist/2" },
+    );
+    // The node is in the graph and in the database. It is selected once.
+    const expectedNodes = [
+      {
+        id: "artist/2",
+        data: {
+          name: "karl",
+          label: "artist",
+        },
+        links: null,
+      },
+    ];
+    expect(dispatch).toHaveBeenCalledWith("selectNodes", expectedNodes);
+  });
+});
+
+describe("startAdvancedGraphSearch", () => {
+  let dispatch;
+  let rootState;
+  beforeEach(() => {
+    dispatch = vi.fn();
+    searchObjectHelper.validateSearchObject.mockReturnValue(true);
+    rootState = {
+      searchObject: {
+        valid: true,
+        errors: [],
+        nodeType: "Auftrag",
+        attributes: [],
+        tip: { type: "nodeType", text: "" },
+      },
+      schema: {
+        collectionConnections: [
+          {
+            edgeTypeName: "Auftrag_hat_Auftraggeber",
+            fromNodeTypeName: "Auftrag",
+          },
+        ],
+        edgeTypes: [{ name: "Auftrag_hat_Auftraggeber" }],
+        nodeTypes: [{ name: "Auftrag" }, { name: "Kunde" }],
+      },
+      mainGraph: {
+        Graph: new Viva.Graph.graph(),
+      },
+      selection: {
+        selectedNodes: [
+          {
+            id: "Werk/1",
+            data: {
+              name: "Franks Bauabteilung",
+              "alias name": "frabab",
+              label: "Werk",
+            },
+            links: [],
+          },
+        ],
+      },
+    };
+    const nodes = [
+      {
+        id: "Auftrag/1",
+        data: {
+          name: "bob",
+          age: 23,
+          ph: 7.4,
+          label: "Auftrag",
+        },
+      },
+      {
+        id: "Auftrag/2",
+        data: {
+          name: "karl carlson",
+          age: 3,
+          ph: 2.4,
+          label: "Auftrag",
+        },
+      },
+      {
+        id: "Kunde/1",
+        data: {
+          name: "franz bek",
+          age: 44,
+          ph: 8,
+          label: "Kunde",
+        },
+      },
+      {
+        id: "Werk/1",
+        data: {
+          name: "Franks Bauabteilung",
+          "alias name": "frabab",
+          label: "Werk",
+        },
+      },
+    ];
+    nodes.forEach((node) => {
+      rootState.mainGraph.Graph.addNode(node.id, node.data);
+    });
+  });
+  it("checks if query is valid", () => {
+    rootState.searchObject.valid = false;
+    startAdvancedGraphSearch(
+      { dispatch, rootState },
+      { addToSelection: false },
+    );
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+  it("marks all nodes of certain type when no attributes are defined", () => {
+    startAdvancedGraphSearch(
+      { dispatch, rootState },
+      { addToSelection: false },
+    );
+
+    const foundNodes = [
+      {
+        id: "Auftrag/1",
+        data: {
+          name: "bob",
+          age: 23,
+          ph: 7.4,
+          label: "Auftrag",
+        },
+        links: null,
+      },
+      {
+        id: "Auftrag/2",
+        data: {
+          name: "karl carlson",
+          age: 3,
+          ph: 2.4,
+          label: "Auftrag",
+        },
+        links: null,
+      },
+    ];
+    expect(dispatch).toHaveBeenCalledWith("selectNodes", foundNodes);
+  });
+  it("notifies the user how many nodes were found", () => {
+    startAdvancedGraphSearch(
+      { dispatch, rootState },
+      { addToSelection: false },
+    );
+
+    const foundNodes = [
+      {
+        id: "Auftrag/1",
+        data: {
+          name: "bob",
+          age: 23,
+          ph: 7.4,
+          label: "Auftrag",
+        },
+        links: null,
+      },
+      {
+        id: "Auftrag/2",
+        data: {
+          name: "karl carlson",
+          age: 3,
+          ph: 2.4,
+          label: "Auftrag",
+        },
+        links: null,
+      },
+    ];
+    expect(dispatch).toHaveBeenNthCalledWith(1, "setSuccess", "2 nodes found");
+  });
+  it("notifies the user with a info that 0 nodes were found", () => {
+    rootState.searchObject = {
+      valid: true,
+      errors: [],
+      nodeType: "Auftrag",
+      attributes: [
+        {
+          attributeSearch: "name",
+          operator: "=",
+          attributeData: "karl carlson el royo rochas",
+        },
+      ],
+      tip: { type: "nodeType", text: "" },
+    };
+    startAdvancedGraphSearch(
+      { dispatch, rootState },
+      { addToSelection: false },
+    );
+
+    const foundNodes = [
+      {
+        id: "Auftrag/1",
+        data: {
+          name: "bob",
+          age: 23,
+          ph: 7.4,
+          label: "Auftrag",
+        },
+        links: null,
+      },
+      {
+        id: "Auftrag/2",
+        data: {
+          name: "karl carlson",
+          age: 3,
+          ph: 2.4,
+          label: "Auftrag",
+        },
+        links: null,
+      },
+    ];
+    expect(dispatch).toHaveBeenNthCalledWith(1, "setInfo", "0 nodes found");
+  });
+  it("marks all nodes of certain type when operator = is set", () => {
+    rootState.searchObject = {
+      valid: true,
+      errors: [],
+      nodeType: "Auftrag",
+      attributes: [
+        {
+          attributeSearch: "name",
+          operator: "=",
+          attributeData: "karl carlson",
+        },
+      ],
+      tip: { type: "nodeType", text: "" },
+    };
+    startAdvancedGraphSearch(
+      { dispatch, rootState },
+      { addToSelection: false },
+    );
+
+    const foundNodes = [
+      {
+        id: "Auftrag/2",
+        data: {
+          name: "karl carlson",
+          age: 3,
+          ph: 2.4,
+          label: "Auftrag",
+        },
+        links: null,
+      },
+    ];
+    expect(dispatch).toHaveBeenCalledWith("selectNodes", foundNodes);
+  });
+  it("marks all nodes of certain type when operator != is set", () => {
+    rootState.searchObject = {
+      valid: true,
+      errors: [],
+      nodeType: "Auftrag",
+      attributes: [
+        {
+          attributeSearch: "name",
+          operator: "!=",
+          attributeData: '"karl carlson"',
+        },
+      ],
+      tip: { type: "nodeType", text: "" },
+    };
+    startAdvancedGraphSearch(
+      { dispatch, rootState },
+      { addToSelection: false },
+    );
+
+    const foundNodes = [
+      {
+        id: "Auftrag/1",
+        data: {
+          name: "bob",
+          age: 23,
+          ph: 7.4,
+          label: "Auftrag",
+        },
+        links: null,
+      },
+    ];
+    expect(dispatch).toHaveBeenCalledWith("selectNodes", foundNodes);
+  });
+  it("marks all nodes of certain type when operator > is set", () => {
+    rootState.searchObject = {
+      valid: true,
+      errors: [],
+      nodeType: "Auftrag",
+      attributes: [
+        { attributeSearch: "age", operator: ">", attributeData: "21" },
+      ],
+      tip: { type: "nodeType", text: "" },
+    };
+    startAdvancedGraphSearch(
+      { dispatch, rootState },
+      { addToSelection: false },
+    );
+
+    const foundNodes = [
+      {
+        id: "Auftrag/1",
+        data: {
+          name: "bob",
+          age: 23,
+          ph: 7.4,
+          label: "Auftrag",
+        },
+        links: null,
+      },
+    ];
+    expect(dispatch).toHaveBeenCalledWith("selectNodes", foundNodes);
+  });
+  it("marks all nodes of certain type when operator >= is set", () => {
+    rootState.searchObject = {
+      valid: true,
+      errors: [],
+      nodeType: "Auftrag",
+      attributes: [
+        { attributeSearch: "ph", operator: ">=", attributeData: "7.4" },
+      ],
+      tip: { type: "nodeType", text: "" },
+    };
+    startAdvancedGraphSearch(
+      { dispatch, rootState },
+      { addToSelection: false },
+    );
+
+    const foundNodes = [
+      {
+        id: "Auftrag/1",
+        data: {
+          name: "bob",
+          age: 23,
+          ph: 7.4,
+          label: "Auftrag",
+        },
+        links: null,
+      },
+    ];
+    expect(dispatch).toHaveBeenCalledWith("selectNodes", foundNodes);
+  });
+  it("marks all nodes of certain type when operator < is set", () => {
+    rootState.searchObject = {
+      valid: true,
+      errors: [],
+      nodeType: "Auftrag",
+      attributes: [
+        { attributeSearch: "age", operator: "<", attributeData: "21" },
+      ],
+      tip: { type: "nodeType", text: "" },
+    };
+    startAdvancedGraphSearch(
+      { dispatch, rootState },
+      { addToSelection: false },
+    );
+
+    const foundNodes = [
+      {
+        id: "Auftrag/2",
+        data: {
+          name: "karl carlson",
+          age: 3,
+          ph: 2.4,
+          label: "Auftrag",
+        },
+        links: null,
+      },
+    ];
+    expect(dispatch).toHaveBeenCalledWith("selectNodes", foundNodes);
+  });
+  it("marks all nodes of certain type when operator <= is set", () => {
+    rootState.searchObject = {
+      valid: true,
+      errors: [],
+      nodeType: "Auftrag",
+      attributes: [
+        { attributeSearch: "age", operator: "<=", attributeData: "21" },
+      ],
+      tip: { type: "nodeType", text: "" },
+    };
+    startAdvancedGraphSearch(
+      { dispatch, rootState },
+      { addToSelection: false },
+    );
+
+    const foundNodes = [
+      {
+        id: "Auftrag/2",
+        data: {
+          name: "karl carlson",
+          age: 3,
+          ph: 2.4,
+          label: "Auftrag",
+        },
+        links: null,
+      },
+    ];
+    expect(dispatch).toHaveBeenCalledWith("selectNodes", foundNodes);
+  });
+  it("marks all nodes of certain type when operator LIKE is set", () => {
+    rootState.searchObject = {
+      valid: true,
+      errors: [],
+      nodeType: "Auftrag",
+      attributes: [
+        { attributeSearch: "name", operator: " LIKE ", attributeData: "kar%" },
+      ],
+      tip: { type: "nodeType", text: "" },
+    };
+    startAdvancedGraphSearch(
+      { dispatch, rootState },
+      { addToSelection: false },
+    );
+
+    const foundNodes = [
+      {
+        id: "Auftrag/2",
+        data: {
+          name: "karl carlson",
+          age: 3,
+          ph: 2.4,
+          label: "Auftrag",
+        },
+        links: null,
+      },
+    ];
+    expect(dispatch).toHaveBeenCalledWith("selectNodes", foundNodes);
+  });
+  it('marks all nodes of certain type when search Attribute has " " in it', () => {
+    rootState.searchObject = {
+      valid: true,
+      errors: [],
+      nodeType: "Werk",
+      attributes: [
+        {
+          attributeSearch: "alias name",
+          operator: " LIKE ",
+          attributeData: "frab%",
+        },
+      ],
+      tip: { type: "nodeType", text: "" },
+    };
+    startAdvancedGraphSearch(
+      { dispatch, rootState },
+      { addToSelection: false },
+    );
+
+    const foundNodes = [
+      {
+        id: "Werk/1",
+        data: {
+          name: "Franks Bauabteilung",
+          "alias name": "frabab",
+          label: "Werk",
+        },
+        links: null,
+      },
+    ];
+    expect(dispatch).toHaveBeenCalledWith("selectNodes", foundNodes);
+  });
+
+  it("adds nodes to existing selection when flag is set", () => {
+    rootState.searchObject = {
+      valid: true,
+      errors: [],
+      nodeType: "Auftrag",
+      attributes: [
+        { attributeSearch: "name", operator: " LIKE ", attributeData: "kar%" },
+      ],
+      tip: { type: "nodeType", text: "" },
+    };
+    startAdvancedGraphSearch({ dispatch, rootState }, { addToSelection: true });
+
+    const foundNodes = [
+      {
+        id: "Auftrag/2",
+        data: {
+          name: "karl carlson",
+          age: 3,
+          ph: 2.4,
+          label: "Auftrag",
+        },
+        links: null,
+      },
+    ];
+    expect(dispatch).toHaveBeenCalledWith("selectNodes", [
+      ...foundNodes,
+      ...rootState.selection.selectedNodes,
+    ]);
+  });
+  it("Puts out an error if parameters are not in schema", async () => {
+    rootState.searchObject = { valid: true, errors: expect.anything() };
+    searchObjectHelper.validateSearchObject.mockReturnValue(false);
+    await startAdvancedGraphSearch(
+      { dispatch, rootState },
+      { addToSelection: true },
+    );
+    expect(dispatch).toHaveBeenCalledWith(
+      "setError",
+      new Error("search parameters not in schema"),
+    );
+  });
+});
+
+describe("setSearchString", () => {
+  let commit;
+  let input;
+  beforeEach(() => {
+    commit = vi.fn();
+    input = "Artist: name=12";
+  });
+  it("sets the search string", () => {
+    setSearchString({ commit }, input);
+    expect(commit).toHaveBeenCalledWith("SET_SEARCH_STRING", input);
+  });
+});
+
+describe("setSearchObject", () => {
+  let commit;
+  let input;
+  beforeEach(() => {
+    commit = vi.fn();
+    input = { searchString: "Artist: name=12" };
+  });
+  it("sets the search string", () => {
+    setSearchObject({ commit }, input);
+    expect(commit).toHaveBeenCalledWith("SET_SEARCH_OBJECT", input);
+  });
+});

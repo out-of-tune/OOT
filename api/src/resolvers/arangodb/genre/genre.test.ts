@@ -1,4 +1,13 @@
-import casual from 'casual'
+import { randomUUID } from 'node:crypto'
+
+// Random test values.
+const casual = {
+    integer: (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min,
+    get name() { return `name-${randomUUID().slice(0, 8)}` },
+    get username() { return `user-${randomUUID().slice(0, 8)}` },
+    get uuid() { return randomUUID() },
+    get password() { return randomUUID().replaceAll('-', '').slice(0, 12) },
+}
 import { InvalidInputError } from '../../../errors/errors.js'
 import resolvers from './genre.js'
 

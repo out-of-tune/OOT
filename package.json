@@ -2,6 +2,15 @@
   "name": "root",
   "private": true,
   "devDependencies": {
-    "lerna": "^3.16.4"
+    "lerna": "^10.0.1"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "check": "npm run check:client && npm run check:api && npm run check:services",
+    "check:client": "npm --prefix client run check",
+    "check:api": "npm --prefix api run typecheck && npm --prefix api test",
+    "check:services": "npm --prefix auth test && npm --prefix services/share test"
   }
 }

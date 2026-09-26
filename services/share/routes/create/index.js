@@ -1,32 +1,23 @@
-const fs = require('fs').promises
-const base58 = require('base58')
-
+const fs = require('node:fs/promises')
+const path = require('node:path')
 const arango = require('../../datasources/arangodb')
 const { STORAGE_PATH } = require('../../settings')
-const INITIAL_ID = 'abcd'
 
+/** Stores the uploaded object under a new id and returns its URI. */
 async function create(req, res) {
     const type = req.params.type
-    const data = req.body.object
+    const data = req.body?.object
+    if (typeof data !== 'string' || data.length === 0) {
+        return res.status(400).json({ error: "'object' must be a non-empty string" })
+    }
+    if (!arango.share) {
+        return res.status(503).json({ error: 'The database is not ready yet' })
+    }
 
-    var key = await arango.share.fetch(type)
-    
-    if (!key || key.length === 0 || !key[0].key) key = [await arango.share.create(INITIAL_ID, type)]
-    const id = key[0].key
+    const id = await arango.share.allocateKey(type)
+    await fs.writeFile(path.join(STORAGE_PATH, type, id), data)
 
-    await fs.writeFile(`${STORAGE_PATH}/${type}/${id}`, data)
-    await arango.share.update(key[0].id, { key: increment(id) })
-
-    res.json({
-        id,
-        type,
-        uri: `${type}/${id}`
-    })
-}
-
-function increment(id) {
-    const num = base58.base58_to_int(id)
-    return base58.int_to_base58(num + 1)
+    res.json({ id, type, uri: `${type}/${id}` })
 }
 
 module.exports = create

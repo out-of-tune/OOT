@@ -1,16 +1,18 @@
 {
   "compilerOptions": {
     "outDir": "dist",
-    "lib": [
-      "es2020"
-    ],
-    "target": "esnext",
+    "rootDir": ".",
+    "target": "ES2023",
+    "lib": ["ES2023"],
     "module": "NodeNext",
-    "moduleResolution": "node16",
+    "moduleResolution": "NodeNext",
+    "types": ["node"],
+    "strict": true,
+    "noImplicitAny": false,
     "esModuleInterop": true,
-    "types": [
-      "node",
-      "jest"
-    ]
-  }
+    "skipLibCheck": true,
+    "sourceMap": true
+  },
+  "include": ["src/**/*.ts", "schema/**/*.ts"],
+  "exclude": ["src/**/*.test.ts", "schema/**/*.test.ts", "schema/testcases/**"]
 }

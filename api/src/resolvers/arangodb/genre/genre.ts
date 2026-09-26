@@ -11,12 +11,9 @@ const resolvers = {
         genre: (_, { id, name, limit }: GnereQuery, {dataSources }) => {
             const filters = {id, name}
             if (Object.values(filters).filter(val => val).length > 1)
-                throw new InvalidInputError({
-                    data: {
-                        location: 'genre',
-                        input: filters,
-                        unexpected: 'Only one or zero fields are expected to be set. Multiple fields are ambiguous.'
-                    }
+                throw new InvalidInputError('Set at most one of id and name.', {
+                    location: 'genre',
+                    input: filters,
                 })
 
             if (id) return [{ id }]

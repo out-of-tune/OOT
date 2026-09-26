@@ -1,6 +1,19 @@
-import casual from 'casual'
+import { randomUUID } from 'node:crypto'
+import { readFileSync } from 'node:fs'
+import { ApolloServer } from '@apollo/server'
+import { makeExecutableSchema } from '@graphql-tools/schema'
+
+// Random test values.
+const casual = {
+    integer: (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min,
+    get name() { return `name-${randomUUID().slice(0, 8)}` },
+    get username() { return `user-${randomUUID().slice(0, 8)}` },
+    get uuid() { return randomUUID() },
+    get password() { return randomUUID().replaceAll('-', '').slice(0, 12) },
+}
 import { InvalidInputError } from '../../../errors/errors.js'
 import resolvers from './artist.js'
+import { SpotifyRequestError } from '../../../datasources/spotify/index.js'
 
 const genId = (base='Artist') => `${base}/${casual.integer(1, 200000)}`
 
@@ -135,5 +148,49 @@ describe('artist resolvers', () => {
                 mbid
             })
         })
+    })
+})
+
+describe('unknown artist by sid', () => {
+    const makeContext = (artistInfo) => {
+        const created: string[] = []
+        return {
+            created,
+            context: {
+                dataSources: {
+                    spotify: { artist_info: artistInfo },
+                    arango: {
+                        artist: {
+                            search: async () => [],
+                            create: async ({ sid }) => { created.push(sid); return { id: 'Artist/99', sid } },
+                            createInfo: async () => ({}),
+                            linkGenres: async () => [],
+                        },
+                    },
+                },
+            },
+        }
+    }
+
+    test('loads the artist from Spotify without an HTTP round trip', async () => {
+        const { context, created } = makeContext(async () => ({ name: 'New', genres: ['rock'], popularity: 1, images: [] }))
+        const res = await resolvers.Query.artist({}, { sid: 'abc"def' }, context)
+        expect(res).toEqual([{ id: 'Artist/99', sid: 'abc"def' }])
+        expect(created).toEqual(['abc"def'])
+    })
+
+    test('returns no artist when Spotify rejects the id', async () => {
+        const { context } = makeContext(async () => { throw new SpotifyRequestError(400, 'invalid id') })
+        expect(await resolvers.Query.artist({}, { sid: 'bad' }, context)).toEqual([])
+        expect(await resolvers.Mutation.addArtist({}, { sid: 'bad' }, context)).toEqual({ success: false, message: 'invalid id' })
+    })
+
+    test('does not let the response cache keep the empty result', async () => {
+        const { context } = makeContext(async () => { throw new SpotifyRequestError(503, 'unavailable') })
+        const typeDefs = readFileSync(new URL('../../../../schema/schema.graphql', import.meta.url), 'utf-8')
+        const server = new ApolloServer({ schema: makeExecutableSchema({ typeDefs, resolvers: { Query: resolvers.Query } }) })
+        const response = await server.executeOperation({ query: '{ artist(sid: "abc") { name } }' }, { contextValue: context })
+        expect(response.body.kind === 'single' && response.body.singleResult.data).toEqual({ artist: [] })
+        expect(response.http.headers.get('cache-control')).toBe('no-store')
     })
 })
