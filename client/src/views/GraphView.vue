@@ -9,6 +9,7 @@ import {
 import { useRoute } from "vue-router";
 import CompassAxes from "@/components/graph/CompassAxes.vue";
 import EmptyGraphHint from "@/components/graph/EmptyGraphHint.vue";
+import ThemeBackdrop from "@/components/graph/ThemeBackdrop.vue";
 import GraphStatus from "@/components/graph/GraphStatus.vue";
 import NodeInfoPanel from "@/components/graph/NodeInfoPanel.vue";
 import NodeLabels from "@/components/graph/NodeLabels.vue";
@@ -211,7 +212,8 @@ onBeforeUnmount(() => {
       "
       class="pointer-events-none fixed inset-0 z-[5] flex items-center justify-center"
     >
-      <EmptyGraphHint />
+      <ThemeBackdrop />
+      <EmptyGraphHint class="relative" />
     </div>
 
     <TopBar />

@@ -13,6 +13,7 @@ import IconButton from "@/components/ui/IconButton.vue";
 import UiSlider from "@/components/ui/UiSlider.vue";
 import { formatDuration } from "@/lib/formatDuration";
 import { useStore } from "@/store";
+import AmbientCover from "./AmbientCover.vue";
 import CurrentSongInfo from "./CurrentSongInfo.vue";
 
 const store = useStore();
@@ -72,6 +73,7 @@ function seek(value: number) {
   <div
     class="panel flex w-full flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-5"
   >
+    <AmbientCover :images="store.state.music_player.currentSong.images" />
     <audio
       ref="audio"
       :src="songUrl || undefined"

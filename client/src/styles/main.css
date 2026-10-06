@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./themes.css";
 
 /* Design tokens. The app is dark only: the graph renders on a black canvas. */
 @theme {
@@ -30,7 +31,8 @@
 
   --radius-panel: 0.875rem;
   --shadow-panel:
-    0 12px 32px -8px rgb(0 0 0 / 0.6), 0 0 0 1px rgb(255 255 255 / 0.04);
+    0 12px 32px -8px rgb(0 0 0 / 0.6), 0 0 0 1px rgb(255 255 255 / 0.04),
+    inset 0 1px 0 rgb(255 255 255 / 0.05);
 }
 
 @layer base {
@@ -60,14 +62,15 @@
   }
 
   ::selection {
-    background-color: rgb(45 156 219 / 0.35);
+    background-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
   }
 }
 
 @layer components {
-  /* Floating panel on top of the graph. */
+  /* Floating panel on top of the graph. It holds the theme decorations of styles/themes.css;
+     a utility such as `fixed` still sets its position. */
   .panel {
-    @apply rounded-panel border border-line bg-surface/90 shadow-panel backdrop-blur-md;
+    @apply relative rounded-panel border border-line bg-surface/90 shadow-panel backdrop-blur-md;
   }
 
   .field {
@@ -88,7 +91,7 @@
 .graph-selection-indicator {
   position: absolute;
   border: 1px solid var(--color-brand);
-  background-color: rgb(218 106 29 / 0.08);
+  background-color: color-mix(in srgb, var(--color-brand) 8%, transparent);
 }
 
 /* driver.js tour, in the app colors. */

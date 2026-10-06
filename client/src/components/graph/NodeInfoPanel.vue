@@ -241,7 +241,7 @@ const focusNode = () => {
 <template>
   <section
     aria-label="Node info"
-    class="nodeInfo panel flex max-h-[calc(100vh-11rem)] w-80 flex-col overflow-hidden"
+    class="nodeInfo panel panel-glyph flex max-h-[calc(100vh-11rem)] w-80 flex-col overflow-hidden"
   >
     <header
       class="flex items-center justify-between border-b border-line py-2 pr-2 pl-4"

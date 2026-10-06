@@ -1,0 +1,400 @@
+/*
+ * Small decorations of the genre themes (lib/themes.ts). Each is a detail at an edge:
+ * a stripe along the top of the panels, the theme glyph in the corner of the large
+ * panels, and a badge and a side stripe on the tool rail. The default theme has none.
+ * None of them takes pointer events. Motion only runs when the system allows it, and it
+ * only changes opacity, scale and rotation, which need no repaint.
+ *
+ * The theme sets --theme-glyph (an SVG mask) and the color tokens of main.css.
+ */
+
+/* ---------- Stripe along the top edge of every panel ---------- */
+
+:root:not([data-theme="default"]) .panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 14px;
+  right: 14px;
+  height: 2px;
+  border-radius: 0 0 2px 2px;
+  pointer-events: none;
+  opacity: 0.7;
+  background: var(--theme-stripe);
+}
+
+:root[data-theme="jazz"] {
+  /* A gold hairline that fades out, like a brass bell catching light. */
+  --theme-stripe: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-brand) 30%,
+    var(--color-brand-soft) 50%,
+    var(--color-brand) 70%,
+    transparent
+  );
+  /* Piano keys: white keys with black gaps. */
+  --theme-rail: repeating-linear-gradient(
+    180deg,
+    #efe7d2 0 9px,
+    #0d0d10 9px 11px
+  );
+}
+
+/* Rock: the cream piping of an amp; on the rail, a sunburst finish. */
+:root[data-theme="rock"] {
+  --theme-stripe: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-brand) 15%,
+    var(--color-brand) 85%,
+    transparent
+  );
+  --theme-rail: linear-gradient(
+    180deg,
+    #2a0d0b,
+    var(--color-accent) 25%,
+    var(--color-accent-strong) 50%,
+    var(--color-accent) 75%,
+    #2a0d0b
+  );
+}
+
+/* Metal: polished chrome, as on the hardware of a guitar. */
+:root[data-theme="metal"] {
+  --theme-stripe: linear-gradient(
+    90deg,
+    transparent,
+    #5c6068 12%,
+    #f1f3f6 30%,
+    #6d7178 48%,
+    #e3e6ea 66%,
+    #5c6068 88%,
+    transparent
+  );
+  --theme-rail: linear-gradient(
+    90deg,
+    #4d5158,
+    #f1f3f6 40%,
+    #7a7e86 70%,
+    #c9ccd2
+  );
+}
+
+/* Techno: the sixteen steps of a drum machine, a lit step on each beat. */
+:root[data-theme="electronic"] {
+  --theme-stripe: repeating-linear-gradient(
+    90deg,
+    var(--color-accent-strong) 0 6px,
+    transparent 6px 9px,
+    #4a4a4a 9px 15px,
+    transparent 15px 18px,
+    #4a4a4a 18px 24px,
+    transparent 24px 27px,
+    #4a4a4a 27px 33px,
+    transparent 33px 36px
+  );
+  --theme-rail: repeating-linear-gradient(
+    180deg,
+    var(--color-accent-strong) 0 5px,
+    transparent 5px 8px,
+    #4a4a4a 8px 13px,
+    transparent 13px 16px,
+    #4a4a4a 16px 21px,
+    transparent 21px 24px,
+    #4a4a4a 24px 29px,
+    transparent 29px 32px
+  );
+}
+
+/* IDM: the ticks of a ruler, a long one every fifth, as on a technical drawing. */
+:root[data-theme="idm"] {
+  --theme-stripe: repeating-linear-gradient(
+    90deg,
+    var(--color-brand) 0 1px,
+    transparent 1px 6px
+  );
+  --theme-rail:
+    repeating-linear-gradient(
+        180deg,
+        var(--color-brand) 0 1px,
+        transparent 1px 30px
+      )
+      0 0 / 100% 30px,
+    repeating-linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--color-brand) 55%, transparent) 0 1px,
+        transparent 1px 6px
+      )
+      100% 0 / 50% 100% no-repeat;
+}
+
+:root[data-theme="hiphop"] {
+  /* A gold chain of dots. */
+  --theme-stripe: radial-gradient(
+      circle,
+      var(--color-brand) 0 1px,
+      transparent 1.4px
+    )
+    0 50% / 5px 2px repeat-x;
+  --theme-rail: radial-gradient(
+      circle,
+      var(--color-brand) 0 1.5px,
+      transparent 2px
+    )
+    50% 0 / 4px 6px repeat-y;
+}
+
+:root[data-theme="pop"] {
+  --theme-stripe: linear-gradient(
+    90deg,
+    var(--color-accent-strong),
+    var(--color-brand),
+    var(--color-teal),
+    var(--color-accent-strong)
+  );
+  --theme-rail: repeating-linear-gradient(
+    180deg,
+    var(--color-accent-strong) 0 4px,
+    transparent 4px 8px,
+    var(--color-brand) 8px 12px,
+    transparent 12px 16px,
+    var(--color-teal) 16px 20px,
+    transparent 20px 24px
+  );
+}
+
+/* Ambient: one quiet line that fades in and out. */
+:root[data-theme="ambient"] {
+  --theme-stripe: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--color-brand) 70%, transparent) 50%,
+    transparent
+  );
+  --theme-rail: linear-gradient(
+    180deg,
+    transparent,
+    color-mix(in srgb, var(--color-teal) 60%, transparent),
+    transparent
+  );
+}
+
+:root[data-theme="reggae"] {
+  /* Green, gold and red, in three equal bands. */
+  --theme-stripe: linear-gradient(
+    90deg,
+    var(--color-accent-strong) 0 33.3%,
+    var(--color-brand) 33.3% 66.6%,
+    var(--color-teal) 66.6%
+  );
+  --theme-rail: linear-gradient(
+    180deg,
+    var(--color-accent-strong) 0 33.3%,
+    var(--color-brand) 33.3% 66.6%,
+    var(--color-teal) 66.6%
+  );
+}
+
+/* Latin: a sunset from magenta to mango; on the rail, the five strokes of the clave. */
+:root[data-theme="latin"] {
+  --theme-stripe: linear-gradient(
+    90deg,
+    var(--color-accent-strong),
+    var(--color-brand) 55%,
+    var(--color-teal)
+  );
+  /* The 3-2 son clave over sixteen steps: strokes on 1, 4, 7, 11 and 13. */
+  --theme-rail: linear-gradient(
+    180deg,
+    var(--color-brand) 0 6.25%,
+    transparent 6.25% 18.75%,
+    var(--color-brand) 18.75% 25%,
+    transparent 25% 37.5%,
+    var(--color-brand) 37.5% 43.75%,
+    transparent 43.75% 62.5%,
+    var(--color-brand) 62.5% 68.75%,
+    transparent 68.75% 75%,
+    var(--color-brand) 75% 81.25%,
+    transparent 81.25%
+  );
+}
+
+/* R&B and soul: a soft line from violet to rose, like city light on a wet window. */
+:root[data-theme="rnb"] {
+  --theme-stripe: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-accent-strong) 30%,
+    var(--color-brand) 70%,
+    transparent
+  );
+  --theme-rail: linear-gradient(
+    180deg,
+    transparent,
+    var(--color-accent-strong) 35%,
+    var(--color-brand) 65%,
+    transparent
+  );
+}
+
+:root[data-theme="folk"] {
+  /* Stitches, as on a denim seam. */
+  --theme-stripe: repeating-linear-gradient(
+    90deg,
+    var(--color-brand-soft) 0 5px,
+    transparent 5px 9px
+  );
+  --theme-rail: repeating-linear-gradient(
+    180deg,
+    var(--color-brand-soft) 0 5px,
+    transparent 5px 9px
+  );
+}
+
+:root[data-theme="classical"] {
+  /* Two hairlines, like the rules of a printed score. */
+  --theme-stripe: linear-gradient(
+    180deg,
+    var(--color-brand) 0 0.5px,
+    transparent 0.5px 1.5px,
+    var(--color-brand) 1.5px 2px
+  );
+  /* Five staff lines, standing upright along the rail. */
+  --theme-rail: repeating-linear-gradient(
+    90deg,
+    var(--color-brand) 0 1px,
+    transparent 1px 2px
+  );
+}
+
+/* ---------- The glyph in the corner of the large panels ---------- */
+
+:root:not([data-theme="default"]) .panel-glyph::after {
+  content: "";
+  position: absolute;
+  right: 9px;
+  bottom: 8px;
+  width: 12px;
+  height: 12px;
+  pointer-events: none;
+  opacity: 0.35;
+  background-color: var(--color-brand-soft);
+  mask: var(--theme-glyph) center / contain no-repeat;
+}
+
+/* ---------- The tool rail: a badge under it and a stripe along its side ---------- */
+
+:root:not([data-theme="default"]) .theme-rail::before {
+  content: "";
+  position: absolute;
+  /*
+   * Under the rail: above it, the top bar can be close on short screens. The rail is a
+   * panel, whose ::before is also the top stripe, so `top` is reset here.
+   */
+  top: auto;
+  bottom: -30px;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  translate: -50% 0;
+  pointer-events: none;
+  background-color: var(--color-brand);
+  mask: var(--theme-glyph) center / contain no-repeat;
+  filter: drop-shadow(0 0 6px var(--color-brand));
+}
+
+:root:not([data-theme="default"]) .theme-rail::after {
+  content: "";
+  position: absolute;
+  top: 18px;
+  bottom: 18px;
+  left: -8px;
+  width: 3px;
+  border-radius: 2px;
+  pointer-events: none;
+  opacity: 0.75;
+  background: var(--theme-rail);
+}
+
+/* The ruler of the IDM rail has long and short ticks, so it is wider. */
+:root[data-theme="idm"] .theme-rail::after {
+  width: 7px;
+  left: -12px;
+  border-radius: 0;
+}
+
+/* The staff of the classical rail has five lines, so it is wider. */
+:root[data-theme="classical"] .theme-rail::after {
+  width: 9px;
+  left: -14px;
+  opacity: 0.45;
+}
+
+:root[data-theme="jazz"] .theme-rail::after {
+  width: 5px;
+  left: -9px;
+  opacity: 0.55;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The neon of the electronic theme hums: a slow glow on the rail stripe. */
+  :root[data-theme="electronic"] .theme-rail::after {
+    animation: theme-hum 3.2s ease-in-out infinite;
+  }
+
+  /* The pop badge twinkles now and then. */
+  :root[data-theme="pop"] .theme-rail::before {
+    animation: theme-twinkle 5s ease-in-out infinite;
+  }
+
+  /* The ambient badge breathes. */
+  :root[data-theme="ambient"] .theme-rail::before {
+    animation: theme-breathe 7s ease-in-out infinite;
+  }
+
+  /* The reggae sun turns, very slowly. */
+  :root[data-theme="reggae"] .theme-rail::before {
+    animation: theme-turn 40s linear infinite;
+  }
+}
+
+/* Only opacity changes: the compositor runs it without painting. */
+@keyframes theme-hum {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes theme-twinkle {
+  0%,
+  80%,
+  100% {
+    scale: 1;
+    opacity: 1;
+  }
+  88% {
+    scale: 1.25;
+    opacity: 0.6;
+  }
+}
+
+@keyframes theme-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes theme-turn {
+  to {
+    rotate: 360deg;
+  }
+}

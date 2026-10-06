@@ -79,7 +79,7 @@ function trapFocus(event: KeyboardEvent) {
           aria-modal="true"
           :aria-labelledby="titleId"
           tabindex="-1"
-          class="panel flex max-h-[85vh] w-full flex-col bg-surface outline-none"
+          class="panel panel-glyph flex max-h-[85vh] w-full flex-col bg-surface outline-none"
           :class="{
             'max-w-sm': size === 'sm',
             'max-w-lg': size === 'md',

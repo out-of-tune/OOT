@@ -25,6 +25,7 @@ import UiSlider from "@/components/ui/UiSlider.vue";
 import { formatDuration } from "@/lib/formatDuration";
 import { useStore } from "@/store";
 import { playbackPosition } from "@/store/modules/spotify_player";
+import AmbientCover from "./AmbientCover.vue";
 import CurrentSongInfo from "./CurrentSongInfo.vue";
 
 /** How long a slider must rest before its value goes to Spotify, in milliseconds. */
@@ -116,6 +117,7 @@ function transfer(deviceId: string | null) {
   <div
     class="panel flex w-full flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-5"
   >
+    <AmbientCover :images="track?.images" />
     <div class="flex min-w-0 items-center gap-1 sm:w-64">
       <div class="min-w-0 flex-1">
         <CurrentSongInfo
