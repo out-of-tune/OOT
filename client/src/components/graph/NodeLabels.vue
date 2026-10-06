@@ -18,6 +18,9 @@ defineProps<{ items: NodeLabel[] }>();
       }"
     >
       {{ item.data[item.dataKey || "name"] }}
+      <span v-if="item.subtitle" class="block text-[10px] opacity-80">{{
+        item.subtitle
+      }}</span>
     </span>
   </div>
 </template>

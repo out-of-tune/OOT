@@ -11,6 +11,8 @@ export interface NodeLabel {
   colors: { textColor: string; backgroundColor: string };
   data: NodeData;
   dataKey: string;
+  /** Second line under the name, for example the MusicBrainz rating `★ 4.2`. */
+  subtitle?: string;
 }
 
 export interface GraphCameraState {

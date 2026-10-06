@@ -273,3 +273,62 @@ describe("addToClickHistory", () => {
     });
   });
 });
+
+describe("move changes", () => {
+  const moves = [
+    {
+      nodeId: "a",
+      from: { x: 1, y: 2, pinned: false },
+      to: { x: 10, y: 20, z: 0, pinned: true },
+    },
+  ];
+  const compass = { nodeLabel: "album" };
+  const change = {
+    type: "move",
+    data: { nodes: [], links: [] },
+    moves,
+    compass,
+  };
+
+  it("undo puts the nodes where they were, redo where the layout put them", () => {
+    const dispatch = vi.fn();
+    const state = { historyIndex: 0, changes: [change] };
+    const commit = vi.fn((type: string, index: number) => {
+      if (type === "SET_HISTORY_INDEX") state.historyIndex = index;
+    });
+    actions.undo({ state, commit, dispatch, rootState: {} } as never);
+    expect(dispatch).toHaveBeenCalledWith("applyMoves", {
+      moves,
+      direction: "from",
+    });
+    actions.redo({ state, commit, dispatch, rootState: {} } as never);
+    expect(dispatch).toHaveBeenCalledWith("applyMoves", {
+      moves,
+      direction: "to",
+    });
+    // Undo takes the compass axes away, redo shows them again.
+    expect(commit).toHaveBeenCalledWith("SET_COMPASS", null);
+    expect(commit).toHaveBeenCalledWith("SET_COMPASS", compass);
+  });
+
+  it("applyMoves sets position and pin state, and skips nodes that left the graph", () => {
+    const commit = vi.fn();
+    const rootState = {
+      mainGraph: {
+        Graph: { getNode: (id: string) => (id === "a" ? {} : undefined) },
+      },
+    };
+    actions.applyMoves({ commit, rootState } as never, {
+      moves: [...moves, { ...moves[0], nodeId: "gone" }],
+      direction: "to",
+    });
+    expect(commit.mock.calls).toEqual([
+      [
+        "SET_NODE_POSITION",
+        { nodeId: "a", xPosition: 10, yPosition: 20, zPosition: 0 },
+      ],
+      ["PIN_NODE", { id: "a" }],
+      ["RERENDER_GRAPH"],
+    ]);
+  });
+});

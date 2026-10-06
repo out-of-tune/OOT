@@ -80,6 +80,8 @@ declare module "vivagraphjs" {
       callback: (ui: NodeUI, position: Position) => void,
     ): WebglGraphics;
     release(container: HTMLElement): void;
+    /** Called after each frame that the renderer draws. */
+    endRender(): void;
   }
 
   export interface Layout {

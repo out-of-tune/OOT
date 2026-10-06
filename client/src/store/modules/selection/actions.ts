@@ -10,7 +10,7 @@ import type { SelectedArea } from "@/lib/select";
 import type { GraphLink, GraphNode, NodeId, Position } from "@/types/graph";
 import type { Context, RootState } from "@/store/types";
 import { hasSongs } from "@/lib/spotifyNode";
-import { songsForNodes } from "../music_player/actions";
+import { songsForNodes } from "@/lib/songs";
 import type { SelectionState } from "./index";
 import { withOpacity } from "@/lib/color";
 

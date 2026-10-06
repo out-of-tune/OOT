@@ -1,5 +1,6 @@
 import { markRaw } from "vue";
 import createGraph from "ngraph.graph";
+import { METADATA_ATTRIBUTES } from "@/lib/metadata";
 import type { BaseState } from "./types";
 
 export const emptyConfiguration = (): BaseState["configurations"] => ({
@@ -34,6 +35,7 @@ export const createRootState = (): BaseState => ({
         label: "artist",
         attributes: ["name", "id", "popularity", "sid", "mbid", "images"],
         endpoints: ["graphql", "spotify"],
+        metadataAttributes: METADATA_ATTRIBUTES.artist,
       },
       { label: "genre", attributes: ["name", "id"], endpoints: ["graphql"] },
       {
@@ -52,6 +54,7 @@ export const createRootState = (): BaseState => ({
           "uri",
         ],
         endpoints: ["spotify"],
+        metadataAttributes: METADATA_ATTRIBUTES.album,
       },
       {
         label: "song",

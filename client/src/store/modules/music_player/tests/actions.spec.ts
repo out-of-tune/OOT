@@ -1,5 +1,6 @@
 import createGraph from "ngraph.graph";
-import { actions, songsForNodes } from "../actions";
+import { songsForNodes } from "@/lib/songs";
+import { actions } from "../actions";
 
 import SpotifyService from "@/services/SpotifyService";
 vi.mock("@/services/SpotifyService");

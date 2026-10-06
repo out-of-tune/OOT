@@ -27,6 +27,7 @@ export const KEY = {
   M: 77,
   P: 80,
   U: 85,
+  V: 86,
 } as const;
 
 /** Key code of 1 on the number pad. */
@@ -219,6 +220,8 @@ export const actions = {
     } else if (key === KEY.H) {
       dispatch("toggleHighlight");
       if (rootState.appearance.highlight) dispatch("storeColors");
+    } else if (key === KEY.V) {
+      dispatch("setCovers", !rootState.appearance.covers);
     } else if (key === KEY.I) {
       dispatch("invertSelection");
     } else if (modeOfKey(key) && !state.keysdown[KEY.CTRL]) {

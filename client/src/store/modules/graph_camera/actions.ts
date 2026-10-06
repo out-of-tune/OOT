@@ -35,6 +35,12 @@ function generateColorObject(ui: NodeUI) {
   };
 }
 
+/** The rating of a node with MusicBrainz metadata, as it shows under its name. */
+function subtitleOf(data: NodeLabel["data"]) {
+  const rating = data.mbRating;
+  return typeof rating === "number" ? `★ ${rating.toFixed(1)}` : undefined;
+}
+
 /** The label of the node at the position, or undefined when the node is off screen. */
 export function nodeLabelAt(
   renderer: GraphRenderer,
@@ -49,6 +55,7 @@ export function nodeLabelAt(
     id: ui.node.id,
     data: ui.node.data,
     dataKey: "name",
+    subtitle: subtitleOf(ui.node.data),
   };
 }
 
@@ -60,7 +67,9 @@ function sameLabel(a: NodeLabel | undefined, b: NodeLabel | undefined) {
     a.colors.textColor === b.colors.textColor &&
     a.colors.backgroundColor === b.colors.backgroundColor &&
     a.data === b.data &&
-    a.dataKey === b.dataKey
+    a.dataKey === b.dataKey &&
+    // Metadata changes the data object in place, so the rating compares by value.
+    a.subtitle === b.subtitle
   );
 }
 

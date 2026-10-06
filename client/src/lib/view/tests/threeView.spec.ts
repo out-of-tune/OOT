@@ -107,6 +107,27 @@ vi.mock("3d-force-graph", () => {
   return { default: ForceGraph3D };
 });
 
+// jsdom loads no images, so the texture loader reports each texture as loaded at once.
+vi.mock("three", async (importOriginal) => {
+  const three = await importOriginal<typeof import("three")>();
+  class TextureLoader {
+    static loads: string[] = [];
+    setCrossOrigin() {
+      return this;
+    }
+    load(
+      url: string,
+      onLoad: (texture: InstanceType<typeof three.Texture>) => void,
+    ) {
+      TextureLoader.loads.push(url);
+      const texture = new three.Texture();
+      queueMicrotask(() => onLoad(texture));
+      return texture;
+    }
+  }
+  return { ...three, TextureLoader };
+});
+
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 function setup() {
@@ -289,6 +310,57 @@ describe("threeView", () => {
     graph.addNode("late", { label: "genre" });
     await flush();
     expect(fake.data.nodes).toHaveLength(0);
+  });
+});
+
+describe("threeView node images", () => {
+  type ImageMesh = {
+    material: { visible: boolean };
+    children: {
+      visible: boolean;
+      material: {
+        opacity: number;
+        map: { dispose: () => void } | null;
+        alphaMap: unknown;
+      };
+    }[];
+  };
+  const meshOf = (fake: FakeForceGraph, id: string) =>
+    fake.data.nodes.find((node) => node.id === id)?.mesh as ImageMesh;
+
+  it("shows a loaded image instead of the sphere, at the alpha of the node color", async () => {
+    const { graph, view, fake } = setup();
+    graph.addNode("a", { label: "album" });
+    graph.addNode("b", { label: "artist" });
+    view.getGraphics().setNodeImage("a", "cover.jpg", "square");
+    view.getGraphics().setNodeImage("b", "photo.jpg", "circle");
+    await flush();
+    const mesh = meshOf(fake, "a");
+    expect(mesh.children).toHaveLength(1);
+    expect(mesh.children[0].visible).toBe(true);
+    expect(mesh.material.visible).toBe(false);
+    expect(mesh.children[0].material.alphaMap).toBeNull();
+    expect(meshOf(fake, "b").children[0].material.alphaMap).not.toBeNull();
+    view.getGraphics().getNodeUI("a").color = 0xffffff40;
+    expect(mesh.children[0].material.opacity).toBeCloseTo(0x40 / 0xff);
+  });
+
+  it("shares one texture by URL and disposes it with its last node", async () => {
+    const { graph, view, fake } = setup();
+    graph.addNode("a", { label: "album" });
+    graph.addNode("b", { label: "album" });
+    view.getGraphics().setNodeImage("a", "same.jpg");
+    view.getGraphics().setNodeImage("b", "same.jpg");
+    await flush();
+    const texture = meshOf(fake, "a").children[0].material.map!;
+    expect(meshOf(fake, "b").children[0].material.map).toBe(texture);
+    const dispose = vi.spyOn(texture, "dispose");
+    graph.removeNode("a");
+    expect(dispose).not.toHaveBeenCalled();
+    view.getGraphics().setNodeImage("b", null);
+    expect(dispose).toHaveBeenCalledTimes(1);
+    expect(meshOf(fake, "b").children).toHaveLength(0);
+    expect(meshOf(fake, "b").material.visible).toBe(true);
   });
 });
 

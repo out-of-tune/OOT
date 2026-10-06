@@ -227,3 +227,12 @@
   font-size: 0.85rem;
   white-space: pre;
 }
+
+.prose-doc code {
+  padding: 0.05rem 0.3rem;
+  border-radius: 0.25rem;
+  background: var(--color-surface);
+  color: var(--color-fg);
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}

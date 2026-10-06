@@ -7,6 +7,7 @@ import type { Schema } from "@/types/schema";
 import type { SearchObject } from "@/types/search";
 import type { AppearanceState } from "./modules/appearance";
 import type { AuthenticationState } from "./modules/authentication";
+import type { CompassState } from "./modules/compass";
 import type { ConfigurationIoState } from "./modules/configuration_io";
 import type { EventsState } from "./modules/events";
 import type { ExpandState } from "./modules/expand";
@@ -73,6 +74,7 @@ export interface BaseState {
 export interface ModuleStates {
   appearance: AppearanceState;
   authentication: AuthenticationState;
+  compass: CompassState;
   configuration_io: ConfigurationIoState;
   events: EventsState;
   expand: ExpandState;

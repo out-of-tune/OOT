@@ -11,7 +11,11 @@ import {
 import { AdvancedSearchLexer } from "./antlr/AdvancedSearchLexer";
 import { AdvancedSearchParser } from "./antlr/AdvancedSearchParser";
 import { SearchListener } from "./SearchListener";
-import type { Schema, SchemaNodeType } from "@/types/schema";
+import {
+  nodeTypeAttributes,
+  type Schema,
+  type SchemaNodeType,
+} from "@/types/schema";
 import type { SearchObject, SearchTip } from "@/types/search";
 
 /** Collects the parser errors instead of printing them. */
@@ -82,8 +86,9 @@ export function validateSearchObject(
 ): boolean {
   const schemaNodeType = getNodeTypeByName(schema, searchObject.nodeType);
   if (!schemaNodeType) return false;
+  const attributes = nodeTypeAttributes(schemaNodeType);
   return searchObject.attributes.every((attribute) =>
-    schemaNodeType.attributes.includes(attribute.attributeSearch),
+    attributes.includes(attribute.attributeSearch),
   );
 }
 
@@ -91,9 +96,8 @@ export function getAttributes(
   nodeType: string | undefined,
   schemaNodeTypes: SchemaNodeType[],
 ): string[] {
-  return (
-    schemaNodeTypes.find((schemaNodeType) => schemaNodeType.label === nodeType)
-      ?.attributes ?? []
+  return nodeTypeAttributes(
+    schemaNodeTypes.find((schemaNodeType) => schemaNodeType.label === nodeType),
   );
 }
 

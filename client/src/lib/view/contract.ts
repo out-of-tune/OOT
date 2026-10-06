@@ -20,6 +20,12 @@ export interface LinkUI {
   color: number;
 }
 
+/** Side of a node image relative to the node size, in each view. Layouts use it to keep covers apart. */
+export const COVER_SIDE: Record<ViewMode, number> = { "2d": 1.6, "3d": 0.84 };
+
+/** Shape of the image of a node: artists show a circle, albums and songs a square. */
+export type NodeImageShape = "circle" | "square";
+
 /** A point on the screen, in client coordinates. */
 export interface ScreenPoint {
   x: number;
@@ -36,6 +42,15 @@ export interface GraphGraphics {
   toScreen(position: Position): ScreenPoint;
   /** Calls the callback for each node on each frame, for example to place DOM labels. */
   placeNode(callback: (ui: NodeUI, position: Position) => void): void;
+  /**
+   * Shows an image on the node instead of its plain shape, or the plain shape again for
+   * `null`. The image fades with the alpha of the node color and scales with its size.
+   */
+  setNodeImage(
+    nodeId: NodeId,
+    url: string | null,
+    shape?: NodeImageShape,
+  ): void;
 }
 
 export interface GraphLayout {

@@ -8,6 +8,7 @@ import type {
   NodeUI,
   ViewFactory,
 } from "./contract";
+import { createCoverLayer } from "./coverLayer";
 
 const INPUT_EVENTS = [
   "mouseEnter",
@@ -96,6 +97,49 @@ export const createVivaView: ViewFactory = ({
     graphics: webglGraphics,
   });
 
+  // Node images: a canvas on top that draws after each WebGL frame.
+  // Many images change at once, so they ask for one new frame together.
+  let rerenderScheduled = false;
+  let disposed = false;
+  const scheduleRerender = () => {
+    if (rerenderScheduled || disposed) return;
+    rerenderScheduled = true;
+    queueMicrotask(() => {
+      rerenderScheduled = false;
+      if (!disposed) renderer.rerender();
+    });
+  };
+  const covers = createCoverLayer(container, scheduleRerender);
+  const endRender = webglGraphics.endRender.bind(webglGraphics);
+  webglGraphics.endRender = () => {
+    endRender();
+    if (!covers.active) return;
+    const scale = renderer.getTransform().scale;
+    covers.draw((nodeId) => {
+      // Viva builds the node UIs when the renderer runs, so a node can have none yet.
+      const ui = webglGraphics.getNodeUI(nodeId);
+      if (!ui) return undefined;
+      const screen = webglGraphics.transformGraphToClientCoordinates({
+        x: ui.position.x,
+        y: ui.position.y,
+      });
+      return {
+        x: screen.x,
+        y: screen.y,
+        side: ui.size * scale,
+        color: ui.color,
+      };
+    });
+  };
+
+  // A node that leaves the graph lets its image go.
+  type Change = { changeType: string; node?: GraphNode };
+  const onGraphChanged = (changes: unknown[]) =>
+    (changes as Change[]).forEach(({ changeType, node }) => {
+      if (changeType === "remove" && node) covers.set(node.id, null, "square");
+    });
+  graph.on("changed", onGraphChanged);
+
   const graphics: GraphGraphics = {
     getNodeUI: (nodeId) => webglGraphics.getNodeUI(nodeId),
     getLinkUI: (linkId) => webglGraphics.getLinkUI(linkId),
@@ -111,6 +155,10 @@ export const createVivaView: ViewFactory = ({
       webglGraphics.placeNode((ui, position) =>
         callback(ui as NodeUI, position),
       );
+    },
+    setNodeImage: (nodeId, url, shape = "square") => {
+      covers.set(nodeId, url, shape);
+      scheduleRerender();
     },
   };
 
@@ -153,8 +201,11 @@ export const createVivaView: ViewFactory = ({
     run: () => trackResizeListeners(() => void renderer.run()),
     rerender: () => renderer.rerender(),
     dispose: () => {
+      disposed = true;
+      graph.off("changed", onGraphChanged);
       clearTimeout(zoomTimer);
       renderer.dispose();
+      covers.dispose();
       resizeListeners
         .splice(0)
         .forEach((listener) => window.removeEventListener("resize", listener));

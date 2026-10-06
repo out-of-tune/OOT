@@ -6,6 +6,7 @@ import {
   getLinkColor,
   getNodeColor,
 } from "@/lib/graph";
+import { imageShapeOf, nodeImageUrl } from "@/lib/nodeImage";
 import type { GraphNode } from "@/types/graph";
 import type { Context, NodeRef, RootState } from "@/store/types";
 import type { AppearanceState } from "./index";
@@ -24,6 +25,28 @@ const randomOpaqueColor = () =>
   );
 
 export const actions = {
+  /** Gives each node its image (photo or cover), or takes the images away when covers are off. */
+  applyNodeImages({ rootState, state }: Ctx) {
+    const renderer = rootState.mainGraph.renderState.Renderer;
+    if (!renderer) return;
+    const graphics = renderer.getGraphics();
+    const graph = rootState.mainGraph.Graph;
+    getAllNodes(rootState).forEach((node) =>
+      graphics.setNodeImage(
+        node.id,
+        state.covers ? nodeImageUrl(graph, node) : null,
+        imageShapeOf(node),
+      ),
+    );
+  },
+
+  setCovers({ commit, dispatch }: Ctx, covers: boolean) {
+    commit("SET_COVERS", covers);
+    dispatch("applyNodeImages");
+    // Artists without an image load theirs only while covers show.
+    if (covers) dispatch("scheduleMetadata");
+  },
+
   /** Colors each community of the graph (Chinese Whispers clustering) with a random color. */
   clusterNodes({ rootState, commit }: Ctx) {
     const whisper = createChineseWhisper(rootState.mainGraph.Graph);

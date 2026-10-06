@@ -43,6 +43,24 @@ const steps: DriveStep[] = [
     },
   },
   {
+    element: "#covers-button",
+    popover: {
+      title: "Covers",
+      description:
+        "Artists show their photo in a circle, albums their cover in a square. The key V turns covers on and off.",
+      side: "left",
+    },
+  },
+  {
+    element: "#compass-button",
+    popover: {
+      title: "Compass",
+      description:
+        "Place albums or artists on two axes: by year and rating, or between two MusicBrainz tags.",
+      side: "left",
+    },
+  },
+  {
     element: "#undo-button",
     popover: {
       title: "Undo",

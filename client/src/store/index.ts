@@ -17,6 +17,8 @@ import graph_io from "./modules/graph_io";
 import history from "./modules/history";
 import init_config from "./modules/init_config";
 import init_graph from "./modules/init_graph";
+import compass from "./modules/compass";
+import metadata from "./modules/metadata";
 import modes from "./modules/modes";
 import music_player from "./modules/music_player";
 import playlists from "./modules/playlists";
@@ -106,6 +108,12 @@ const persistViewMode = new VuexPersistence<RootState>({
   filter: (mutation: Mutation) => mutation.type === "SET_VIEW_MODE",
 });
 
+const persistCovers = new VuexPersistence<RootState>({
+  key: "oot_covers",
+  reducer: (state) => ({ appearance: { covers: state.appearance.covers } }),
+  filter: (mutation: Mutation) => mutation.type === "SET_COVERS",
+});
+
 export const key: InjectionKey<Store<RootState>> = Symbol("store");
 
 export const store = createStore<RootState>({
@@ -116,6 +124,7 @@ export const store = createStore<RootState>({
     persistConfigurationNames.plugin,
     persistTour.plugin,
     persistViewMode.plugin,
+    persistCovers.plugin,
     shareMutations<RootState>([
       ...userMutations,
       ...configurationMutations,
@@ -132,12 +141,14 @@ export const store = createStore<RootState>({
     appearance,
     appearance_mapping,
     collapse,
+    compass,
     configuration_io,
     coordinate_system,
     events,
     expand,
     graph_io,
     remove,
+    metadata,
     modes,
     init_graph,
     init_config,
