@@ -283,12 +283,17 @@
   mask: var(--theme-glyph) center / contain no-repeat;
 }
 
-/* ---------- The tool rail: a badge above it and a stripe along its side ---------- */
+/* ---------- The tool rail: a badge under it and a stripe along its side ---------- */
 
 :root:not([data-theme="default"]) .theme-rail::before {
   content: "";
   position: absolute;
-  top: -30px;
+  /*
+   * Under the rail: above it, the top bar can be close on short screens. The rail is a
+   * panel, whose ::before is also the top stripe, so `top` is reset here.
+   */
+  top: auto;
+  bottom: -30px;
   left: 50%;
   width: 18px;
   height: 18px;
