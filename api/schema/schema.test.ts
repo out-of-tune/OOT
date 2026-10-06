@@ -20,6 +20,12 @@ describe('Schema', () => {
         Token: () => ({
             token: 'ACCESS-TOKEN'
         }),
+        MusicMetadata: () => ({
+            sid: 'SPOTIFY-ID',
+            status: 'FOUND',
+            rating: 4.5,
+            genres: [{ name: 'idm', count: 7 }],
+        }),
         Artist: () => ({
             id: 'Artist/1',
             name: 'Bob D.',

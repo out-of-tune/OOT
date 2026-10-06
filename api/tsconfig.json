@@ -13,6 +13,6 @@
     "skipLibCheck": true,
     "sourceMap": true
   },
-  "include": ["src/**/*.ts", "schema/**/*.ts"],
-  "exclude": ["src/**/*.test.ts", "schema/**/*.test.ts", "schema/testcases/**"]
+  "include": ["src/**/*.ts", "schema/**/*.ts", "scripts/**/*.ts"],
+  "exclude": ["src/**/*.test.ts", "schema/**/*.test.ts", "schema/testcases/**", "scripts/**/*.test.ts"]
 }

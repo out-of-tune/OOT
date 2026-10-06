@@ -115,6 +115,18 @@ docker run --rm --network <project>_default -v "$PWD/db/seed:/seed:ro" \
 
 `<project>` is the Docker Compose project name, by default the name of the repository folder. Running the script again replaces the same documents.
 
+## MusicBrainz metadata
+
+The API reads tags, genres and ratings of artists and albums from [MusicBrainz](https://musicbrainz.org) and keeps them in ArangoDB. It sends at most one request per second, as MusicBrainz asks. Set `MUSICBRAINZ_CONTACT` to an e-mail address or a URL, so that MusicBrainz can reach you. It goes into the User-Agent of each request.
+
+The artist JSON dump fills the artist metadata at once, without live requests. Download `artist.tar.xz` (about 2 GB) from the [JSON dumps](https://data.metabrainz.org/pub/musicbrainz/data/json-dumps/). Then run in the `api` folder, with the settings of the API in `.env`:
+
+```
+xz -dc artist.tar.xz | tar -xO mbdump/artist | npx tsx scripts/import-musicbrainz-artists.ts
+```
+
+The script keeps the artists with a Spotify link. Running it again replaces the same documents.
+
 ## Development checks
 
 Each package has its own tests. From the repository root, `npm run check` runs all of them:

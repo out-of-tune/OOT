@@ -38,6 +38,49 @@ export type Genre = {
   supergenres?: Maybe<Array<Maybe<Genre>>>;
 };
 
+export enum MetadataStatus {
+  Found = 'FOUND',
+  NotFound = 'NOT_FOUND',
+  /** Not looked up yet. Ask again in a few seconds. */
+  Pending = 'PENDING'
+}
+
+/**
+ * Metadata from MusicBrainz, the open music database, for a Spotify artist or album.
+ * An album is a MusicBrainz release group. The answers are never cached, because a
+ * PENDING answer becomes FOUND or NOT_FOUND.
+ */
+export type MusicMetadata = {
+  __typename?: 'MusicMetadata';
+  area?: Maybe<Scalars['String']['output']>;
+  /** Artist: the year it began. Album: the year of its first release. */
+  beginYear?: Maybe<Scalars['Int']['output']>;
+  country?: Maybe<Scalars['String']['output']>;
+  endYear?: Maybe<Scalars['Int']['output']>;
+  genres: Array<MusicTag>;
+  mbid?: Maybe<Scalars['String']['output']>;
+  /** Average rating of the users, 0 to 5. */
+  rating?: Maybe<Scalars['Float']['output']>;
+  ratingVotes?: Maybe<Scalars['Int']['output']>;
+  /** Album: Live, Compilation, Remix... */
+  secondaryTypes: Array<Scalars['String']['output']>;
+  /** Spotify id. */
+  sid: Scalars['ID']['output'];
+  status: MetadataStatus;
+  tags: Array<MusicTag>;
+  /** Artist: Person, Group, Orchestra... Album: Album, EP, Single... */
+  type?: Maybe<Scalars['String']['output']>;
+  /** MusicBrainz page. */
+  url?: Maybe<Scalars['String']['output']>;
+};
+
+/** A tag of MusicBrainz with the number of users who gave it. */
+export type MusicTag = {
+  __typename?: 'MusicTag';
+  count: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   addArtist: AddArtistResponse;
@@ -74,9 +117,22 @@ export type NumericsFilter = {
 
 export type Query = {
   __typename?: 'Query';
+  /** Metadata of up to 200 Spotify albums, like artistMetadata. */
+  albumMetadata: Array<MusicMetadata>;
   artist?: Maybe<Array<Maybe<Artist>>>;
+  /**
+   * Metadata of up to 200 Spotify artists, in the order of the ids. With urgent, the ids that
+   * are not known yet go before the rest of the queue: for a node that a user looks at.
+   */
+  artistMetadata: Array<MusicMetadata>;
   genre?: Maybe<Array<Maybe<Genre>>>;
   publicToken?: Maybe<Token>;
+};
+
+
+export type QueryAlbumMetadataArgs = {
+  sids: Array<Scalars['ID']['input']>;
+  urgent?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -86,6 +142,12 @@ export type QueryArtistArgs = {
   mbid?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   sid?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QueryArtistMetadataArgs = {
+  sids: Array<Scalars['ID']['input']>;
+  urgent?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -187,9 +249,13 @@ export type ResolversTypes = {
   AddArtistResponse: ResolverTypeWrapper<AddArtistResponse>;
   Artist: ResolverTypeWrapper<Artist>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
+  Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   Genre: ResolverTypeWrapper<Genre>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
+  MetadataStatus: MetadataStatus;
+  MusicMetadata: ResolverTypeWrapper<MusicMetadata>;
+  MusicTag: ResolverTypeWrapper<MusicTag>;
   Mutation: ResolverTypeWrapper<Record<PropertyKey, never>>;
   NUMCOMP: Numcomp;
   NumericsFilter: NumericsFilter;
@@ -205,9 +271,12 @@ export type ResolversParentTypes = {
   AddArtistResponse: AddArtistResponse;
   Artist: Artist;
   Boolean: Scalars['Boolean']['output'];
+  Float: Scalars['Float']['output'];
   Genre: Genre;
   ID: Scalars['ID']['output'];
   Int: Scalars['Int']['output'];
+  MusicMetadata: MusicMetadata;
+  MusicTag: MusicTag;
   Mutation: Record<PropertyKey, never>;
   NumericsFilter: NumericsFilter;
   Query: Record<PropertyKey, never>;
@@ -247,13 +316,37 @@ export type GenreResolvers<ContextType = any, ParentType extends ResolversParent
   supergenres?: Resolver<Maybe<Array<Maybe<ResolversTypes['Genre']>>>, ParentType, ContextType>;
 };
 
+export type MusicMetadataResolvers<ContextType = any, ParentType extends ResolversParentTypes['MusicMetadata'] = ResolversParentTypes['MusicMetadata']> = {
+  area?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  beginYear?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  endYear?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  genres?: Resolver<Array<ResolversTypes['MusicTag']>, ParentType, ContextType>;
+  mbid?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  rating?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  ratingVotes?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  secondaryTypes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
+  sid?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['MetadataStatus'], ParentType, ContextType>;
+  tags?: Resolver<Array<ResolversTypes['MusicTag']>, ParentType, ContextType>;
+  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  url?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+};
+
+export type MusicTagResolvers<ContextType = any, ParentType extends ResolversParentTypes['MusicTag'] = ResolversParentTypes['MusicTag']> = {
+  count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   addArtist?: Resolver<ResolversTypes['AddArtistResponse'], ParentType, ContextType, RequireFields<MutationAddArtistArgs, 'sid'>>;
   createfeedback?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationCreatefeedbackArgs, 'feedback'>>;
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+  albumMetadata?: Resolver<Array<ResolversTypes['MusicMetadata']>, ParentType, ContextType, RequireFields<QueryAlbumMetadataArgs, 'sids' | 'urgent'>>;
   artist?: Resolver<Maybe<Array<Maybe<ResolversTypes['Artist']>>>, ParentType, ContextType, RequireFields<QueryArtistArgs, 'limit'>>;
+  artistMetadata?: Resolver<Array<ResolversTypes['MusicMetadata']>, ParentType, ContextType, RequireFields<QueryArtistMetadataArgs, 'sids' | 'urgent'>>;
   genre?: Resolver<Maybe<Array<Maybe<ResolversTypes['Genre']>>>, ParentType, ContextType, RequireFields<QueryGenreArgs, 'limit'>>;
   publicToken?: Resolver<Maybe<ResolversTypes['Token']>, ParentType, ContextType>;
 };
@@ -267,6 +360,8 @@ export type Resolvers<ContextType = any> = {
   AddArtistResponse?: AddArtistResponseResolvers<ContextType>;
   Artist?: ArtistResolvers<ContextType>;
   Genre?: GenreResolvers<ContextType>;
+  MusicMetadata?: MusicMetadataResolvers<ContextType>;
+  MusicTag?: MusicTagResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Token?: TokenResolvers<ContextType>;

@@ -4,6 +4,8 @@ import { startStandaloneServer } from "@apollo/server/standalone";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import cache from "./caching/index.js";
 import ArangoAPI from "./datasources/arangodb/index.js";
+import { MusicBrainzClient } from "./datasources/musicbrainz/client.js";
+import MusicBrainzAPI from "./datasources/musicbrainz/index.js";
 import SpotifyAPI from "./datasources/spotify/index.js";
 import helpers from "./helpers/index.js";
 import * as settings from "./helpers/settings.js";
@@ -28,11 +30,13 @@ spotify.start();
 /** Longest wait for open requests on shutdown, in milliseconds. */
 const SHUTDOWN_TIMEOUT = 5000;
 let started = false;
+let musicbrainz: MusicBrainzAPI | undefined;
 
 // As PID 1 in a container, Node does not stop on SIGTERM unless it handles the signal.
 async function shutdown(signal: NodeJS.Signals) {
   console.log(`${signal} received. Stopping the server...`);
   spotify.stop();
+  musicbrainz?.stop();
   setTimeout(() => process.exit(0), SHUTDOWN_TIMEOUT).unref();
   try {
     if (started) await server.stop();
@@ -52,11 +56,21 @@ const db = await ArangoAPI.connect(
   settings.getArangoPassword(),
 );
 
+await MusicBrainzAPI.onConnect(db);
+// One instance for the process: its queue keeps the rate limit of MusicBrainz for all requests.
+musicbrainz = new MusicBrainzAPI(
+  db,
+  new MusicBrainzClient(`out-of-tune/1.0 ( ${settings.MUSICBRAINZ_CONTACT} )`),
+  (ids) => spotify.albumBarcodes(ids),
+);
+const metadata = musicbrainz;
+
 const { url } = await startStandaloneServer(server, {
   context: async () => ({
     dataSources: {
       spotify,
       arango: new ArangoAPI(db),
+      musicbrainz: metadata,
     },
   }),
   listen: { port: settings.API_PORT },
