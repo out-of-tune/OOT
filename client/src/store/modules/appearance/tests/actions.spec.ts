@@ -360,3 +360,43 @@ describe("fadeOut", () => {
     expect(commit).toHaveBeenCalledTimes(3);
   });
 });
+
+describe("applyNodeImages", () => {
+  it("gives each node its image, or none while covers are off", async () => {
+    const { default: createGraph } = await import("ngraph.graph");
+    const graph = createGraph();
+    graph.addNode("artist/a", { label: "artist", images: ["a.jpg"] });
+    graph.addNode("genre/g", { label: "genre" });
+    const { getAllNodes } = await import("@/lib/graph");
+    vi.mocked(getAllNodes).mockReturnValue([
+      graph.getNode("artist/a")!,
+      graph.getNode("genre/g")!,
+    ]);
+    const setNodeImage = vi.fn();
+    const rootState = {
+      mainGraph: {
+        Graph: graph,
+        renderState: { Renderer: { getGraphics: () => ({ setNodeImage }) } },
+      },
+    };
+    actions.applyNodeImages({ rootState, state: { covers: true } } as never);
+    expect(setNodeImage.mock.calls).toEqual([
+      ["artist/a", "a.jpg", "circle"],
+      ["genre/g", null, "square"],
+    ]);
+    setNodeImage.mockClear();
+    actions.applyNodeImages({ rootState, state: { covers: false } } as never);
+    expect(setNodeImage).toHaveBeenCalledWith("artist/a", null, "circle");
+  });
+
+  it("setCovers saves the switch and applies it", () => {
+    const commit = vi.fn();
+    const dispatch = vi.fn();
+    actions.setCovers({ commit, dispatch } as never, false);
+    expect(commit).toHaveBeenCalledWith("SET_COVERS", false);
+    expect(dispatch).toHaveBeenCalledWith("applyNodeImages");
+    expect(dispatch).not.toHaveBeenCalledWith("scheduleMetadata");
+    actions.setCovers({ commit, dispatch } as never, true);
+    expect(dispatch).toHaveBeenCalledWith("scheduleMetadata");
+  });
+});

@@ -8,6 +8,7 @@ import {
   searchObjectForType,
 } from "@/lib/search/searchObject";
 import { useStore } from "@/store";
+import { nodeTypeAttributes } from "@/types/schema";
 import RuleList from "./RuleList.vue";
 
 const props = defineProps<{ nodeLabel: string }>();
@@ -18,11 +19,12 @@ const size = ref(20);
 const min = ref(5);
 const max = ref(40);
 
-const attributes = computed(
-  () =>
+const attributes = computed(() =>
+  nodeTypeAttributes(
     store.state.schema.nodeTypes.find(
       (nodeType) => nodeType.label === props.nodeLabel,
-    )?.attributes ?? [],
+    ),
+  ),
 );
 const mapAttribute = ref("");
 // The schema can load after this component.

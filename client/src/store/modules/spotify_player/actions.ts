@@ -13,8 +13,8 @@ import type {
   StartPlaybackOptions,
 } from "@/types/spotify";
 import type { Context, RootState } from "@/store/types";
-import { findOrAddSongNode } from "../music_player/actions";
-import { addSongsWithNeighbors, replaceGraphWith } from "../playlists/actions";
+import { addSongsWithNeighbors, findOrAddSongNode } from "@/lib/songs";
+import { replaceGraphWith } from "../playlists/actions";
 import {
   playbackPosition,
   type NowPlaying,

@@ -83,14 +83,14 @@ watch(filter, () => nextTick(loadMoreIfNeeded));
 
 const newName = ref("");
 const creating = ref(false);
-async function createPlaylist() {
+/** Creates an empty playlist, or with `fromGraph` one with the songs of the graph. */
+async function createPlaylist(fromGraph = false) {
   if (!newName.value.trim() || creating.value) return;
   creating.value = true;
   try {
-    const playlist: SpotifyPlaylist | undefined = await store.dispatch(
-      "createPlaylist",
-      { name: newName.value },
-    );
+    const playlist: SpotifyPlaylist | undefined = fromGraph
+      ? await store.dispatch("saveGraphAsPlaylist", newName.value)
+      : await store.dispatch("createPlaylist", { name: newName.value });
     if (playlist) {
       newName.value = "";
       filter.value = "";
@@ -202,7 +202,7 @@ function loadGraph() {
                 : `${playlists.length} of ${total} playlists`
           }}
         </p>
-        <form class="flex gap-2" @submit.prevent="createPlaylist">
+        <form class="flex gap-2" @submit.prevent="createPlaylist()">
           <input
             v-model="newName"
             type="text"
@@ -216,6 +216,13 @@ function loadGraph() {
             :disabled="!newName.trim() || creating"
             class="shrink-0"
             ><Plus class="size-4" /> Create</UiButton
+          >
+          <UiButton
+            :disabled="!newName.trim() || creating"
+            class="shrink-0"
+            title="A playlist with the songs of the graph, and a random song of each artist and album"
+            @click="createPlaylist(true)"
+            >From graph</UiButton
           >
         </form>
       </div>

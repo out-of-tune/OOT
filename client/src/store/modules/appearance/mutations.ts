@@ -11,6 +11,9 @@ export const mutations = {
   SET_HIGHLIGHT_ACTIVE(state, highlight: boolean) {
     state.highlight = highlight;
   },
+  SET_COVERS(state, covers: boolean) {
+    state.covers = covers;
+  },
 } satisfies MutationTree<AppearanceState>;
 
 export default mutations;

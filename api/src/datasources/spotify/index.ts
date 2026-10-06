@@ -12,6 +12,8 @@ const API_RETRY_DELAY = 500;
 /** Longest Retry-After that a request waits for, in milliseconds. A longer one fails the request. */
 const API_MAX_RETRY_AFTER = 10_000;
 const RETRY_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
+/** Wait between the album requests of albumBarcodes, in milliseconds. */
+const BARCODE_REQUEST_INTERVAL = 250;
 
 export interface ArtistInfo {
   name: string;
@@ -120,6 +122,28 @@ class SpotifyAPI {
       }
       await delay(wait);
     }
+  }
+
+  /**
+   * The barcodes (UPC) of albums by id, one request per album. Albums without one, and
+   * albums that Spotify does not know (404), are left out. Other errors fail the whole call.
+   */
+  async albumBarcodes(ids: string[]): Promise<Map<string, string>> {
+    const barcodes = new Map<string, string>();
+    for (const [index, id] of ids.entries()) {
+      // Spaced out: Spotify answers a burst with a long ban of the whole app.
+      if (index > 0) await delay(BARCODE_REQUEST_INTERVAL);
+      let response: Response;
+      try {
+        response = await this.get(`/albums/${encodeURIComponent(id)}`);
+      } catch (error) {
+        if (error instanceof SpotifyRequestError && error.status === 404) continue;
+        throw error;
+      }
+      const album = (await response.json()) as { external_ids?: { upc?: string } };
+      if (album.external_ids?.upc) barcodes.set(id, album.external_ids.upc);
+    }
+    return barcodes;
   }
 
   async artist_info(sid: string): Promise<ArtistInfo> {

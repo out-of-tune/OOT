@@ -1,0 +1,165 @@
+{
+ "id": "a66999a7-ae5c-460e-ba94-1a01143ae847",
+ "name": "Snow Patrol",
+ "type": "Group",
+ "country": "GB",
+ "area": {
+  "disambiguation": "",
+  "id": "8a754a16-0027-3a29-b6d7-2b40ea0481ed",
+  "type": null,
+  "iso-3166-1-codes": [
+   "GB"
+  ],
+  "name": "United Kingdom",
+  "type-id": null,
+  "sort-name": "United Kingdom"
+ },
+ "life-span": {
+  "ended": false,
+  "end": null,
+  "begin": "1994"
+ },
+ "rating": {
+  "votes-count": 5,
+  "value": 3.8
+ },
+ "genres": [
+  {
+   "disambiguation": "",
+   "name": "alternative rock",
+   "count": 5,
+   "id": "ceeaa283-5d7b-4202-8d1d-e25d116b2a18"
+  },
+  {
+   "name": "indie rock",
+   "disambiguation": "",
+   "id": "ccd19ebf-052c-4afe-8ad9-fbb0a73f94a7",
+   "count": 5
+  },
+  {
+   "id": "1208a8e7-e5bd-4891-9f81-9a9fdfceeb39",
+   "count": 1,
+   "name": "noise pop",
+   "disambiguation": ""
+  },
+  {
+   "id": "797e2e85-5ffd-495c-a757-8b4079052f0e",
+   "count": 3,
+   "name": "pop rock",
+   "disambiguation": ""
+  },
+  {
+   "count": 1,
+   "id": "a493b79c-4072-4371-a14c-446b1027982a",
+   "disambiguation": "",
+   "name": "post-britpop"
+  },
+  {
+   "id": "618704fc-daac-44a2-92c9-89e3b1a2fc8c",
+   "count": 1,
+   "name": "power pop",
+   "disambiguation": ""
+  },
+  {
+   "name": "rock",
+   "disambiguation": "",
+   "id": "0e3fc579-2d24-4f20-9dae-736e1ec78798",
+   "count": 1
+  }
+ ],
+ "tags": [
+  {
+   "count": 5,
+   "name": "alternative rock"
+  },
+  {
+   "count": 2,
+   "name": "british"
+  },
+  {
+   "name": "indie rock",
+   "count": 5
+  },
+  {
+   "name": "noise pop",
+   "count": 1
+  },
+  {
+   "count": 3,
+   "name": "pop rock"
+  },
+  {
+   "count": 1,
+   "name": "post-britpop"
+  },
+  {
+   "name": "power pop",
+   "count": 1
+  },
+  {
+   "count": 1,
+   "name": "rock"
+  }
+ ],
+ "relations": [
+  {
+   "direction": "forward",
+   "attributes": [],
+   "attribute-ids": {},
+   "type": "free streaming",
+   "type-id": "769085a1-c2f7-4c24-a532-2375a77693bd",
+   "target-credit": "",
+   "attribute-values": {},
+   "begin": null,
+   "ended": false,
+   "target-type": "url",
+   "url": {
+    "resource": "https://open.spotify.com/artist/3rIZMv9rysU7JkLzEaC5Jp",
+    "id": "fe7de522-90a8-4f06-8a5f-02b64383b20b"
+   },
+   "source-credit": "",
+   "end": null
+  },
+  {
+   "direction": "forward",
+   "attributes": [],
+   "attribute-ids": {},
+   "type": "discogs",
+   "type-id": "04a5b104-a4c2-4bac-99a1-7b837c37d9e4",
+   "target-credit": "",
+   "attribute-values": {},
+   "begin": null,
+   "ended": false,
+   "target-type": "url",
+   "url": {
+    "id": "a1fdb0ad-0681-4dad-a4bb-7ce523f72858",
+    "resource": "https://www.discogs.com/artist/21757"
+   },
+   "end": null,
+   "source-credit": ""
+  },
+  {
+   "source-credit": "",
+   "end": null,
+   "artist": {
+    "disambiguation": "",
+    "id": "b8f913bb-28cc-4bc6-a867-08812814962f",
+    "type": "Group",
+    "country": null,
+    "type-id": "e431f5f6-b5d2-343d-8b36-72607fffb74b",
+    "name": "Band Aid 20",
+    "sort-name": "Band Aid 20"
+   },
+   "target-type": "artist",
+   "ended": false,
+   "begin": null,
+   "attribute-values": {},
+   "target-credit": "",
+   "type-id": "75c09861-6857-4ec0-9729-84eefde7fc86",
+   "type": "collaboration",
+   "attribute-ids": {},
+   "attributes": [],
+   "direction": "forward"
+  }
+ ]
+}

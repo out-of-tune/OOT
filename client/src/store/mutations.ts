@@ -64,6 +64,25 @@ export const mutations = {
     state.mainGraph.currentNode = node;
   },
 
+  /**
+   * Adds attributes to the data of a node. The data object changes in place: a new one would
+   * make the renderer build the node again and lose its color and size.
+   */
+  MERGE_NODE_DATA(
+    state,
+    { nodeId, data }: { nodeId: NodeId; data: Partial<NodeData> },
+  ) {
+    const node = state.mainGraph.Graph.getNode(nodeId);
+    if (!node) return;
+    Object.assign(node.data, data);
+    const current = state.mainGraph.currentNode;
+    if (current.id === nodeId)
+      state.mainGraph.currentNode = {
+        ...current,
+        data: { ...current.data, ...data },
+      };
+  },
+
   CREATE_GRAPH(state) {
     // The graph engine objects are not reactive: Vue proxies would slow them down
     // and break identity checks inside the renderer.

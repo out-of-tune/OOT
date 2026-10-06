@@ -63,12 +63,14 @@ describe("createVivaView input events", () => {
     vi.spyOn(Viva.Graph, "webglInputEvents").mockReturnValue(
       fakeEvents as never,
     );
-    vi.spyOn(Viva.Graph.View, "webglGraphics").mockReturnValue({} as never);
+    vi.spyOn(Viva.Graph.View, "webglGraphics").mockReturnValue({
+      endRender: vi.fn(),
+    } as never);
     vi.spyOn(Viva.Graph.View, "renderer").mockReturnValue({} as never);
     vi.spyOn(Viva.Graph.Layout, "forceDirected").mockReturnValue({} as never);
     const { createVivaView } = await import("../vivaView");
     const view = createVivaView({
-      graph: {} as never,
+      graph: { on: vi.fn(), off: vi.fn() } as never,
       container: {} as never,
       layoutOptions: {} as never,
     });
@@ -102,12 +104,13 @@ describe("createVivaView lifecycle", () => {
     );
     vi.spyOn(Viva.Graph.View, "webglGraphics").mockReturnValue({
       getNodeUI: (id: string) => ({ position: positions[id] }),
+      endRender: vi.fn(),
     } as never);
     vi.spyOn(Viva.Graph.View, "renderer").mockReturnValue(renderer as never);
     vi.spyOn(Viva.Graph.Layout, "forceDirected").mockReturnValue({} as never);
     const { createVivaView } = await import("../vivaView");
     const view = createVivaView({
-      graph: {} as never,
+      graph: { on: vi.fn(), off: vi.fn() } as never,
       container: { clientWidth: 1000, clientHeight: 1000 } as never,
       layoutOptions: {} as never,
     });

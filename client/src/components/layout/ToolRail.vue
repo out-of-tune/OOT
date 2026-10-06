@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import {
   Box,
+  ChartScatter,
   CircleQuestionMark,
   Compass,
+  Image as ImageIcon,
   ListPlus,
   ListVideo,
   MessageSquare,
@@ -16,6 +18,7 @@ import {
   Undo2,
 } from "@lucide/vue";
 import { computed, ref } from "vue";
+import CompassMenu from "@/components/popovers/CompassMenu.vue";
 import LoadSaveMenu from "@/components/popovers/LoadSaveMenu.vue";
 import SelectionActions from "@/components/popovers/SelectionActions.vue";
 import IconButton from "@/components/ui/IconButton.vue";
@@ -27,7 +30,10 @@ import type { ActiveMode } from "@/store/types";
 const store = useStore();
 const activeMode = computed(() => store.state.activeMode);
 const selectionOpen = ref(false);
+const compassOpen = ref(false);
+const compassActive = computed(() => Boolean(store.state.compass.active));
 const viewMode = computed(() => store.state.viewMode);
+const covers = computed(() => store.state.appearance.covers);
 const switchingView = ref(false);
 
 async function toggleViewMode() {
@@ -117,6 +123,14 @@ const openInNewTab = (path: string) =>
     >
       <Box />
     </IconButton>
+    <IconButton
+      id="covers-button"
+      :label="covers ? 'Hide covers (V)' : 'Show covers (V)'"
+      :active="covers"
+      @click="store.dispatch('setCovers', !covers)"
+    >
+      <ImageIcon />
+    </IconButton>
 
     <hr class="my-1 w-6 border-line" />
 
@@ -146,6 +160,22 @@ const openInNewTab = (path: string) =>
       </template>
       <template #default="{ close }">
         <SelectionActions @done="close" />
+      </template>
+    </UiPopover>
+
+    <UiPopover v-model:open="compassOpen" label="Compass" placement="left">
+      <template #trigger="{ open, toggle }">
+        <IconButton
+          id="compass-button"
+          label="Compass: place nodes on two axes"
+          :active="open || compassActive"
+          @click="toggle"
+        >
+          <ChartScatter />
+        </IconButton>
+      </template>
+      <template #default="{ close }">
+        <CompassMenu @done="close" />
       </template>
     </UiPopover>
 

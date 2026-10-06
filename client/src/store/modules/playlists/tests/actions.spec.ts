@@ -408,3 +408,52 @@ describe("choosePlaylist", () => {
     );
   });
 });
+
+describe("saveGraphAsPlaylist", () => {
+  const graphWith = async (count: number, label = "song") => {
+    const { default: createGraph } = await import("ngraph.graph");
+    const graph = createGraph();
+    for (let index = 0; index < count; index++)
+      graph.addNode(`${label}/${index}`, { label, sid: String(index) });
+    graph.addNode("genre/g", { label: "genre" });
+    return {
+      mainGraph: { Graph: graph },
+      spotify: { accessToken: "token" },
+      authentication: { loginState: true, accessToken: "token" },
+    };
+  };
+
+  it("asks for a selection when the graph has too many artists and albums", async () => {
+    const dispatch = vi.fn();
+    SpotifyService.getSongsFromAlbum = vi.fn();
+    const result = await actions.saveGraphAsPlaylist(
+      { dispatch, rootState: await graphWith(101, "album") } as never,
+      "Mix",
+    );
+    expect(result).toBeUndefined();
+    expect(SpotifyService.getSongsFromAlbum).not.toHaveBeenCalled();
+    expect(dispatch).toHaveBeenCalledWith(
+      "setInfo",
+      expect.stringContaining("Select up to 100"),
+    );
+  });
+
+  it("creates a playlist with the songs of the graph, also when there are many", async () => {
+    const dispatch = vi.fn().mockResolvedValue({ id: "p" });
+    SpotifyService.getFullSongData = vi.fn(
+      async (_token: string, ids: string[]) => ({
+        tracks: ids.map((id) => ({ id, uri: `spotify:track:${id}`, name: id })),
+      }),
+    ) as never;
+    await actions.saveGraphAsPlaylist(
+      { dispatch, rootState: await graphWith(120) } as never,
+      "Mix",
+    );
+    const [, payload] = dispatch.mock.calls.find(
+      ([type]) => type === "createPlaylist",
+    )!;
+    expect(payload.name).toBe("Mix");
+    expect(payload.uris).toHaveLength(120);
+    expect(payload.uris[0]).toBe("spotify:track:0");
+  });
+});

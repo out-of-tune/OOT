@@ -666,6 +666,8 @@ export const actions = {
     dispatch("applyEdgeColorConfiguration");
     dispatch("applyNodeColorConfiguration");
     dispatch("applyNodeSizeConfiguration");
+    dispatch("applyNodeImages");
+    dispatch("scheduleMetadata");
   },
 
   setFailedExpandedConnections({ commit }: Ctx, connections: Connection[]) {

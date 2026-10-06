@@ -7,6 +7,7 @@ import {
   ref,
 } from "vue";
 import { useRoute } from "vue-router";
+import CompassAxes from "@/components/graph/CompassAxes.vue";
 import EmptyGraphHint from "@/components/graph/EmptyGraphHint.vue";
 import GraphStatus from "@/components/graph/GraphStatus.vue";
 import NodeInfoPanel from "@/components/graph/NodeInfoPanel.vue";
@@ -140,6 +141,8 @@ onMounted(async () => {
   };
   unsubscribe = store.subscribe((mutation) => {
     if (mutation.type === "SET_RENDERER") watchZoom();
+    // The compass axes belong to nodes that are gone.
+    if (mutation.type === "CLEAR_GRAPH") store.commit("SET_COMPASS", null);
     if (LAYOUT_MUTATIONS.includes(mutation.type))
       store.dispatch("applyCoordinateSystems");
     if (NODE_RULE_MUTATIONS.includes(mutation.type)) {
@@ -187,6 +190,7 @@ onBeforeUnmount(() => {
     >
       <NodeLabels :items="nodeLabels" />
     </div>
+    <CompassAxes />
     <!-- lib/select.ts shows this layer during a SHIFT + drag selection. -->
     <div class="graph-overlay absolute inset-0 hidden" />
 

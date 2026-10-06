@@ -13,6 +13,7 @@ const generalShortcuts: Shortcut[] = [
     description: "Fit the graph to the selection, or to the screen",
   },
   { keys: ["Space"], description: "Pause or resume the motion" },
+  { keys: ["V"], description: "Show or hide the covers on the nodes" },
   { keys: ["1"], description: "Click mode: expand" },
   { keys: ["2"], description: "Click mode: collapse" },
   { keys: ["3"], description: "Click mode: explore" },
@@ -320,6 +321,29 @@ function scrollToSection(id: string) {
           artist node adds a random song of the artist, and an album node adds a
           random song of the album.
         </p>
+        <h2 id="covers">Covers</h2>
+        <p>
+          Artists show their photo in a circle, albums their cover in a square.
+          A song shows the cover of its album while the album is not in the
+          graph. A thin ring in the node color keeps the color rules visible.
+          The cover button in the tool rail, or the key V, turns covers on and
+          off. When you zoom in, the names show with the MusicBrainz rating
+          under them.
+        </p>
+
+        <h2 id="compass">Compass</h2>
+        <p>
+          The compass in the tool rail places the albums or the artists of the
+          graph on two axes and pins them, like a map. An axis is a number
+          (year, rating, number of votes, number of tracks, active since) or a
+          line from one MusicBrainz tag to another, for example from "ambient"
+          to "techno". On a tag axis, a node moves toward the tag that more
+          MusicBrainz users gave it. "Timeline" puts the year across and the
+          rating up. "Tag compass" picks two pairs of tags that split the nodes
+          of the graph. Nodes without a value wait in rows under the plane. Undo
+          puts the nodes back, and "Release" lets the layout move them again.
+        </p>
+
         <h2 id="pauseresume">
           I can’t click on the nodes, they are moving to fast. Is there a way to
           pause?
@@ -367,6 +391,33 @@ function scrollToSection(id: string) {
           type. Click a neighbor to expand it and to show it in the node info.
           If the node has no neighbors in the graph yet, "Load relations"
           expands it.
+        </p>
+
+        <h2 id="musicbrainz">Where do the tags and ratings come from?</h2>
+        <p>
+          From <a href="https://musicbrainz.org">MusicBrainz</a>, an open music
+          database that people edit, like Wikipedia. Nothing in out-of-tune is
+          generated. For artists and albums, the node info shows the rating of
+          the MusicBrainz users, the genres, and for artists the type, the
+          country and the years. Out-of-tune matches a Spotify artist or album
+          by its Spotify link on MusicBrainz, or by the barcode of the album. If
+          an artist is not on MusicBrainz yet, the node info has a link to add
+          it.
+        </p>
+        <p>
+          The server asks MusicBrainz at most once a second, for all users
+          together, and keeps every answer. A big new graph therefore takes a
+          moment. The node that the node info shows goes ahead of the others.
+          The tags and ratings are under the licence CC BY-NC-SA.
+        </p>
+        <p>
+          Color, size and tooltip rules in the
+          <a href="#settings">settings</a> can use the new attributes:
+          <code>mbRating</code>, <code>mbVotes</code>, <code>mbType</code>,
+          <code>country</code>, <code>beginYear</code>,
+          <code>endYear</code> (artists) and <code>releaseYear</code> (albums).
+          So can the graph search, for example
+          <code>album: mbRating&gt;4</code>.
         </p>
 
         <h2 id="nodeinfofocusnode">
@@ -731,7 +782,10 @@ function scrollToSection(id: string) {
           The window loads your playlists from Spotify each time it opens, so
           playlists that you make in another Spotify app show there too. More
           playlists load when you scroll down. You can also create a new
-          playlist there.
+          playlist there. "From graph" fills the new playlist with the songs of
+          the graph, and a random song of each artist and album. For a graph
+          with more than 100 artists and albums, select the nodes you want and
+          use "Add to playlist" instead.
         </p>
         <h2 id="deleteGraph">
           How can I delete a stored graph or configuration?

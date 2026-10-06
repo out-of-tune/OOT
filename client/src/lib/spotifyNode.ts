@@ -34,3 +34,23 @@ export const songFromTrack = (
   track: SpotifyTrack,
   images: SpotifyImage[] = [],
 ): Song => ({ ...track, images: track.album?.images ?? images });
+
+/** Width from which an image is sharp enough for a cover on a node, in pixels. */
+const COVER_WIDTH = 160;
+
+/**
+ * The URL of the image that a node shows: the smallest image that is at least COVER_WIDTH
+ * wide. Without widths (database artists), the first image, which Spotify lists largest first.
+ */
+export function coverUrl(images: unknown): string | null {
+  const list = spotifyImages(images);
+  if (list.length === 0) return null;
+  const sized = list.filter((image) => image.width);
+  if (sized.length === 0) return list[0].url;
+  const sharp = sized
+    .filter((image) => (image.width ?? 0) >= COVER_WIDTH)
+    .sort((a, b) => (a.width ?? 0) - (b.width ?? 0));
+  return (
+    sharp[0] ?? [...sized].sort((a, b) => (b.width ?? 0) - (a.width ?? 0))[0]
+  ).url;
+}

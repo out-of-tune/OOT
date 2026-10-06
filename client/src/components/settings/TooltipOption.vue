@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useStore } from "@/store";
-import type { SchemaNodeType } from "@/types/schema";
+import { nodeTypeAttributes, type SchemaNodeType } from "@/types/schema";
 
 const props = defineProps<{ nodeType: SchemaNodeType }>();
 const store = useStore();
@@ -34,7 +34,11 @@ const attribute = computed({
     class="field"
   >
     <option v-if="attribute === ''" value="" disabled>node id</option>
-    <option v-for="option in nodeType.attributes" :key="option" :value="option">
+    <option
+      v-for="option in nodeTypeAttributes(nodeType)"
+      :key="option"
+      :value="option"
+    >
       {{ option }}
     </option>
   </select>

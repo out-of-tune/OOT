@@ -61,10 +61,58 @@ type AddArtistResponse {
   artist: Artist
 }
 
+"A tag of MusicBrainz with the number of users who gave it."
+type MusicTag {
+  name: String!
+  count: Int!
+}
+
+enum MetadataStatus {
+  FOUND
+  NOT_FOUND
+  "Not looked up yet. Ask again in a few seconds."
+  PENDING
+}
+
+"""
+Metadata from MusicBrainz, the open music database, for a Spotify artist or album.
+An album is a MusicBrainz release group. The answers are never cached, because a
+PENDING answer becomes FOUND or NOT_FOUND.
+"""
+type MusicMetadata {
+  "Spotify id."
+  sid: ID!
+  status: MetadataStatus!
+  mbid: String
+  "MusicBrainz page."
+  url: String
+  "Average rating of the users, 0 to 5."
+  rating: Float
+  ratingVotes: Int
+  genres: [MusicTag!]!
+  tags: [MusicTag!]!
+  "Artist: Person, Group, Orchestra... Album: Album, EP, Single..."
+  type: String
+  "Album: Live, Compilation, Remix..."
+  secondaryTypes: [String!]!
+  country: String
+  area: String
+  "Artist: the year it began. Album: the year of its first release."
+  beginYear: Int
+  endYear: Int
+}
+
 type Query {
   artist(id: ID, sid: ID, mbid: ID, name: String, limit: Int = 10): [Artist]
   genre(id: ID, name: String, limit: Int = 10): [Genre]
   publicToken: Token
+  """
+  Metadata of up to 200 Spotify artists, in the order of the ids. With urgent, the ids that
+  are not known yet go before the rest of the queue: for a node that a user looks at.
+  """
+  artistMetadata(sids: [ID!]!, urgent: Boolean = false): [MusicMetadata!]!
+  "Metadata of up to 200 Spotify albums, like artistMetadata."
+  albumMetadata(sids: [ID!]!, urgent: Boolean = false): [MusicMetadata!]!
 }
 
 type Mutation {

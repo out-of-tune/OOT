@@ -16,3 +16,6 @@ export const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET ?? "";
 
 export const NODE_ENV = process.env.NODE_ENV ?? "production";
 export const isDev = NODE_ENV === "development";
+
+/** Contact in the User-Agent of MusicBrainz requests. MusicBrainz asks for one, so it can reach the operator. */
+export const MUSICBRAINZ_CONTACT = process.env.MUSICBRAINZ_CONTACT ?? "https://github.com/out-of-tune/OOT";

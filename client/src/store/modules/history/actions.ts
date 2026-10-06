@@ -2,7 +2,7 @@ import type { ActionTree, Commit, Dispatch } from "vuex";
 import { getAllLinks } from "@/lib/graph";
 import type { GraphLink, LinkInput } from "@/types/graph";
 import type { ActiveMode, Context, NodeRef, RootState } from "@/store/types";
-import type { GraphChange, HistoryState } from "./index";
+import type { GraphChange, HistoryState, NodeMove } from "./index";
 
 type Ctx = Context<HistoryState>;
 
@@ -63,6 +63,10 @@ export const actions = {
     const change = state.changes[state.historyIndex];
     if (change.type === "add") remove(rootState, change, commit);
     else if (change.type === "remove") add(change, commit, dispatch);
+    else {
+      dispatch("applyMoves", { moves: change.moves ?? [], direction: "from" });
+      if (change.compass) commit("SET_COMPASS", null);
+    }
     commit("SET_HISTORY_INDEX", state.historyIndex - 1);
     dispatch("setSuccess", "Undone");
   },
@@ -73,7 +77,31 @@ export const actions = {
     const change = state.changes[state.historyIndex];
     if (change.type === "add") add(change, commit, dispatch);
     else if (change.type === "remove") remove(rootState, change, commit);
+    else {
+      dispatch("applyMoves", { moves: change.moves ?? [], direction: "to" });
+      if (change.compass) commit("SET_COMPASS", change.compass);
+    }
     dispatch("setSuccess", "Redone");
+  },
+
+  /** Puts nodes at the start (`from`) or the end (`to`) of their moves. Nodes that left the graph are skipped. */
+  applyMoves(
+    { commit, rootState }: Ctx,
+    { moves, direction }: { moves: NodeMove[]; direction: "from" | "to" },
+  ) {
+    const graph = rootState.mainGraph.Graph;
+    moves.forEach((move) => {
+      if (!graph.getNode(move.nodeId)) return;
+      const { x, y, z, pinned } = move[direction];
+      commit("SET_NODE_POSITION", {
+        nodeId: move.nodeId,
+        xPosition: x,
+        yPosition: y,
+        ...(z === undefined ? {} : { zPosition: z }),
+      });
+      commit(pinned ? "PIN_NODE" : "UNPIN_NODE", { id: move.nodeId });
+    });
+    commit("RERENDER_GRAPH");
   },
 
   /** Records a change and drops the changes that were undone before it. */

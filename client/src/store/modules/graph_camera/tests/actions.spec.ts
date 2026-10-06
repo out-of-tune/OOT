@@ -236,3 +236,26 @@ describe("fitGraphToNodes", () => {
     expect(commit).toHaveBeenCalledWith("FIT_TO_NODES", nodes);
   });
 });
+
+describe("nodeLabelAt", () => {
+  it("shows the MusicBrainz rating under the name", async () => {
+    const { nodeLabelAt } = await import("../actions");
+    const renderer = {
+      getGraphics: () => ({
+        toScreen: () => ({ x: 10, y: 10, visible: true }),
+      }),
+    };
+    const ui = (data: object) =>
+      ({ color: 0xffffffff, node: { id: "a", data } }) as never;
+    expect(
+      nodeLabelAt(renderer as never, ui({ name: "A", mbRating: 4.25 }), {
+        x: 0,
+        y: 0,
+      })?.subtitle,
+    ).toBe("★ 4.3");
+    expect(
+      nodeLabelAt(renderer as never, ui({ name: "A" }), { x: 0, y: 0 })
+        ?.subtitle,
+    ).toBeUndefined();
+  });
+});

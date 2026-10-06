@@ -1,11 +1,17 @@
 import ForceGraph3D from "3d-force-graph";
 import {
+  CanvasTexture,
   LineBasicMaterial,
   Mesh,
   MeshLambertMaterial,
   SphereGeometry,
+  Sprite,
+  SpriteMaterial,
+  SRGBColorSpace,
+  TextureLoader,
   Vector3,
   type PerspectiveCamera,
+  type Texture,
 } from "three";
 import type { GraphLink, GraphNode, NodeId, Position } from "@/types/graph";
 import { rgbaParts } from "@/lib/color";
@@ -15,9 +21,12 @@ import type {
   GraphLayout,
   GraphRenderer,
   LinkUI,
+  NodeImageShape,
   NodeUI,
   ViewFactory,
 } from "./contract";
+import { COVER_SIDE } from "./contract";
+import { refCounted } from "./refCounted";
 
 /** Camera distance at which the zoom scale is 1. */
 const REFERENCE_DISTANCE = 400;
@@ -37,12 +46,40 @@ const MIN_FIT_RADIUS = 40;
 const VELOCITY_DECAY = { running: 0.4, paused: 1 };
 
 const SPHERE = new SphereGeometry(1, 16, 12);
+/** Side of the image sprite, relative to the sphere radius (the mesh scale). */
+const SPRITE_SCALE = COVER_SIDE["3d"] / SIZE_TO_RADIUS;
+
+/** Alpha mask that cuts a sprite to a circle. Made once, on first use. */
+let circleMask: CanvasTexture | undefined;
+function getCircleMask() {
+  if (circleMask) return circleMask;
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = 64;
+  const context = canvas.getContext("2d");
+  if (context) {
+    context.fillStyle = "#fff";
+    context.beginPath();
+    context.arc(32, 32, 31, 0, Math.PI * 2);
+    context.fill();
+  }
+  circleMask = new CanvasTexture(canvas);
+  return circleMask;
+}
+
+/** Image of a node in the scene. The sphere stays as the target of the pointer. */
+interface NodeImage {
+  url: string;
+  sprite: Sprite;
+  material: SpriteMaterial;
+  loaded: boolean;
+}
 
 interface ViewNode {
   id: NodeId;
   node: GraphNode;
   mesh: Mesh<SphereGeometry, MeshLambertMaterial>;
   ui: NodeUI;
+  image?: NodeImage;
   x?: number;
   y?: number;
   z?: number;
@@ -113,6 +150,45 @@ export function fitCamera(
   };
 }
 
+/** A texture and whether it has loaded, with the callbacks that wait for the load. */
+interface CachedTexture {
+  texture: Texture;
+  loaded: boolean;
+  waiting: (() => void)[];
+}
+
+/** Textures by URL. Nodes with the same image share one texture. */
+function createTextureCache() {
+  const loader = new TextureLoader().setCrossOrigin("anonymous");
+  const textures = refCounted<CachedTexture>(
+    (url) => {
+      const entry: CachedTexture = {
+        texture: undefined as unknown as Texture,
+        loaded: false,
+        waiting: [],
+      };
+      entry.texture = loader.load(url, () => {
+        entry.loaded = true;
+        entry.waiting.splice(0).forEach((callback) => callback());
+      });
+      entry.texture.colorSpace = SRGBColorSpace;
+      return entry;
+    },
+    (entry) => entry.texture.dispose(),
+  );
+  return {
+    /** The texture of the URL. `onLoad` runs when it has loaded, at once if it already has. */
+    acquire(url: string, onLoad: () => void) {
+      const entry = textures.acquire(url);
+      if (entry.loaded) onLoad();
+      else entry.waiting.push(onLoad);
+      return entry.texture;
+    },
+    release: textures.release,
+    clear: textures.clear,
+  };
+}
+
 export const createThreeView: ViewFactory = ({ graph, container }) => {
   // The library empties its element, so it gets its own. The DOM labels stay a sibling on top.
   const host = document.createElement("div");
@@ -121,6 +197,55 @@ export const createThreeView: ViewFactory = ({ graph, container }) => {
 
   const nodes = new Map<NodeId, ViewNode>();
   const links = new Map<string, ViewLink>();
+  const textures = createTextureCache();
+
+  /** A node with a loaded image shows the image instead of the sphere, at the alpha of its color. */
+  function applyNodeColor(viewNode: ViewNode, color: number) {
+    const material = viewNode.mesh.material;
+    applyColor(material, color);
+    const image = viewNode.image;
+    if (!image?.loaded) return;
+    material.visible = false;
+    image.material.opacity = rgbaParts(color).a;
+    image.sprite.visible = image.material.opacity > 0;
+  }
+
+  function releaseImage(viewNode: ViewNode) {
+    const image = viewNode.image;
+    if (!image) return;
+    viewNode.mesh.remove(image.sprite);
+    image.material.dispose();
+    textures.release(image.url);
+    viewNode.image = undefined;
+  }
+
+  function setImage(
+    viewNode: ViewNode,
+    url: string | null,
+    shape: NodeImageShape,
+  ) {
+    if ((viewNode.image?.url ?? null) === url) return;
+    releaseImage(viewNode);
+    if (url) {
+      const material = new SpriteMaterial({
+        transparent: true,
+        alphaMap: shape === "circle" ? getCircleMask() : null,
+      });
+      const sprite = new Sprite(material);
+      sprite.scale.setScalar(SPRITE_SCALE);
+      sprite.visible = false;
+      const image: NodeImage = { url, sprite, material, loaded: false };
+      viewNode.image = image;
+      viewNode.mesh.add(sprite);
+      material.map = textures.acquire(url, () => {
+        if (viewNode.image !== image) return;
+        image.loaded = true;
+        material.needsUpdate = true;
+        applyNodeColor(viewNode, viewNode.ui.color);
+      });
+    }
+    applyNodeColor(viewNode, viewNode.ui.color);
+  }
 
   function createViewNode(graphNode: GraphNode): ViewNode {
     const material = new MeshLambertMaterial({ transparent: true });
@@ -140,7 +265,7 @@ export const createThreeView: ViewFactory = ({ graph, container }) => {
         },
         set color(value: number) {
           color = value;
-          applyColor(material, value);
+          applyNodeColor(viewNode, value);
         },
         get size() {
           return size;
@@ -167,7 +292,9 @@ export const createThreeView: ViewFactory = ({ graph, container }) => {
   }
 
   function removeNode(nodeId: NodeId) {
-    nodes.get(nodeId)?.mesh.material.dispose();
+    const viewNode = nodes.get(nodeId);
+    if (viewNode) releaseImage(viewNode);
+    viewNode?.mesh.material.dispose();
     nodes.delete(nodeId);
   }
 
@@ -369,6 +496,8 @@ export const createThreeView: ViewFactory = ({ graph, container }) => {
     placeNode: (callback) => {
       placeNodeCallback = callback;
     },
+    setNodeImage: (nodeId, url, shape = "square") =>
+      setImage(requireNode(nodeId), url, shape),
   };
 
   const layout: GraphLayout = {
@@ -407,7 +536,11 @@ export const createThreeView: ViewFactory = ({ graph, container }) => {
       document.removeEventListener("pointerup", replaceFakePointerUp, true);
       graph.off("changed", onGraphChanged);
       forceGraph._destructor();
-      nodes.forEach((viewNode) => viewNode.mesh.material.dispose());
+      nodes.forEach((viewNode) => {
+        releaseImage(viewNode);
+        viewNode.mesh.material.dispose();
+      });
+      textures.clear();
       links.forEach((viewLink) => viewLink.material.dispose());
       host.remove();
     },

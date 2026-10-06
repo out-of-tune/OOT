@@ -4,6 +4,8 @@ import {
   ExternalLink,
   Music,
   Network,
+  Star,
+  StarHalf,
   Play,
   Plus,
   UserCheck,
@@ -16,6 +18,7 @@ import UiButton from "@/components/ui/UiButton.vue";
 import IconButton from "@/components/ui/IconButton.vue";
 import { formatDuration } from "@/lib/formatDuration";
 import { getConnectedNodesAndLinks } from "@/lib/graph";
+import { metadataSettled, tagsOf } from "@/lib/metadata";
 import { songFromTrack, spotifyImages } from "@/lib/spotifyNode";
 import { useStore } from "@/store";
 import type { GraphNode } from "@/types/graph";
@@ -60,6 +63,51 @@ const duration = computed(() => {
   const ms = data.value.duration_ms as number | undefined;
   return ms ? formatDuration(Math.round(ms / 1000)) : undefined;
 });
+
+/** MusicBrainz metadata of an artist or album, once the metadata module has merged it. */
+const about = computed(() => {
+  if (label.value !== "artist" && label.value !== "album") return undefined;
+  const value = data.value;
+  const genres = (value.mbGenres as string[] | undefined) ?? [];
+  const tags = tagsOf(value).map((tag) => tag.name);
+  const kind = [value.mbType, ...((value.mbSecondaryTypes as string[]) ?? [])]
+    .filter(Boolean)
+    .join(" · ");
+  const begin = value.beginYear as number | undefined;
+  const end = value.endYear as number | undefined;
+  return {
+    status: value.mbStatus as string | undefined,
+    url: value.mbUrl as string | undefined,
+    rating: value.mbRating as number | undefined,
+    votes: value.mbVotes as number | undefined,
+    // Genres are the tags that MusicBrainz knows as genres. Without them, the other tags.
+    genres: (genres.length > 0 ? genres : tags).slice(0, 8),
+    kind,
+    place: (value.area ?? value.country) as string | undefined,
+    years:
+      label.value === "album"
+        ? ((value.releaseYear ?? begin) as number | undefined)
+        : begin
+          ? `${begin}${end ? `–${end}` : " – today"}`
+          : undefined,
+  };
+});
+
+// The shown node goes ahead of the MusicBrainz queue of the server.
+watch(
+  () => node.value.id,
+  () => {
+    if (about.value && !metadataSettled(data.value))
+      store.dispatch("loadNodeMetadata", node.value);
+  },
+  { immediate: true },
+);
+
+/** Five stars for a rating of 0 to 5: full, half or empty. */
+const stars = (rating: number) =>
+  Array.from({ length: 5 }, (_, index) =>
+    rating >= index + 0.75 ? "full" : rating >= index + 0.25 ? "half" : "empty",
+  );
 
 const album = computed(
   () =>
@@ -274,6 +322,96 @@ const focusNode = () => {
           {{ following ? "Following" : "Follow" }}
         </UiButton>
       </div>
+
+      <section
+        v-if="about"
+        aria-label="About"
+        class="flex flex-col gap-2 rounded-lg border border-line p-3 text-sm"
+      >
+        <template v-if="about.status === 'FOUND'">
+          <div
+            v-if="about.rating !== undefined"
+            class="flex items-center gap-2"
+            :title="`${about.rating} of 5 from ${about.votes} MusicBrainz ratings`"
+          >
+            <span class="flex text-amber-400" aria-hidden="true">
+              <span
+                v-for="(star, index) in stars(about.rating)"
+                :key="index"
+                class="relative size-3.5"
+              >
+                <Star class="absolute size-3.5 text-fg-subtle" />
+                <Star
+                  v-if="star === 'full'"
+                  class="absolute size-3.5 fill-current"
+                />
+                <StarHalf
+                  v-else-if="star === 'half'"
+                  class="absolute size-3.5 fill-current"
+                />
+              </span>
+            </span>
+            <span class="tabular-nums"
+              >{{ about.rating.toFixed(1) }}
+              <span class="text-xs text-fg-subtle"
+                >({{ about.votes }} votes)</span
+              ></span
+            >
+          </div>
+          <ul v-if="about.genres.length" class="flex flex-wrap gap-1">
+            <li
+              v-for="genre in about.genres"
+              :key="genre"
+              class="rounded-full bg-surface-hover px-2 py-0.5 text-xs text-fg-muted"
+            >
+              {{ genre }}
+            </li>
+          </ul>
+          <p
+            v-if="about.kind || about.place || about.years"
+            class="text-xs text-fg-muted"
+          >
+            {{
+              [about.kind, about.place, about.years].filter(Boolean).join(" · ")
+            }}
+          </p>
+          <a
+            v-if="about.url"
+            :href="about.url"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-1 text-xs text-fg-subtle hover:text-fg"
+          >
+            Data: MusicBrainz <ExternalLink class="size-3" />
+          </a>
+        </template>
+        <p
+          v-else-if="about.status === 'NOT_FOUND'"
+          class="text-xs text-fg-subtle"
+        >
+          Not on MusicBrainz yet.
+          <a
+            :href="
+              label === 'artist'
+                ? 'https://musicbrainz.org/doc/How_to_Add_an_Artist'
+                : 'https://musicbrainz.org/doc/How_to_Add_a_Release'
+            "
+            target="_blank"
+            rel="noopener noreferrer"
+            class="underline hover:text-fg"
+            >Add it</a
+          >, and its tags and rating show here.
+        </p>
+        <p
+          v-else-if="about.status === 'PENDING'"
+          class="text-xs text-fg-subtle"
+        >
+          In the MusicBrainz queue. Tags and rating show in a moment.
+        </p>
+        <p v-else class="text-xs text-fg-subtle">
+          Asking MusicBrainz for tags and rating…
+        </p>
+      </section>
 
       <dl
         v-if="label === 'album' || label === 'song'"

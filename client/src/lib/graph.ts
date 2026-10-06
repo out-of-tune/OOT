@@ -1,4 +1,5 @@
 import { eq, gt, gte, lt, lte } from "lodash-es";
+import { withoutMetadata } from "@/lib/metadata";
 import type { NodeUI } from "@/lib/view/contract";
 import type {
   GraphLink,
@@ -168,7 +169,7 @@ export function getGraphObject(rootState: GraphState): GraphObject {
   const nodesWithPositions = getAllNodes(rootState).map((node) => {
     const { links: _links, ...nodeData } = node;
     return {
-      node: { ...nodeData },
+      node: { ...nodeData, data: withoutMetadata(nodeData.data) },
       position: getNodePosition(rootState, node),
       pinned: getPinnedState(rootState, node),
     };

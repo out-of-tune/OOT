@@ -14,10 +14,12 @@ export interface AppearanceState {
   pendingRequestCount: number;
   highlight: boolean;
   colors?: StoredColors;
+  /** Nodes show the images of artists and the covers of albums. Saved in local storage. */
+  covers: boolean;
 }
 
 export const appearance: Module<AppearanceState, RootState> = {
-  state: () => ({ pendingRequestCount: 0, highlight: false }),
+  state: () => ({ pendingRequestCount: 0, highlight: false, covers: true }),
   actions,
   mutations,
 };

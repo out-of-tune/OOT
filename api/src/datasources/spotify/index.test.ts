@@ -49,3 +49,11 @@ test('does not retry client errors', async () => {
     await expect(new SpotifyAPI('id', 'secret').artist_info('sid')).rejects.toMatchObject({ status: 400 })
     expect(fetchMock).toHaveBeenCalledTimes(1)
 })
+
+test('albumBarcodes skips albums that Spotify does not know', async () => {
+    fetchMock
+        .mockResolvedValueOnce(status(404))
+        .mockResolvedValueOnce(new Response(JSON.stringify({ external_ids: { upc: '123' } }), { status: 200 }))
+    const codes = await new SpotifyAPI('id', 'secret').albumBarcodes(['gone', 'there'])
+    expect([...codes]).toEqual([['there', '123']])
+})

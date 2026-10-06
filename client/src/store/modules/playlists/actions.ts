@@ -1,15 +1,18 @@
 import type { ActionTree, Commit, Dispatch } from "vuex";
 import { uniqBy } from "lodash-es";
 import SpotifyService from "@/services/SpotifyService";
-import type { GraphItems, NodeInput } from "@/types/graph";
 import type { SpotifyPlaylist, SpotifyTrack } from "@/types/spotify";
 import type { Context, RootState } from "@/store/types";
 import type { PlaylistsState } from "./index";
-import { nodeFromSpotify } from "@/lib/spotifyNode";
+import { getAllNodes } from "@/lib/graph";
+import { hasSongs } from "@/lib/spotifyNode";
+import { addSongsWithNeighbors, songsForNodes } from "@/lib/songs";
 import { statusOf } from "@/lib/token";
 
 type Ctx = Context<PlaylistsState>;
 
+/** Most artist and album nodes that "save graph as playlist" takes. */
+export const GRAPH_PLAYLIST_LIMIT = 100;
 /** Spotify returns at most 50 playlists per page. */
 const PLAYLIST_PAGE_SIZE = 50;
 /** Goes up on each load of the first page. A page from an older load is dropped. */
@@ -17,40 +20,6 @@ let playlistLoad = 0;
 
 const formatSongList = (songs: { name?: string }[]) =>
   songs.map((song) => `'${song.name ?? ""}'`).join(", ");
-
-const nodesOf = (result: unknown): NodeInput[] =>
-  (result as GraphItems | undefined)?.nodes ?? [];
-
-/**
- * Adds song nodes to the graph, then their albums, the artists of those albums and the
- * genres of those artists. Playlists, liked songs and recently played songs use it.
- */
-export async function addSongsWithNeighbors(
-  dispatch: Dispatch,
-  tracks: (SpotifyTrack | null | undefined)[],
-) {
-  const songNodes: NodeInput[] = tracks
-    .filter((track): track is SpotifyTrack => Boolean(track?.id))
-    .map((track) => ({
-      ...nodeFromSpotify("song", track as unknown as Record<string, unknown>),
-      links: [],
-    }));
-
-  dispatch("addToGraph", { nodes: songNodes, links: [] });
-
-  const albums = await dispatch("expandAction", {
-    nodes: songNodes,
-    expandConfiguration: [{ nodeType: "song", edges: ["Song_to_Album"] }],
-  });
-  const artists = await dispatch("expandAction", {
-    nodes: nodesOf(albums).filter((node) => node.data.label === "album"),
-    expandConfiguration: [{ nodeType: "album", edges: ["Album_to_Artist"] }],
-  });
-  await dispatch("expandAction", {
-    nodes: nodesOf(artists).filter((node) => node.data.label === "artist"),
-    expandConfiguration: [{ nodeType: "artist", edges: ["Artist_to_Genre"] }],
-  });
-}
 
 /**
  * Replaces the graph with the nodes that `add` builds from `items`. The graph stays when
@@ -162,6 +131,47 @@ export const actions = {
       );
       return undefined;
     }
+  },
+
+  /**
+   * Creates a playlist from the graph: its songs, and a random song of each artist and
+   * album. Each artist and album costs one Spotify request, so a graph with more than
+   * GRAPH_PLAYLIST_LIMIT of them needs a selection instead. Songs load 50 per request.
+   */
+  async saveGraphAsPlaylist(
+    { dispatch, rootState }: Ctx,
+    name: string,
+  ): Promise<SpotifyPlaylist | undefined> {
+    const nodes = getAllNodes(rootState).filter(hasSongs);
+    if (nodes.length === 0) {
+      dispatch("setInfo", "The graph has no songs, artists or albums");
+      return undefined;
+    }
+    const costly = nodes.filter((node) => node.data.label !== "song").length;
+    if (costly > GRAPH_PLAYLIST_LIMIT) {
+      dispatch(
+        "setInfo",
+        `The graph has ${costly} artists and albums. Select up to ${GRAPH_PLAYLIST_LIMIT} and use "Add to playlist".`,
+      );
+      return undefined;
+    }
+    dispatch("setMessage", "Picking the songs of the graph");
+    let songs: { uri?: string }[];
+    try {
+      songs = await songsForNodes(dispatch, rootState, nodes);
+    } catch (error) {
+      dispatch(
+        "setError",
+        new Error(
+          `The songs could not be loaded (${statusOf(error) ?? "network"})`,
+        ),
+      );
+      return undefined;
+    }
+    const uris = songs
+      .map((song) => song.uri)
+      .filter((uri): uri is string => Boolean(uri));
+    return dispatch("createPlaylist", { name, uris });
   },
 
   /** Opens the playlist window, so that the user chooses the playlist that songs go to. */
