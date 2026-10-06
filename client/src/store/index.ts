@@ -64,6 +64,8 @@ const playlistMutations = [
 const graphIOMutations = ["SET_STORED_GRAPH_NAMES"];
 const configurationIOMutations = ["SET_STORED_CONFIGURATION_NAMES"];
 const generalSettingsMutations = ["SET_SHOW_TOUR"];
+// The theme is chosen in the Settings tab and shows in the graph tab at once.
+const themeMutations = ["SET_UI_THEME", "SET_AUTO_THEME"];
 
 type Mutation = { type: string };
 
@@ -108,6 +110,17 @@ const persistViewMode = new VuexPersistence<RootState>({
   filter: (mutation: Mutation) => mutation.type === "SET_VIEW_MODE",
 });
 
+const persistTheme = new VuexPersistence<RootState>({
+  key: "oot_theme",
+  reducer: (state) => ({
+    appearance: {
+      uiTheme: state.appearance.uiTheme,
+      autoTheme: state.appearance.autoTheme,
+    },
+  }),
+  filter: (mutation: Mutation) => themeMutations.includes(mutation.type),
+});
+
 const persistCovers = new VuexPersistence<RootState>({
   key: "oot_covers",
   reducer: (state) => ({ appearance: { covers: state.appearance.covers } }),
@@ -125,12 +138,14 @@ export const store = createStore<RootState>({
     persistTour.plugin,
     persistViewMode.plugin,
     persistCovers.plugin,
+    persistTheme.plugin,
     shareMutations<RootState>([
       ...userMutations,
       ...configurationMutations,
       ...graphIOMutations,
       ...configurationIOMutations,
       ...generalSettingsMutations,
+      ...themeMutations,
     ]),
   ],
   // The modules add their own state at runtime.

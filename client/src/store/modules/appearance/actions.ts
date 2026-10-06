@@ -7,6 +7,7 @@ import {
   getNodeColor,
 } from "@/lib/graph";
 import { imageShapeOf, nodeImageUrl } from "@/lib/nodeImage";
+import { themeForGenres, type ThemeId } from "@/lib/themes";
 import type { GraphNode } from "@/types/graph";
 import type { Context, NodeRef, RootState } from "@/store/types";
 import type { AppearanceState } from "./index";
@@ -38,6 +39,28 @@ export const actions = {
         imageShapeOf(node),
       ),
     );
+  },
+
+  setUiTheme({ commit, dispatch }: Ctx, theme: ThemeId | "auto") {
+    commit("SET_UI_THEME", theme);
+    if (theme === "auto") dispatch("matchThemeToGraph");
+  },
+
+  /**
+   * With the "auto" theme, picks the theme of the most common genres in the graph: genre
+   * nodes count twice, the MusicBrainz genres of artists and albums once.
+   */
+  matchThemeToGraph({ commit, state, rootState }: Ctx) {
+    if (state.uiTheme !== "auto") return;
+    const genres = getAllNodes(rootState).flatMap((node) =>
+      node.data.label === "genre"
+        ? [{ name: String(node.data.name ?? ""), weight: 2 }]
+        : ((node.data.mbGenres as string[] | undefined) ?? [])
+            .slice(0, 3)
+            .map((name) => ({ name, weight: 1 })),
+    );
+    const theme = themeForGenres(genres);
+    if (theme !== state.autoTheme) commit("SET_AUTO_THEME", theme);
   },
 
   setCovers({ commit, dispatch }: Ctx, covers: boolean) {

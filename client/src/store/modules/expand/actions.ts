@@ -668,6 +668,7 @@ export const actions = {
     dispatch("applyNodeSizeConfiguration");
     dispatch("applyNodeImages");
     dispatch("scheduleMetadata");
+    dispatch("matchThemeToGraph");
   },
 
   setFailedExpandedConnections({ commit }: Ctx, connections: Connection[]) {

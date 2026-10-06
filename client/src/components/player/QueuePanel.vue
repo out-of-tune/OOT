@@ -116,7 +116,10 @@ async function saveAsPlaylist() {
 </script>
 
 <template>
-  <section aria-label="Queue" class="panel flex max-h-[50vh] w-80 flex-col">
+  <section
+    aria-label="Queue"
+    class="panel panel-glyph flex max-h-[50vh] w-80 flex-col"
+  >
     <header
       class="flex items-center justify-between gap-2 border-b border-line py-2 pr-2 pl-4"
     >

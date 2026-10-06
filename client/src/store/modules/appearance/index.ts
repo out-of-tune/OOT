@@ -1,5 +1,6 @@
 import type { Module } from "vuex";
 import type { GraphLink, GraphNode } from "@/types/graph";
+import type { ThemeId } from "@/lib/themes";
 import type { RootState } from "@/store/types";
 import actions from "./actions";
 import mutations from "./mutations";
@@ -16,10 +17,20 @@ export interface AppearanceState {
   colors?: StoredColors;
   /** Nodes show the images of artists and the covers of albums. Saved in local storage. */
   covers: boolean;
+  /** UI theme chosen in the settings: a genre theme, or "auto" to match the graph. Saved in local storage. */
+  uiTheme: ThemeId | "auto";
+  /** The theme that "auto" shows: the one of the most common genres in the graph. */
+  autoTheme: ThemeId;
 }
 
 export const appearance: Module<AppearanceState, RootState> = {
-  state: () => ({ pendingRequestCount: 0, highlight: false, covers: true }),
+  state: () => ({
+    pendingRequestCount: 0,
+    highlight: false,
+    covers: true,
+    uiTheme: "default",
+    autoTheme: "default",
+  }),
   actions,
   mutations,
 };

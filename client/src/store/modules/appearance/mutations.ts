@@ -1,4 +1,5 @@
 import type { MutationTree } from "vuex";
+import type { ThemeId } from "@/lib/themes";
 import type { AppearanceState, StoredColors } from "./index";
 
 export const mutations = {
@@ -13,6 +14,12 @@ export const mutations = {
   },
   SET_COVERS(state, covers: boolean) {
     state.covers = covers;
+  },
+  SET_UI_THEME(state, theme: ThemeId | "auto") {
+    state.uiTheme = theme;
+  },
+  SET_AUTO_THEME(state, theme: ThemeId) {
+    state.autoTheme = theme;
   },
 } satisfies MutationTree<AppearanceState>;
 

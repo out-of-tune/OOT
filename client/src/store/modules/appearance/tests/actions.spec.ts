@@ -400,3 +400,45 @@ describe("applyNodeImages", () => {
     expect(dispatch).toHaveBeenCalledWith("scheduleMetadata");
   });
 });
+
+describe("themes", () => {
+  it("matches the theme to the genres of the graph only in auto mode", async () => {
+    const { default: createGraph } = await import("ngraph.graph");
+    const graph = createGraph();
+    graph.addNode("genre/1", { label: "genre", name: "bebop" });
+    graph.addNode("artist/1", {
+      label: "artist",
+      mbGenres: ["techno", "house", "electro", "idm"],
+    });
+    const { getAllNodes } = await import("@/lib/graph");
+    vi.mocked(getAllNodes).mockReturnValue([
+      graph.getNode("genre/1")!,
+      graph.getNode("artist/1")!,
+    ]);
+    const commit = vi.fn();
+    const rootState = { mainGraph: { Graph: graph } };
+    actions.matchThemeToGraph({
+      commit,
+      rootState,
+      state: { uiTheme: "rock", autoTheme: "default" },
+    } as never);
+    expect(commit).not.toHaveBeenCalled();
+    // The genre node counts twice, three artist genres once each: electronic wins 3 to 2.
+    actions.matchThemeToGraph({
+      commit,
+      rootState,
+      state: { uiTheme: "auto", autoTheme: "default" },
+    } as never);
+    expect(commit).toHaveBeenCalledWith("SET_AUTO_THEME", "electronic");
+  });
+
+  it("setUiTheme matches the graph when it switches to auto", () => {
+    const commit = vi.fn();
+    const dispatch = vi.fn();
+    actions.setUiTheme({ commit, dispatch } as never, "jazz");
+    expect(dispatch).not.toHaveBeenCalled();
+    actions.setUiTheme({ commit, dispatch } as never, "auto");
+    expect(commit).toHaveBeenCalledWith("SET_UI_THEME", "auto");
+    expect(dispatch).toHaveBeenCalledWith("matchThemeToGraph");
+  });
+});

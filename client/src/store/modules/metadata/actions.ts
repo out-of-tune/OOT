@@ -215,6 +215,8 @@ export const actions = {
       return true;
     });
     if (run !== loadRun) return;
+    // The genres of artists and albums can change the theme that matches the graph.
+    if (merged > 0) dispatch("matchThemeToGraph");
     if (merged > 0 && rulesUseMetadata(rootState)) {
       dispatch("applyNodeColorConfiguration");
       dispatch("applyNodeSizeConfiguration");

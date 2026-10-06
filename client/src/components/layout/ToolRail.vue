@@ -88,7 +88,7 @@ const openInNewTab = (path: string) =>
   <nav
     id="toolbar"
     aria-label="Tools"
-    class="panel fixed top-1/2 right-3 z-20 flex -translate-y-1/2 flex-col items-center gap-1 p-1"
+    class="panel theme-rail fixed top-1/2 right-3 z-20 flex -translate-y-1/2 flex-col items-center gap-1 p-1"
   >
     <div
       id="mouse-modes"

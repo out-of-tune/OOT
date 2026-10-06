@@ -451,6 +451,25 @@ function scrollToSection(id: string) {
           corresponding button on the top of the page.
         </p>
 
+        <h2 id="themes">Themes</h2>
+        <p>
+          Under General you can give the app the colors of your kind of music:
+          jazz, rock, metal, techno and house, IDM, hip hop, R&amp;B and soul,
+          pop, ambient, reggae, Latin, folk and country, or classical. A theme
+          changes the accent colors and the tint of the panels, and adds small
+          details: a stripe along the top of the panels, its symbol in their
+          corner, and a symbol and a stripe on the tool rail. While the graph is
+          empty, a scene of the genre fills the screen: a jazz club with
+          spotlights, the gold panel of a valve amp with fire and lightning, a
+          seven-string neck, rain on a window at night, palm fronds and the
+          clave, a warehouse with lasers and a drum machine, the curves of a
+          harmonograph, tape loops, hills at dusk. The graph keeps the colors of
+          your rules. "Match the graph" picks the theme of the most common
+          genres in your graph, and changes it when the graph changes. If your
+          system asks for less motion, the scenes stand still. In every theme,
+          the player takes a soft glow from the cover of the song that plays.
+        </p>
+
         <h2 id="nodeconfiguration">Node configuration</h2>
         <p>
           Every node type has its own set of settings. For each node type you

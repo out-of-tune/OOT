@@ -8,6 +8,7 @@ import SizeRuleEditor from "@/components/settings/SizeRuleEditor.vue";
 import TooltipOption from "@/components/settings/TooltipOption.vue";
 import UiSegmented from "@/components/ui/UiSegmented.vue";
 import UiSwitch from "@/components/ui/UiSwitch.vue";
+import { THEMES, glyphUrl, themeById, type Theme } from "@/lib/themes";
 import { useStore } from "@/store";
 
 type Page = "nodes" | "edges" | "general";
@@ -21,6 +22,14 @@ const pages: { value: Page; label: string }[] = [
 ];
 
 const nodeTypes = computed(() => store.state.schema.nodeTypes);
+const uiTheme = computed(() => store.state.appearance.uiTheme);
+const autoTheme = computed(() => themeById(store.state.appearance.autoTheme));
+const swatch = (theme: Theme) => [
+  theme.colors.accent,
+  theme.colors.brand,
+  theme.colors.teal,
+];
+
 const showTour = computed({
   get: () => store.state.events.showTour,
   set: (value: boolean) => store.dispatch("setShowTour", value),
@@ -116,6 +125,76 @@ const showTour = computed({
             </p>
           </div>
           <UiSwitch v-model="showTour" label="Show the tour" />
+        </div>
+
+        <div class="mt-6 border-t border-line pt-5">
+          <p id="theme-label" class="text-sm font-medium">Theme</p>
+          <p class="mb-3 text-sm text-fg-muted">
+            Colors of the app for your kind of music. The graph keeps its own
+            colors.
+          </p>
+          <div
+            role="radiogroup"
+            aria-labelledby="theme-label"
+            class="grid grid-cols-2 gap-2 sm:grid-cols-3"
+          >
+            <button
+              type="button"
+              role="radio"
+              :aria-checked="uiTheme === 'auto'"
+              class="flex flex-col items-start gap-1.5 rounded-lg border p-3 text-left text-sm"
+              :class="
+                uiTheme === 'auto'
+                  ? 'border-accent bg-accent/15'
+                  : 'border-line hover:border-line-strong hover:bg-surface-hover'
+              "
+              @click="store.dispatch('setUiTheme', 'auto')"
+            >
+              <span class="font-medium">Match the graph</span>
+              <span class="text-xs text-fg-muted"
+                >Now: {{ autoTheme.name }}</span
+              >
+            </button>
+            <button
+              v-for="theme in THEMES"
+              :key="theme.id"
+              type="button"
+              role="radio"
+              :aria-checked="uiTheme === theme.id"
+              class="flex flex-col items-start gap-1.5 rounded-lg border p-3 text-left text-sm"
+              :class="
+                uiTheme === theme.id
+                  ? 'border-accent bg-accent/15'
+                  : 'border-line hover:border-line-strong hover:bg-surface-hover'
+              "
+              :style="{
+                backgroundColor:
+                  uiTheme === theme.id ? undefined : theme.colors.surface,
+              }"
+              @click="store.dispatch('setUiTheme', theme.id)"
+            >
+              <span class="flex w-full items-center justify-between gap-2">
+                <span class="font-medium">{{ theme.name }}</span>
+                <span
+                  v-if="theme.glyph"
+                  class="size-4 shrink-0"
+                  aria-hidden="true"
+                  :style="{
+                    backgroundColor: theme.colors.brand,
+                    mask: `${glyphUrl(theme.glyph)} center / contain no-repeat`,
+                  }"
+                />
+              </span>
+              <span class="flex gap-1" aria-hidden="true">
+                <span
+                  v-for="color in swatch(theme)"
+                  :key="color"
+                  class="size-3 rounded-full"
+                  :style="{ backgroundColor: color }"
+                />
+              </span>
+            </button>
+          </div>
         </div>
       </section>
     </main>
