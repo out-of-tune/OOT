@@ -20,6 +20,22 @@ const getNewToken = async (dispatch: TokenDispatch, rootState: TokenState) => {
 export const statusOf = (error: unknown): number | undefined =>
   (error as { response?: { status?: number } } | null)?.response?.status;
 
+/** Text for a failed Spotify Web API call. */
+export function describeSpotifyError(error: unknown): string {
+  const status = statusOf(error);
+  const detail = (
+    error as { response?: { data?: { error?: { message?: string } } } }
+  )?.response?.data?.error?.message;
+  if (status === 404)
+    return "No active Spotify device. Open Spotify somewhere, or play in this tab.";
+  if (status === 403) return detail ?? "Spotify Premium is needed for this.";
+  if (status === 401) return "Your Spotify session expired. Log in again.";
+  return (
+    detail ??
+    (error instanceof Error ? error.message : "The Spotify request failed")
+  );
+}
+
 /** The resolved result of a request function that returns one value or an array of promises. */
 export type Settled<R> = R extends readonly (infer P)[]
   ? Awaited<P>[]

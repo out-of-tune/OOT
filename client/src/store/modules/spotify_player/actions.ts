@@ -2,15 +2,18 @@ import type { ActionTree, Dispatch } from "vuex";
 import { checkNodesExistence } from "@/lib/graphql";
 import { createSpotifyPlayer, type PlayerErrorKind } from "@/lib/spotifyPlayer";
 import { nodeFromSpotify } from "@/lib/spotifyNode";
-import { statusOf } from "@/lib/token";
+import { sleep } from "@/lib/sleep";
+import { describeSpotifyError, statusOf } from "@/lib/token";
 import SpotifyService from "@/services/SpotifyService";
 import type { NodeInput } from "@/types/graph";
 import type {
   RepeatState,
+  Song,
   SpotifyTrack,
   StartPlaybackOptions,
 } from "@/types/spotify";
 import type { Context, RootState } from "@/store/types";
+import { findOrAddSongNode } from "../music_player/actions";
 import { addSongsWithNeighbors, replaceGraphWith } from "../playlists/actions";
 import {
   playbackPosition,
@@ -24,12 +27,20 @@ type Ctx = Context<SpotifyPlayerState>;
 /** How often the state of another device is read, in milliseconds. */
 const REMOTE_POLL_INTERVAL = 5000;
 const REPEAT_ORDER: RepeatState[] = ["off", "context", "track"];
+/** Wait before a queue change goes to Spotify, so that quick changes restart the song only once. */
+const QUEUE_SYNC_DELAY = 300;
+/** Wait before the queue loads again after a change. Spotify shows a change only after a moment. */
+const QUEUE_RELOAD_DELAY = 800;
 
 // The SDK player and the poll timer are not state: they must not become reactive or persisted.
 let player: SpotifySdkPlayer | null = null;
 let pollTimer: ReturnType<typeof setInterval> | undefined;
 /** Goes up on each connect and each disconnect. A connect that sees another number was cancelled. */
 let connection = 0;
+/** The queue change that runs. A change made meanwhile sets `queueDirty`, and the run sends it too. */
+let queueSync: Promise<boolean> | null = null;
+let queueDirty = false;
+let queueReloadTimer: ReturnType<typeof setTimeout> | undefined;
 
 const userToken = (rootState: RootState) =>
   rootState.authentication.accessToken;
@@ -64,21 +75,18 @@ export function fromApiTrack(track: SpotifyTrack): NowPlaying {
   };
 }
 
-/** Text for a failed Spotify Web API call. */
-function describeError(error: unknown): string {
-  const status = statusOf(error);
-  const detail = (
-    error as { response?: { data?: { error?: { message?: string } } } }
-  )?.response?.data?.error?.message;
-  if (status === 404)
-    return "No active Spotify device. Open Spotify somewhere, or play in this tab.";
-  if (status === 403) return detail ?? "Spotify Premium is needed for this.";
-  if (status === 401) return "Your Spotify session expired. Log in again.";
-  return (
-    detail ??
-    (error instanceof Error ? error.message : "The Spotify request failed")
-  );
+/** A queue entry for a song of the graph or of the node info. */
+export function fromSong(song: Song): NowPlaying {
+  return {
+    ...fromApiTrack(song as unknown as SpotifyTrack),
+    images:
+      (song.album as SpotifyTrack["album"] | undefined)?.images ?? song.images,
+  };
 }
+
+/** The device that a play request goes to: this tab, unless another device plays. */
+const targetDevice = (state: SpotifyPlayerState) =>
+  state.remoteDeviceName ? undefined : (state.deviceId ?? undefined);
 
 /**
  * Runs a Web API call with the user token. After a 401 it refreshes the token once and retries.
@@ -97,11 +105,11 @@ async function withUserToken<T>(
         await dispatch("refreshToken");
         return await call(userToken(rootState));
       } catch (retryError) {
-        dispatch("setError", new Error(describeError(retryError)));
+        dispatch("setError", new Error(describeSpotifyError(retryError)));
         return undefined;
       }
     }
-    dispatch("setError", new Error(describeError(error)));
+    dispatch("setError", new Error(describeSpotifyError(error)));
     return undefined;
   }
 }
@@ -114,6 +122,7 @@ function stopPolling() {
 /** Stops the SDK player and cancels a connect that still runs. */
 function dropPlayer() {
   stopPolling();
+  clearTimeout(queueReloadTimer);
   player?.disconnect();
   player = null;
   connection += 1;
@@ -218,7 +227,10 @@ export const actions = {
       isLocal: true,
       remoteDeviceName: null,
     } satisfies PlaybackUpdate);
-    if (trackChanged) dispatch("checkLiked");
+    if (trackChanged) {
+      dispatch("checkLiked");
+      dispatch("followNowPlaying");
+    }
   },
 
   /** Reads the playback of any device. Used while another device plays. */
@@ -255,7 +267,10 @@ export const actions = {
     } satisfies PlaybackUpdate);
     if (playback.device.volume_percent !== null)
       commit("SET_SPOTIFY_VOLUME", playback.device.volume_percent);
-    if (trackChanged) dispatch("checkLiked");
+    if (trackChanged) {
+      dispatch("checkLiked");
+      dispatch("followNowPlaying");
+    }
   },
 
   startRemotePolling({ state, dispatch }: Ctx) {
@@ -276,11 +291,11 @@ export const actions = {
     options: Omit<StartPlaybackOptions, "deviceId">,
   ) {
     await player?.activateElement().catch(() => undefined);
-    const deviceId = state.remoteDeviceName
-      ? undefined
-      : (state.deviceId ?? undefined);
     await withUserToken(rootState, dispatch, (token) =>
-      SpotifyService.startPlayback(token, { ...options, deviceId }),
+      SpotifyService.startPlayback(token, {
+        ...options,
+        deviceId: targetDevice(state),
+      }),
     );
     setTimeout(() => dispatch("refreshPlaybackState"), 600);
   },
@@ -414,28 +429,83 @@ export const actions = {
       );
   },
 
-  /** Returns false when Spotify did not queue the song. */
-  async addToSpotifyQueue(
-    { rootState, dispatch }: Ctx,
-    song: { uri?: string; name?: string },
+  /**
+   * Adds songs to the end of the queue. While a song is loaded, the queue is sent as a
+   * whole (see setSpotifyQueue), so that it can be changed later. Returns false when
+   * Spotify did not queue the songs.
+   */
+  async addSongsToSpotifyQueue(
+    { state, rootState, commit, dispatch }: Ctx,
+    songs: Song[],
   ): Promise<boolean> {
-    if (!song.uri) return false;
-    const done = await withUserToken(rootState, dispatch, (token) =>
-      SpotifyService.addToPlaybackQueue(token, song.uri as string),
-    );
-    if (done !== undefined) {
-      dispatch("setAddToQueueNotifaction", true);
-      setTimeout(() => dispatch("setAddToQueueNotifaction", false), 500);
-      dispatch("loadSpotifyQueue");
+    const added = songs.filter((song) => song.uri);
+    if (added.length === 0) return false;
+    const queue = [...state.queue, ...added.map(fromSong)];
+    let done = true;
+    if (state.track) done = await dispatch("setSpotifyQueue", queue);
+    else {
+      // Nothing is loaded, so there is no song to keep: the Spotify queue takes the songs.
+      for (const song of added)
+        done =
+          (await withUserToken(rootState, dispatch, (token) =>
+            SpotifyService.addToPlaybackQueue(token, song.uri as string),
+          )) !== undefined && done;
+      commit("SET_SPOTIFY_QUEUE", queue);
+      scheduleQueueReload(dispatch);
     }
-    return done !== undefined;
+    if (done) dispatch("flashQueueBadge");
+    return done;
+  },
+
+  /**
+   * Replaces the songs up next: removes, reorders, clears or adds songs. The Web API cannot
+   * change the queue of Spotify, so this plays the song that plays now again, at its
+   * position, followed by the new list. The list shows at once, and goes to Spotify after
+   * a short wait. Returns false when Spotify refused it.
+   */
+  setSpotifyQueue(
+    { commit, dispatch }: Ctx,
+    queue: NowPlaying[],
+  ): Promise<boolean> {
+    commit("SET_SPOTIFY_QUEUE", queue);
+    return dispatch("syncSpotifyQueue");
+  },
+
+  removeFromSpotifyQueue({ state, dispatch }: Ctx, index: number) {
+    return dispatch(
+      "setSpotifyQueue",
+      state.queue.filter((_, position) => position !== index),
+    );
+  },
+
+  /** Sends the queue of the state to Spotify. Changes made while it runs go in one more request. */
+  syncSpotifyQueue({ state, rootState, commit, dispatch }: Ctx) {
+    queueDirty = true;
+    if (queueSync) return queueSync;
+    const run = async () => {
+      let done = true;
+      try {
+        await sleep(QUEUE_SYNC_DELAY);
+        while (queueDirty) {
+          queueDirty = false;
+          done = await replaceUpNext({ state, rootState, commit, dispatch });
+        }
+      } finally {
+        queueSync = null;
+      }
+      scheduleQueueReload(dispatch);
+      return done;
+    };
+    queueSync = run();
+    return queueSync;
   },
 
   async loadSpotifyQueue({ rootState, commit, dispatch }: Ctx) {
     const queue = await withUserToken(rootState, dispatch, (token) =>
       SpotifyService.getQueue(token),
     );
-    if (queue)
+    // A change that is not at Spotify yet must not be replaced by the old queue.
+    if (queue && !queueSync)
       commit(
         "SET_SPOTIFY_QUEUE",
         queue.queue.filter(Boolean).map(fromApiTrack),
@@ -480,13 +550,12 @@ export const actions = {
   async addNowPlayingToGraph({ state, rootState, dispatch }: Ctx) {
     const id = state.track?.id;
     if (!id) return;
-    const result = await withUserToken(rootState, dispatch, (token) =>
-      SpotifyService.getFullSongData(token, [id]),
-    );
-    const track = result?.tracks[0];
-    if (!track) return;
-    await addSongsWithNeighbors(dispatch, [track]);
-    dispatch("fitGraphToScreen");
+    try {
+      if (await findOrAddSongNode(dispatch, rootState, id))
+        dispatch("fitGraphToScreen");
+    } catch (error) {
+      dispatch("setError", new Error(describeSpotifyError(error)));
+    }
   },
 
   /** Replaces the graph with the top artists of the user and their genres. */
@@ -561,6 +630,62 @@ export const actions = {
     );
   },
 } satisfies ActionTree<SpotifyPlayerState, RootState>;
+
+/** Loads the queue after a change, once Spotify shows it. A newer change moves the load on. */
+function scheduleQueueReload(dispatch: Dispatch) {
+  clearTimeout(queueReloadTimer);
+  queueReloadTimer = setTimeout(
+    () => dispatch("loadSpotifyQueue"),
+    QUEUE_RELOAD_DELAY,
+  );
+}
+
+/**
+ * Plays the song that plays now again, at its position, followed by the queue of the state.
+ * Shuffle would mix the new order, so it goes off. A paused song stays paused.
+ */
+async function replaceUpNext({
+  state,
+  rootState,
+  commit,
+  dispatch,
+}: Pick<Ctx, "state" | "rootState" | "commit" | "dispatch">) {
+  const uris = state.queue.map((song) => song.uri);
+  const track = state.track;
+  if (!track) {
+    if (uris.length === 0) return true;
+    return (
+      (await withUserToken(rootState, dispatch, (token) =>
+        SpotifyService.startPlayback(token, {
+          deviceId: targetDevice(state),
+          uris,
+        }),
+      )) !== undefined
+    );
+  }
+  const paused = state.paused;
+  if (state.shuffle) {
+    commit("SET_SPOTIFY_SHUFFLE", false);
+    await withUserToken(rootState, dispatch, (token) =>
+      SpotifyService.setShuffle(token, false),
+    );
+    dispatch("setInfo", "Shuffle is off, so the queue keeps your order");
+  }
+  await player?.activateElement().catch(() => undefined);
+  const done = await withUserToken(rootState, dispatch, (token) =>
+    SpotifyService.startPlayback(token, {
+      deviceId: targetDevice(state),
+      uris: [track.uri, ...uris],
+      positionMs: Math.round(playbackPosition(state)),
+    }),
+  );
+  if (done === undefined) return false;
+  if (paused)
+    await withUserToken(rootState, dispatch, (token) =>
+      SpotifyService.pausePlayback(token),
+    );
+  return true;
+}
 
 /** The playback fields of the state, to change a few of them in one commit. */
 function currentUpdate(state: SpotifyPlayerState): PlaybackUpdate {

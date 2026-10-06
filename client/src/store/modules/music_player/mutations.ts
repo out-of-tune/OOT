@@ -28,6 +28,9 @@ export const mutations = {
       if (!next) state.queueIndex = Math.max(queueIndex - 1, 0);
     }
   },
+  SET_FOLLOW_PLAYBACK(state, follow: boolean) {
+    state.followPlayback = follow;
+  },
   SET_QUEUE(
     state,
     { queue, queueIndex }: { queue: Song[]; queueIndex: number },

@@ -2,7 +2,8 @@ import type { ActionTree, Commit, Dispatch } from "vuex";
 import { getNodePosition } from "@/lib/graph";
 import { startMultiSelect } from "@/lib/select";
 import type { GraphNode } from "@/types/graph";
-import type { Context, NodeRef, RootState } from "@/store/types";
+import type { ActiveMode, Context, NodeRef, RootState } from "@/store/types";
+import { ACTIVE_MODES } from "../modes";
 import type { EventsState } from "./index";
 
 type Ctx = Context<EventsState>;
@@ -14,6 +15,10 @@ export const KEY = {
   ESC: 27,
   SPACE: 32,
   DEL: 46,
+  ONE: 49,
+  TWO: 50,
+  THREE: 51,
+  FOUR: 52,
   A: 65,
   C: 67,
   F: 70,
@@ -23,6 +28,20 @@ export const KEY = {
   P: 80,
   U: 85,
 } as const;
+
+/** Key code of 1 on the number pad. */
+const NUMPAD_ONE = 97;
+
+/** The click mode of a number key (1 to 4, also on the number pad), or undefined. */
+function modeOfKey(key: number) {
+  const index =
+    key >= KEY.ONE && key <= KEY.FOUR
+      ? key - KEY.ONE
+      : key >= NUMPAD_ONE && key < NUMPAD_ONE + ACTIVE_MODES.length
+        ? key - NUMPAD_ONE
+        : -1;
+  return ACTIVE_MODES[index];
+}
 
 /** The key code of a keyboard event. */
 type KeyEvent = Pick<KeyboardEvent, "which"> &
@@ -47,6 +66,24 @@ function finishMultiSelect(
   if (!state.wasPaused) commit("RESUME_RENDERING");
 }
 
+/** Shows the node in the info panel, loads the songs of an artist or album, and records the click. */
+function showClickedNode(
+  commit: Commit,
+  dispatch: Dispatch,
+  node: NodeRef,
+  action: ActiveMode,
+) {
+  commit("SET_CURRENTNODE", node);
+  if (node.data.label === "artist" || node.data.label === "album")
+    dispatch("getSongSamples", node);
+  dispatch("addToClickHistory", { node, action });
+}
+
+async function expandNode(dispatch: Dispatch, node: NodeRef) {
+  await dispatch("expandAction", { nodes: [node] });
+  dispatch("applyAllConfigurations");
+}
+
 /** Removes the DOM listeners of the previous `initSelectionEvents` call. */
 let removeSelectionListeners: (() => void) | undefined;
 
@@ -66,21 +103,17 @@ export const actions = {
     if (rootState.appearance.highlight) dispatch("loadColors");
   },
 
-  /** Runs the action of the active mode (expand, collapse or explore) on the clicked node. */
+  /** Runs the action of the active mode (expand, collapse, explore or queue) on the clicked node. */
   async mouseClickFunctionality(
     { commit, dispatch, rootState }: Ctx,
     node: NodeRef,
   ) {
-    commit("SET_CURRENTNODE", node);
     const activeMode = rootState.activeMode;
     const label = node.data.label;
-    if (label === "artist" || label === "album")
-      dispatch("getSongSamples", node);
-    dispatch("addToClickHistory", { node, action: activeMode });
+    showClickedNode(commit, dispatch, node, activeMode);
     switch (activeMode) {
       case "expand":
-        await dispatch("expandAction", { nodes: [node] });
-        dispatch("applyAllConfigurations");
+        await expandNode(dispatch, node);
         if (label === "song") dispatch("songAction", node);
         break;
       case "collapse":
@@ -89,7 +122,18 @@ export const actions = {
       case "explore":
         if (label === "song") dispatch("songAction", node);
         break;
+      case "queue":
+        dispatch("addNodesToQueue", [node]);
+        break;
     }
+  },
+
+  /** Shows the node in the info panel, moves the view to it and expands it. A song does not play. */
+  async focusAndExpandNode({ commit, dispatch }: Ctx, node: GraphNode) {
+    showClickedNode(commit, dispatch, node, "expand");
+    dispatch("moveToNode", node);
+    if (node.data.label === "song") dispatch("loadSongInfo", node);
+    await expandNode(dispatch, node);
   },
 
   mouseMoveFunctionality(
@@ -177,6 +221,8 @@ export const actions = {
       if (rootState.appearance.highlight) dispatch("storeColors");
     } else if (key === KEY.I) {
       dispatch("invertSelection");
+    } else if (modeOfKey(key) && !state.keysdown[KEY.CTRL]) {
+      dispatch("setActiveMode", modeOfKey(key));
     } else if (state.keysdown[KEY.CTRL] && key === KEY.A) {
       dispatch("selectAll");
     } else if (
@@ -242,7 +288,10 @@ export const actions = {
     removeSelectionListeners?.();
     const overlay = document.getElementsByClassName(GRAPH_OVERLAY_CLASS)[0];
     const container = document.getElementById(GRAPH_CONTAINER_ID);
-    const shortcutKeys: number[] = Object.values(KEY);
+    const shortcutKeys: number[] = [
+      ...Object.values(KEY),
+      ...ACTIVE_MODES.map((_, index) => NUMPAD_ONE + index),
+    ];
     const onKeyDown = (event: Event) => {
       // Only the shortcuts lose their browser default (for example Space scrolls the page).
       if (shortcutKeys.includes((event as KeyboardEvent).which))

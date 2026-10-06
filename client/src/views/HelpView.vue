@@ -13,6 +13,10 @@ const generalShortcuts: Shortcut[] = [
     description: "Fit the graph to the selection, or to the screen",
   },
   { keys: ["Space"], description: "Pause or resume the motion" },
+  { keys: ["1"], description: "Click mode: expand" },
+  { keys: ["2"], description: "Click mode: collapse" },
+  { keys: ["3"], description: "Click mode: explore" },
+  { keys: ["4"], description: "Click mode: add to queue" },
 ];
 
 const selectionShortcuts: Shortcut[] = [
@@ -238,10 +242,15 @@ function scrollToSection(id: string) {
           currently using, some nodes will be added or removed
         </p>
         <p>
-          There are three basic "modes", which determine what happens when you
-          click on a node:
+          There are four "modes", which determine what happens when you click on
+          a node. The keys 1 to 4 choose them:
         </p>
-        <img src="@/assets/images/modes.png" alt="Listed modes" />
+        <ul>
+          <li><kbd>1</kbd> <a href="#expand">Expand</a></li>
+          <li><kbd>2</kbd> <a href="#collapse">Collapse</a></li>
+          <li><kbd>3</kbd> <a href="#explore">Explore</a></li>
+          <li><kbd>4</kbd> <a href="#queuemode">Queue</a></li>
+        </ul>
 
         <h2 id="expand">Expand</h2>
         <div class="p">
@@ -304,6 +313,13 @@ function scrollToSection(id: string) {
             </li>
           </ul>
         </div>
+        <h2 id="queuemode">Queue</h2>
+        <p>
+          When you click a node and the queue mode is active, a song goes to the
+          end of the <a href="#queue">queue</a>. A song node adds itself. An
+          artist node adds a random song of the artist, and an album node adds a
+          random song of the album.
+        </p>
         <h2 id="pauseresume">
           I can’t click on the nodes, they are moving to fast. Is there a way to
           pause?
@@ -345,6 +361,12 @@ function scrollToSection(id: string) {
           If the node is an artist or album you will additionally see a list of
           songs. You can click on any of them to listen to them song. You can
           also add them to the queue by clicking on the + button.
+        </p>
+        <p>
+          Under "Relations" you see the neighbors of the node in the graph, by
+          type. Click a neighbor to expand it and to show it in the node info.
+          If the node has no neighbors in the graph yet, "Load relations"
+          expands it.
         </p>
 
         <h2 id="nodeinfofocusnode">
@@ -543,6 +565,32 @@ function scrollToSection(id: string) {
           the top right corner.
         </p>
 
+        <p>
+          When the Spotify player is connected, the queue shows the songs up
+          next on Spotify. You can drag, remove and clear them there too. The
+          Spotify Web API cannot change the queue of Spotify, so out-of-tune
+          plays the song that plays now again, at the same position, followed by
+          your new list. You can hear a short gap when this happens. Shuffle
+          goes off, because it would mix your order. If you play an album or a
+          playlist, only the songs that the queue shows stay up next after a
+          change.
+        </p>
+
+        <h2 id="followplayback">Can the graph follow the music?</h2>
+        <p>
+          Yes. Turn on the follow button (the target icon) at the top of the
+          queue. On each new song, the view moves to the node of the song and
+          the node info shows it. A song that is not in the graph yet is added
+          with its album, artists and genres.
+        </p>
+
+        <h2 id="saveplaylist">Can I save the queue as a playlist?</h2>
+        <p>
+          Yes, if you are logged in to Spotify. The save button at the top of
+          the queue creates a new private playlist with the songs. With the
+          Spotify player, these are the song that plays and the songs up next.
+        </p>
+
         <h2 id="playondevice">Can I play the queue on a different device?</h2>
         <p>
           Yes, if you have Spotify premium you can click the button next to the
@@ -554,7 +602,9 @@ function scrollToSection(id: string) {
         <p>
           If you are logged in to Spotify, you can add a song to the
           <a>currently selected playlist</a> by clicking on the icon on the
-          right hand side of the song.
+          right hand side of the song. The button at the top of the queue adds
+          all songs. If you did not choose a playlist yet, the playlist window
+          opens, so that you can choose one.
         </p>
 
         <h1 id="selection">Selection</h1>
@@ -584,7 +634,10 @@ function scrollToSection(id: string) {
             </li>
             <li>Pin and unpin them</li>
             <li>Sort them</li>
-            <li>Add the selected nodes to the queue/a playlist</li>
+            <li>
+              Add the selected nodes to the queue or a playlist. A song adds
+              itself, an artist or an album adds a random song of it.
+            </li>
             <li>Remove the selected nodes</li>
             <li>Invert the selection</li>
           </ul>
@@ -673,6 +726,12 @@ function scrollToSection(id: string) {
           You can visualize playlist by clicking on the PLAYLISTS button on the
           toolbar. If you are logged in you can choose a playlist and load it.
           This will generate a graph.
+        </p>
+        <p>
+          The window loads your playlists from Spotify each time it opens, so
+          playlists that you make in another Spotify app show there too. More
+          playlists load when you scroll down. You can also create a new
+          playlist there.
         </p>
         <h2 id="deleteGraph">
           How can I delete a stored graph or configuration?
@@ -902,7 +961,7 @@ album: name LIKE "Blues Bro"
   gap: 0.25rem;
 }
 
-.shortcuts kbd {
+kbd {
   padding: 0.1rem 0.45rem;
   border: 1px solid var(--color-line-strong);
   border-bottom-width: 2px;

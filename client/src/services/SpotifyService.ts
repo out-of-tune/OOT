@@ -190,15 +190,30 @@ class SpotifyService {
     return { artists };
   }
 
-  /** Spotify accepts at most 100 URIs per request. */
-  addSongsToPlaylist(token: string, playlistId: string, songUris: string[]) {
-    return Promise.all(
-      chunk(songUris, 100).map((uris) =>
-        this.request("POST", `playlists/${playlistId}/items`, token, {
-          body: { uris },
-        }),
-      ),
-    );
+  /** Creates an empty playlist of the user. It is private unless `isPublic` is true. */
+  async createPlaylist(
+    token: string,
+    name: string,
+    {
+      isPublic = false,
+      description,
+    }: { isPublic?: boolean; description?: string } = {},
+  ) {
+    return (await this.request<SpotifyPlaylist>("POST", "me/playlists", token, {
+      body: { name, public: isPublic, ...(description ? { description } : {}) },
+    })) as SpotifyPlaylist;
+  }
+
+  /** Spotify accepts at most 100 URIs per request. The requests go one after another, so the songs keep their order. */
+  async addSongsToPlaylist(
+    token: string,
+    playlistId: string,
+    songUris: string[],
+  ) {
+    for (const uris of chunk(songUris, 100))
+      await this.request("POST", `playlists/${playlistId}/items`, token, {
+        body: { uris },
+      });
   }
 
   searchByString(

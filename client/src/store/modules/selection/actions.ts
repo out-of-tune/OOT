@@ -1,5 +1,5 @@
 import type { ActionTree } from "vuex";
-import { chunk, isEqual, uniq } from "lodash-es";
+import { isEqual, uniq } from "lodash-es";
 import {
   getAllLinks,
   getAllNodes,
@@ -7,11 +7,10 @@ import {
   getNodeUi,
 } from "@/lib/graph";
 import type { SelectedArea } from "@/lib/select";
-import { handleTokenError } from "@/lib/token";
-import SpotifyService from "@/services/SpotifyService";
 import type { GraphLink, GraphNode, NodeId, Position } from "@/types/graph";
-import type { SpotifyTrack } from "@/types/spotify";
 import type { Context, RootState } from "@/store/types";
+import { hasSongs } from "@/lib/spotifyNode";
+import { songsForNodes } from "../music_player/actions";
 import type { SelectionState } from "./index";
 import { withOpacity } from "@/lib/color";
 
@@ -231,59 +230,33 @@ export const actions = {
     dispatch("applyAllConfigurations");
   },
 
-  /** Loads the full data of the selected songs and adds them to the queue. */
-  async addSelectedSongsToQueue({ commit, rootState, state, dispatch }: Ctx) {
-    const songNodes = state.selectedNodes.filter(
-      (node) => node.data.label === "song",
-    );
-    if (songNodes.length === 0) {
-      dispatch("setInfo", "No songs selected");
+  /** Adds the selected songs, and a random song of each selected artist and album, to the queue. */
+  addSelectedSongsToQueue({ state, dispatch }: Ctx) {
+    if (!state.selectedNodes.some(hasSongs)) {
+      dispatch("setInfo", "Select songs, artists or albums");
+      return 0;
+    }
+    return dispatch("addNodesToQueue", state.selectedNodes.filter(hasSongs));
+  },
+
+  /** Adds the selected songs, and a random song of each selected artist and album, to the chosen playlist. */
+  async addSelectedSongsToPlaylist({ state, dispatch, rootState }: Ctx) {
+    const nodes = state.selectedNodes.filter(hasSongs);
+    if (nodes.length === 0) {
+      dispatch("setInfo", "Select songs, artists or albums");
       return;
     }
-    const sids = songNodes.map((node) => String(node.data.sid));
+    if (!rootState.playlists.currentPlaylist.id)
+      return dispatch("choosePlaylist");
     try {
-      const results: { tracks: (SpotifyTrack | null)[] }[] = await Promise.all(
-        chunk(sids, 50).map((ids) =>
-          handleTokenError(
-            (batch: string[], token: string) =>
-              SpotifyService.getFullSongData(token, batch),
-            [ids],
-            dispatch,
-            rootState,
-          ),
-        ),
+      const songs = await songsForNodes(dispatch, rootState, nodes);
+      return dispatch(
+        "addSongsToPlaylist",
+        songs.filter((song) => song.uri),
       );
-      const tracks = results.flatMap((result) => result.tracks);
-      const updatedNodes = songNodes.flatMap((node, index) => {
-        const track = tracks[index];
-        if (!track) return [];
-        return [
-          {
-            id: node.id,
-            data: { ...node.data, ...track, images: track.album?.images ?? [] },
-          },
-        ];
-      });
-      commit("ADD_TO_GRAPH", { nodes: updatedNodes, links: [] });
-      dispatch("applyAllConfigurations");
-      // One after another, so the Spotify queue keeps the order of the selection.
-      // addToQueue returns false when Spotify refused a song. Its error toast then stays.
-      let queued = 0;
-      for (const node of updatedNodes)
-        if ((await dispatch("addToQueue", { ...node.data })) !== false)
-          queued++;
-      if (queued === updatedNodes.length)
-        dispatch("setSuccess", `Added ${queued} songs to queue`);
     } catch (error) {
       dispatch("setError", error);
     }
-  },
-
-  addSelectedSongsToPlaylist({ state, dispatch }: Ctx) {
-    const songs = state.selectedNodes
-      .filter((node) => node.data.label === "song")
-      .map((node) => node.data);
-    return dispatch("addSongsToPlaylist", songs);
   },
 
   pinNodes({ commit, dispatch }: Ctx, nodes: GraphNode[]) {

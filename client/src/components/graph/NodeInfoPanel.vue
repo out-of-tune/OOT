@@ -3,19 +3,23 @@ import {
   Disc3,
   ExternalLink,
   Music,
+  Network,
   Play,
   Plus,
   UserCheck,
   UserPlus,
   X,
 } from "@lucide/vue";
-import { computed, ref, watch } from "vue";
+import { computed, onBeforeUnmount, reactive, ref, watch } from "vue";
+import { sortBy, uniqBy } from "lodash-es";
 import UiButton from "@/components/ui/UiButton.vue";
 import IconButton from "@/components/ui/IconButton.vue";
 import { formatDuration } from "@/lib/formatDuration";
+import { getConnectedNodesAndLinks } from "@/lib/graph";
+import { songFromTrack, spotifyImages } from "@/lib/spotifyNode";
 import { useStore } from "@/store";
 import type { GraphNode } from "@/types/graph";
-import type { SpotifyImage, SpotifyTrack } from "@/types/spotify";
+import type { SpotifyTrack } from "@/types/spotify";
 
 const store = useStore();
 const node = computed(() => store.state.mainGraph.currentNode);
@@ -24,12 +28,7 @@ const label = computed(
   () => (node.value.data.label as string | undefined) ?? "",
 );
 
-/** Image URL. Database artists store plain URLs, Spotify objects store `{ url }`. */
-function imageUrl(images: unknown): string | undefined {
-  if (!Array.isArray(images) || images.length === 0) return undefined;
-  const first = images[0] as string | SpotifyImage;
-  return typeof first === "string" ? first : first?.url;
-}
+const imageUrl = (images: unknown) => spotifyImages(images)[0]?.url;
 
 const cover = computed(() => {
   if (label.value === "song")
@@ -53,10 +52,9 @@ const spotifyUrl = computed(() => {
 const tracks = computed(
   () => (data.value.tracks as SpotifyTrack[] | undefined) ?? [],
 );
-const trackImages = (track: SpotifyTrack): SpotifyImage[] =>
-  track.album?.images ??
-  (data.value.images as SpotifyImage[] | undefined) ??
-  [];
+/** A song of the list, with the cover of the node when the track has no album. */
+const songOf = (track: SpotifyTrack) =>
+  songFromTrack(track, spotifyImages(data.value.images));
 
 const duration = computed(() => {
   const ms = data.value.duration_ms as number | undefined;
@@ -124,10 +122,68 @@ function play(track: SpotifyTrack) {
     });
     return;
   }
-  store.dispatch("playSong", { ...track, images: trackImages(track) });
+  store.dispatch("playSong", songOf(track));
 }
 const queue = (track: SpotifyTrack) =>
-  store.dispatch("addToQueue", { ...track, images: trackImages(track) });
+  store.dispatch("addToQueue", songOf(track));
+/** Neighbors shown per type before "Show all". */
+const RELATIONS_SHOWN = 6;
+
+// The graph engine is not reactive, so its change events tell when the neighbors change.
+const graphVersion = ref(0);
+const onGraphChanged = () => graphVersion.value++;
+watch(
+  () => store.state.mainGraph.Graph,
+  (graph, previous) => {
+    previous?.off("changed", onGraphChanged);
+    graph.on("changed", onGraphChanged);
+    onGraphChanged();
+  },
+  { immediate: true },
+);
+onBeforeUnmount(() =>
+  store.state.mainGraph.Graph.off("changed", onGraphChanged),
+);
+
+/** The node of the panel as it is in the graph, or undefined when it is not in the graph. */
+const graphNode = computed(() => {
+  void graphVersion.value;
+  const id = node.value.id;
+  return id === 0 ? undefined : store.state.mainGraph.Graph.getNode(id);
+});
+
+/** The neighbors of the node in the graph, by type, in the order of the schema. */
+const relations = computed(() => {
+  // Links change without a change of the node, so this reads the version too.
+  void graphVersion.value;
+  const graph = store.state.mainGraph.Graph;
+  const id = graphNode.value?.id;
+  if (id === undefined) return [];
+  const neighbors = uniqBy(
+    getConnectedNodesAndLinks({ graph, node: { id } }).map(
+      (entry) => entry.node,
+    ),
+    "id",
+  );
+  return store.state.schema.nodeTypes
+    .map((type) => ({
+      label: type.label,
+      nodes: sortBy(
+        neighbors.filter((neighbor) => neighbor.data.label === type.label),
+        (neighbor) => String(neighbor.data.name ?? neighbor.id).toLowerCase(),
+      ),
+    }))
+    .filter((group) => group.nodes.length > 0);
+});
+/** Types whose neighbors all show. */
+const expandedRelations = reactive(new Set<string>());
+watch(
+  () => node.value.id,
+  () => expandedRelations.clear(),
+);
+const plural = (type: string) =>
+  `${type.charAt(0).toUpperCase()}${type.slice(1)}s`;
+
 const focusNode = () => {
   if (node.value.id !== 0)
     store.dispatch("fitGraphToNodes", [node.value as GraphNode]);
@@ -299,6 +355,63 @@ const focusNode = () => {
       >
         <Music class="size-3.5" /> No songs loaded
       </p>
+
+      <div class="flex flex-col gap-2">
+        <h3 class="label">Relations</h3>
+        <div v-for="group in relations" :key="group.label">
+          <h4 class="mb-1 text-xs text-fg-subtle">
+            {{ plural(group.label) }} ({{ group.nodes.length }})
+          </h4>
+          <ul class="flex flex-wrap gap-1">
+            <li
+              v-for="neighbor in expandedRelations.has(group.label)
+                ? group.nodes
+                : group.nodes.slice(0, RELATIONS_SHOWN)"
+              :key="neighbor.id"
+              class="max-w-full"
+            >
+              <button
+                type="button"
+                class="max-w-full truncate rounded-md border border-line px-2 py-0.5 text-left text-xs text-fg-muted hover:border-line-strong hover:bg-surface-hover hover:text-fg"
+                :title="`Expand ${neighbor.data.name ?? neighbor.id} and show it here`"
+                @click="store.dispatch('focusAndExpandNode', neighbor)"
+              >
+                {{ neighbor.data.name ?? neighbor.id }}
+              </button>
+            </li>
+            <li v-if="group.nodes.length > RELATIONS_SHOWN">
+              <button
+                type="button"
+                class="rounded-md px-2 py-0.5 text-xs text-accent-strong hover:underline"
+                @click="
+                  expandedRelations.has(group.label)
+                    ? expandedRelations.delete(group.label)
+                    : expandedRelations.add(group.label)
+                "
+              >
+                {{
+                  expandedRelations.has(group.label)
+                    ? "Show less"
+                    : `Show all ${group.nodes.length}`
+                }}
+              </button>
+            </li>
+          </ul>
+        </div>
+        <div
+          v-if="relations.length === 0"
+          class="flex items-center justify-between gap-2 text-xs text-fg-subtle"
+        >
+          <span>No relations in the graph yet.</span>
+          <UiButton
+            v-if="graphNode"
+            size="sm"
+            @click="store.dispatch('focusAndExpandNode', graphNode)"
+          >
+            <Network class="size-3.5" /> Load relations
+          </UiButton>
+        </div>
+      </div>
     </div>
   </section>
 </template>

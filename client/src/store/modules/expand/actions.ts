@@ -3,6 +3,7 @@ import { chunk } from "lodash-es";
 import { checkNodesExistence, mergeGraphQlQueries } from "@/lib/graphql";
 import { gqlString } from "@/lib/graphqlString";
 import { getAllNodes } from "@/lib/graph";
+import { sleep } from "@/lib/sleep";
 import {
   handleGraphqlTokenError,
   handleTokenError,
@@ -54,9 +55,6 @@ const EXPAND_RETRY_DELAY = 10000;
 const NETWORK_RETRY_DELAY = 7000;
 /** Spotify accepts at most 50 ids per batch request. */
 const SPOTIFY_BATCH_SIZE = 50;
-
-const sleep = (milliseconds: number) =>
-  new Promise((resolve) => setTimeout(resolve, milliseconds));
 
 function getRelevantConfiguredConnections(
   expandConfiguration: ActionRule[],

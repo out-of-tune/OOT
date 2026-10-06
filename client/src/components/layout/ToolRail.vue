@@ -3,6 +3,7 @@ import {
   Box,
   CircleQuestionMark,
   Compass,
+  ListPlus,
   ListVideo,
   MessageSquare,
   Minus,
@@ -20,6 +21,7 @@ import SelectionActions from "@/components/popovers/SelectionActions.vue";
 import IconButton from "@/components/ui/IconButton.vue";
 import UiPopover from "@/components/ui/UiPopover.vue";
 import { useStore } from "@/store";
+import { ACTIVE_MODES } from "@/store/modules/modes";
 import type { ActiveMode } from "@/store/types";
 
 const store = useStore();
@@ -38,31 +40,38 @@ async function toggleViewMode() {
 }
 const saveOpen = ref(false);
 
-const modes: {
-  mode: ActiveMode;
-  id: string;
-  label: string;
-  icon: typeof Plus;
-}[] = [
-  {
-    mode: "expand",
+const MODE_BUTTONS: Record<
+  ActiveMode,
+  { id: string; label: string; icon: typeof Plus }
+> = {
+  expand: {
     id: "expand-button",
     label: "Expand: click adds neighbors",
     icon: Plus,
   },
-  {
-    mode: "collapse",
+  collapse: {
     id: "collapse-button",
     label: "Collapse: click removes neighbors",
     icon: Minus,
   },
-  {
-    mode: "explore",
+  explore: {
     id: "explore-button",
     label: "Explore: click only shows info",
     icon: Compass,
   },
-];
+  queue: {
+    id: "queue-button",
+    label: "Queue: click adds a song to the queue",
+    icon: ListPlus,
+  },
+};
+
+/** The mode buttons, with the number key that chooses each. */
+const modes = ACTIVE_MODES.map((mode, index) => ({
+  mode,
+  ...MODE_BUTTONS[mode],
+  label: `${MODE_BUTTONS[mode].label} (${index + 1})`,
+}));
 
 /** Settings and Help open in a new tab, so the graph keeps its state. */
 const openInNewTab = (path: string) =>

@@ -30,7 +30,7 @@ export interface NodeRef {
   links?: GraphLink[] | null;
 }
 
-export type ActiveMode = "expand" | "collapse" | "explore";
+export type ActiveMode = "expand" | "collapse" | "explore" | "queue";
 
 export interface MainGraphState {
   graphContainer: HTMLElement | null;

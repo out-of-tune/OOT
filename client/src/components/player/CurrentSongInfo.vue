@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Music } from "@lucide/vue";
 import { computed } from "vue";
-import { searchGraph } from "@/lib/graph";
+import { findNodesBySid } from "@/lib/graph";
 import { useStore } from "@/store";
 import type { SpotifyImage } from "@/types/spotify";
 
@@ -26,19 +26,7 @@ const artists = computed(() =>
 function showInGraph(type: "song" | "artist", sids: (string | undefined)[]) {
   const nodes = sids
     .filter((sid): sid is string => Boolean(sid))
-    .flatMap((sid) =>
-      searchGraph(
-        {
-          nodeType: type,
-          valid: true,
-          errors: [],
-          attributes: [
-            { attributeData: sid, attributeSearch: "sid", operator: "=" },
-          ],
-        },
-        store.state,
-      ),
-    );
+    .flatMap((sid) => findNodesBySid(store.state, type, sid));
   if (nodes.length > 0) store.dispatch("fitGraphToNodes", nodes);
   else store.dispatch("setInfo", `This ${type} is not in the graph`);
 }

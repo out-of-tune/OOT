@@ -1,6 +1,14 @@
 <script setup lang="ts">
-import { Heart, History, ListMusic, LogIn, Mic2, Play } from "@lucide/vue";
-import { computed, ref, watch } from "vue";
+import {
+  Heart,
+  History,
+  ListMusic,
+  LogIn,
+  Mic2,
+  Play,
+  Plus,
+} from "@lucide/vue";
+import { computed, nextTick, ref, watch } from "vue";
 import UiButton from "@/components/ui/UiButton.vue";
 import UiModal from "@/components/ui/UiModal.vue";
 import { useStore } from "@/store";
@@ -25,7 +33,17 @@ const filtered = computed(() => {
     : playlists.value;
 });
 
+/** Distance from the end of the list at which the next page loads, in pixels. */
+const LOAD_MORE_DISTANCE = 120;
+
+const total = computed(() => store.state.playlists.playlistsTotal);
+const allLoaded = computed(
+  () => total.value !== null && playlists.value.length >= total.value,
+);
+const list = ref<HTMLElement | null>(null);
+
 async function fetchPlaylists(more = false) {
+  if (loading.value) return;
   loading.value = true;
   try {
     await store.dispatch(
@@ -33,18 +51,56 @@ async function fetchPlaylists(more = false) {
     );
   } catch {
     store.dispatch("setError", new Error("Your playlists could not be loaded"));
+    return;
   } finally {
     loading.value = false;
   }
+  await nextTick();
+  loadMoreIfNeeded();
 }
 
+/** Loads the next page when the list is scrolled near its end, or does not fill its box. */
+function loadMoreIfNeeded() {
+  const element = list.value;
+  if (!element || loading.value || allLoaded.value) return;
+  if (
+    element.scrollHeight - element.scrollTop - element.clientHeight <
+    LOAD_MORE_DISTANCE
+  )
+    fetchPlaylists(true);
+}
+
+// Each open loads the playlists again, so playlists made in other Spotify apps show.
 watch(
   [open, loggedIn],
   ([isOpen, isLoggedIn]) => {
-    if (isOpen && isLoggedIn && playlists.value.length === 0) fetchPlaylists();
+    if (isOpen && isLoggedIn) fetchPlaylists();
   },
   { immediate: true },
 );
+// A filter can leave the list too short to scroll. More pages then load at once.
+watch(filter, () => nextTick(loadMoreIfNeeded));
+
+const newName = ref("");
+const creating = ref(false);
+async function createPlaylist() {
+  if (!newName.value.trim() || creating.value) return;
+  creating.value = true;
+  try {
+    const playlist: SpotifyPlaylist | undefined = await store.dispatch(
+      "createPlaylist",
+      { name: newName.value },
+    );
+    if (playlist) {
+      newName.value = "";
+      filter.value = "";
+      selected.value = playlist;
+      list.value?.scrollTo({ top: 0 });
+    }
+  } finally {
+    creating.value = false;
+  }
+}
 
 const close = () => store.dispatch("changePlaylistLoaderState", false);
 const spotifyReady = computed(
@@ -100,9 +156,11 @@ function loadGraph() {
           class="field"
         />
         <ul
+          ref="list"
           role="listbox"
           aria-label="Your playlists"
           class="scrollbar-thin flex h-72 flex-col overflow-y-auto rounded-lg border border-line p-1"
+          @scroll.passive="loadMoreIfNeeded"
         >
           <li v-for="playlist in filtered" :key="playlist.id">
             <button
@@ -135,17 +193,31 @@ function loadGraph() {
             No playlists found.
           </li>
         </ul>
-        <div class="flex items-center justify-between text-xs text-fg-subtle">
-          <span>{{ playlists.length }} loaded</span>
+        <p class="text-xs text-fg-subtle" aria-live="polite">
+          {{
+            loading
+              ? "Loading…"
+              : total === null
+                ? `${playlists.length} playlists`
+                : `${playlists.length} of ${total} playlists`
+          }}
+        </p>
+        <form class="flex gap-2" @submit.prevent="createPlaylist">
+          <input
+            v-model="newName"
+            type="text"
+            maxlength="100"
+            placeholder="New playlist name"
+            aria-label="New playlist name"
+            class="field"
+          />
           <UiButton
-            size="sm"
-            variant="ghost"
-            :disabled="loading"
-            @click="fetchPlaylists(true)"
+            type="submit"
+            :disabled="!newName.trim() || creating"
+            class="shrink-0"
+            ><Plus class="size-4" /> Create</UiButton
           >
-            {{ loading ? "Loading…" : "Load more" }}
-          </UiButton>
-        </div>
+        </form>
       </div>
 
       <aside class="flex flex-col gap-4 text-sm">

@@ -175,3 +175,22 @@ export function getGraphObject(rootState: GraphState): GraphObject {
   });
   return { nodesWithPositions, links };
 }
+
+/** The nodes of a type with the Spotify id. */
+export function findNodesBySid(
+  rootState: GraphState,
+  nodeType: string,
+  sid: string,
+): GraphNode[] {
+  return searchGraph(
+    {
+      nodeType,
+      valid: true,
+      errors: [],
+      attributes: [
+        { attributeData: sid, attributeSearch: "sid", operator: "=" },
+      ],
+    },
+    rootState,
+  );
+}

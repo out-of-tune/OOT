@@ -7,7 +7,7 @@ import {
   useFloating,
   type Placement,
 } from "@floating-ui/vue";
-import { onBeforeUnmount, ref, watch } from "vue";
+import { computed, onBeforeUnmount, ref, watch } from "vue";
 
 const props = withDefaults(
   defineProps<{
@@ -23,11 +23,23 @@ const open = defineModel<boolean>("open", { default: false });
 const reference = ref<HTMLElement | null>(null);
 const floating = ref<HTMLElement | null>(null);
 
-const { floatingStyles } = useFloating(reference, floating, {
-  placement: () => props.placement,
-  middleware: [offset(10), flip(), shift({ padding: 8 })],
-  whileElementsMounted: autoUpdate,
-});
+const { floatingStyles, placement: finalPlacement } = useFloating(
+  reference,
+  floating,
+  {
+    placement: () => props.placement,
+    middleware: [offset(10), flip(), shift({ padding: 8 })],
+    whileElementsMounted: autoUpdate,
+  },
+);
+
+/** The panel grows out of the side that faces its trigger. */
+const origin = computed(
+  () =>
+    ({ left: "right", right: "left", top: "bottom", bottom: "top" })[
+      finalPlacement.value.split("-")[0] as "left" | "right" | "top" | "bottom"
+    ],
+);
 
 function onDocumentPointerDown(event: PointerEvent) {
   const target = event.target as Node;
@@ -64,11 +76,13 @@ const close = () => (open.value = false);
     <slot name="trigger" :open="open" :toggle="toggle" />
   </div>
   <Teleport to="body">
+    <!-- Only opacity and scale animate. Floating UI places the panel with a transform,
+         and a transition of it would fly the panel in from the corner of the page. -->
     <Transition
-      enter-active-class="transition duration-100 ease-out"
-      enter-from-class="scale-95 opacity-0"
-      leave-active-class="transition duration-75 ease-in"
-      leave-to-class="scale-95 opacity-0"
+      enter-active-class="transition-[opacity,scale] duration-100 ease-out"
+      enter-from-class="scale-[0.98] opacity-0"
+      leave-active-class="transition-[opacity,scale] duration-75 ease-in"
+      leave-to-class="scale-[0.98] opacity-0"
     >
       <div
         v-if="open"
@@ -76,7 +90,7 @@ const close = () => (open.value = false);
         role="dialog"
         :aria-label="label"
         class="panel z-[90] bg-surface"
-        :style="floatingStyles"
+        :style="{ ...floatingStyles, transformOrigin: origin }"
       >
         <slot :close="close" />
       </div>

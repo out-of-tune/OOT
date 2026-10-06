@@ -10,6 +10,8 @@ export interface MusicPlayerState {
   queueIndex: number;
   /** Action that runs when the user clicks a song node. */
   songAction: "playSong" | "addToQueue";
+  /** Follow mode: the view moves to the node of the song that plays. */
+  followPlayback: boolean;
 }
 
 export const emptySong = (): Song => ({
@@ -24,6 +26,7 @@ export const music_player: Module<MusicPlayerState, RootState> = {
     queue: [],
     queueIndex: 0,
     songAction: "playSong",
+    followPlayback: false,
   }),
   actions,
   mutations,

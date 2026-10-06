@@ -9,6 +9,9 @@ export const mutations = {
   SET_USER_PLAYLISTS(state, playlists: SpotifyPlaylist[]) {
     state.playlists = playlists;
   },
+  SET_PLAYLISTS_TOTAL(state, total: number | null) {
+    state.playlistsTotal = total;
+  },
   SET_CURRENT_PLAYLIST(state, playlist: Partial<SpotifyPlaylist>) {
     state.currentPlaylist = playlist;
   },

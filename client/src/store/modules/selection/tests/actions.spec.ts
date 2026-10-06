@@ -864,3 +864,45 @@ describe("moveSelection", () => {
     });
   });
 });
+
+describe("selection songs", () => {
+  const nodes = [
+    { id: "genre/1", data: { label: "genre" } },
+    { id: "artist/1", data: { label: "artist", sid: "a" } },
+    { id: "song/1", data: { label: "song", sid: "s" } },
+  ];
+
+  it("queues the songs, artists and albums of the selection", () => {
+    const dispatch = vi.fn();
+    actions.addSelectedSongsToQueue({
+      dispatch,
+      state: { selectedNodes: nodes },
+    } as never);
+    expect(dispatch).toHaveBeenCalledWith("addNodesToQueue", [
+      nodes[1],
+      nodes[2],
+    ]);
+  });
+
+  it("tells what to select when no node gives a song", () => {
+    const dispatch = vi.fn();
+    actions.addSelectedSongsToQueue({
+      dispatch,
+      state: { selectedNodes: [nodes[0]] },
+    } as never);
+    expect(dispatch).toHaveBeenCalledWith(
+      "setInfo",
+      "Select songs, artists or albums",
+    );
+  });
+
+  it("opens the playlist chooser before it loads songs when no playlist is chosen", async () => {
+    const dispatch = vi.fn();
+    await actions.addSelectedSongsToPlaylist({
+      dispatch,
+      state: { selectedNodes: nodes },
+      rootState: { playlists: { currentPlaylist: {} } },
+    } as never);
+    expect(dispatch).toHaveBeenCalledWith("choosePlaylist");
+  });
+});

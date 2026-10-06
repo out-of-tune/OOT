@@ -38,7 +38,7 @@ const steps: DriveStep[] = [
     popover: {
       title: "Click modes",
       description:
-        "Expand adds the neighbors of a node. Collapse removes them. Explore only shows the node info.",
+        "Expand adds the neighbors of a node. Collapse removes them. Explore only shows the node info. Queue adds a song of the node to the queue. The keys 1 to 4 choose a mode.",
       side: "left",
     },
   },

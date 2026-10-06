@@ -654,3 +654,79 @@ describe("resizeGraphContainer", () => {
     });
   });
 });
+
+describe("click mode shortcuts", () => {
+  const press = (which: number, keysdown = {}) => {
+    const dispatch = vi.fn();
+    const state = { keysdown };
+    actions.keyUpFunctions(
+      {
+        dispatch,
+        commit: vi.fn(),
+        rootState: { selection: { selectedNodes: [] }, appearance: {} },
+        state,
+      } as never,
+      { which },
+    );
+    return dispatch;
+  };
+
+  it.each([
+    [49, "expand"],
+    [50, "collapse"],
+    [51, "explore"],
+    [52, "queue"],
+    [97, "expand"],
+    [100, "queue"],
+  ])("key code %i chooses %s", (which, mode) => {
+    expect(press(which)).toHaveBeenCalledWith("setActiveMode", mode);
+  });
+
+  it("ignores 5 and Ctrl with a number", () => {
+    expect(press(53)).not.toHaveBeenCalledWith(
+      "setActiveMode",
+      expect.anything(),
+    );
+    expect(press(49, { 17: true })).not.toHaveBeenCalledWith(
+      "setActiveMode",
+      expect.anything(),
+    );
+  });
+});
+
+describe("queue click mode", () => {
+  it("adds the song of the clicked node to the queue and does not expand", async () => {
+    const dispatch = vi.fn();
+    const node = { id: "artist/1", data: { label: "artist", sid: "1" } };
+    await actions.mouseClickFunctionality(
+      {
+        commit: vi.fn(),
+        dispatch,
+        rootState: { activeMode: "queue" },
+      } as never,
+      node,
+    );
+    expect(dispatch).toHaveBeenCalledWith("addNodesToQueue", [node]);
+    expect(dispatch).not.toHaveBeenCalledWith(
+      "expandAction",
+      expect.anything(),
+    );
+  });
+});
+
+describe("focusAndExpandNode", () => {
+  it("shows the neighbor, moves the view to it and expands it", async () => {
+    const commit = vi.fn();
+    const dispatch = vi.fn();
+    const node = { id: "song/1", data: { label: "song", sid: "1" } };
+    await actions.focusAndExpandNode(
+      { commit, dispatch } as never,
+      node as never,
+    );
+    expect(commit).toHaveBeenCalledWith("SET_CURRENTNODE", node);
+    expect(dispatch).toHaveBeenCalledWith("moveToNode", node);
+    expect(dispatch).toHaveBeenCalledWith("loadSongInfo", node);
+    expect(dispatch).toHaveBeenCalledWith("expandAction", { nodes: [node] });
+    expect(dispatch).toHaveBeenLastCalledWith("applyAllConfigurations");
+  });
+});

@@ -2,15 +2,14 @@
 import { computed } from "vue";
 import UiButton from "@/components/ui/UiButton.vue";
 import { getNodePosition } from "@/lib/graph";
+import { hasSongs } from "@/lib/spotifyNode";
 import { useStore } from "@/store";
 
 const emit = defineEmits<{ done: [] }>();
 
 const store = useStore();
 const selected = computed(() => store.state.selection.selectedNodes);
-const songCount = computed(
-  () => selected.value.filter((node) => node.data.label === "song").length,
-);
+const songCount = computed(() => selected.value.filter(hasSongs).length);
 const loggedIn = computed(() => store.state.authentication.loginState);
 
 function run(action: string, payload?: unknown) {
@@ -66,6 +65,7 @@ function showItems() {
         size="sm"
         class="col-span-2"
         :disabled="songCount === 0"
+        title="Songs, and a random song of each artist and album"
         @click="run('addSelectedSongsToQueue')"
       >
         Add songs to queue
@@ -77,6 +77,7 @@ function showItems() {
         size="sm"
         class="flex-1"
         :disabled="songCount === 0"
+        title="Songs, and a random song of each artist and album"
         @click="run('addSelectedSongsToPlaylist')"
       >
         Add to playlist
