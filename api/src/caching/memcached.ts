@@ -1,13 +1,12 @@
-import Keyv from "keyv"
 import KeyvMemcache from "@keyv/memcache";
-import { KeyvAdapter } from "@apollo/utils.keyvadapter"
+import { KeyvAdapter } from "@apollo/utils.keyvadapter";
+import Keyv from "keyv";
 import { MEMCACHED_HOST } from "../helpers/settings.js";
 
-const servers = [
-    MEMCACHED_HOST,
-].join(",");
-  
-const memcache = new KeyvMemcache(servers)
+// The adapter is typed against the CommonJS build of keyv. At runtime both builds are the same class.
+type AdapterKeyv = ConstructorParameters<typeof KeyvAdapter<string>>[0];
 
-export default new KeyvAdapter(new Keyv({ store: memcache }))
-  
+/** Shared cache of Apollo Server, stored in memcached. */
+const memcache = new KeyvAdapter<string>(new Keyv({ store: new KeyvMemcache(MEMCACHED_HOST) }) as unknown as AdapterKeyv);
+
+export default memcache;

@@ -1,22 +1,24 @@
-import BaseAPI from './base.js'
+import type { Database } from "arangojs";
+import BaseAPI from "./base.js";
 
+/** Origins of artist data. Spotify is `Source/0`. */
 class SourceAPI extends BaseAPI {
-    static collection = "Source"
-    static async onConnect(db) {
-        super.onConnect(db)
-        const sources = new SourceAPI(db)
-        const spotify = await sources.fetch('Spotify')
-        if (spotify && spotify.length === 0)
-            sources.create('Spotify', '0')
-    }
+  static collection = "Source";
 
-    create(name, _key) {
-        return super._create('Source', { _key, name })
-    }
+  static async onConnect(db: Database) {
+    await super.onConnect(db);
+    const sources = new SourceAPI(db);
+    const spotify = await sources.fetch("Spotify");
+    if (spotify.length === 0) await sources.create("Spotify", "0");
+  }
 
-    fetch(name) {
-        return this._search('Source', name, 'name', 1)
-    }
+  create(name: string, _key: string) {
+    return this._create("Source", { _key, name });
+  }
+
+  fetch(name: string) {
+    return this._search("Source", name, "name", 1);
+  }
 }
 
-export default SourceAPI
+export default SourceAPI;

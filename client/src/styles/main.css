@@ -1,0 +1,229 @@
+@import "tailwindcss";
+
+/* Design tokens. The app is dark only: the graph renders on a black canvas. */
+@theme {
+  --font-sans:
+    "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --color-canvas: #000000;
+  --color-surface: #141417;
+  --color-surface-raised: #1c1c21;
+  --color-surface-hover: #26262c;
+  --color-line: #2c2c33;
+  --color-line-strong: #3a3a43;
+  --color-fg: #ececf1;
+  --color-fg-muted: #a0a0ab;
+  --color-fg-subtle: #6e6e78;
+
+  /* Brand colors of out-of-tune. */
+  --color-accent: #2d9cdb;
+  --color-accent-strong: #56ccf2;
+  --color-brand: #da6a1d;
+  --color-brand-soft: #f2994a;
+  --color-teal: #1dcdda;
+
+  --color-success: #3fb950;
+  --color-danger: #f85149;
+  --color-info: #2d9cdb;
+
+  --radius-panel: 0.875rem;
+  --shadow-panel:
+    0 12px 32px -8px rgb(0 0 0 / 0.6), 0 0 0 1px rgb(255 255 255 / 0.04);
+}
+
+@layer base {
+  html,
+  body,
+  #app {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-canvas);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    color-scheme: dark;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  ::selection {
+    background-color: rgb(45 156 219 / 0.35);
+  }
+}
+
+@layer components {
+  /* Floating panel on top of the graph. */
+  .panel {
+    @apply rounded-panel border border-line bg-surface/90 shadow-panel backdrop-blur-md;
+  }
+
+  .field {
+    @apply h-9 w-full rounded-lg border border-line bg-surface-raised px-3 text-sm text-fg placeholder:text-fg-subtle transition-colors outline-none hover:border-line-strong focus:border-accent focus:ring-2 focus:ring-accent/25;
+  }
+
+  .label {
+    @apply text-xs font-medium tracking-wide text-fg-muted uppercase;
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line-strong) transparent;
+  }
+}
+
+/* Rectangle of the SHIFT + drag selection. lib/select.ts creates it. */
+.graph-selection-indicator {
+  position: absolute;
+  border: 1px solid var(--color-brand);
+  background-color: rgb(218 106 29 / 0.08);
+}
+
+/* driver.js tour, in the app colors. */
+.driver-popover.oot-tour {
+  background-color: var(--color-surface-raised);
+  color: var(--color-fg);
+  border: 1px solid var(--color-line);
+  border-radius: 0.75rem;
+}
+
+.driver-popover.oot-tour .driver-popover-title {
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+}
+
+.driver-popover.oot-tour .driver-popover-description {
+  color: var(--color-fg-muted);
+  font-family: var(--font-sans);
+}
+
+.driver-popover.oot-tour .driver-popover-arrow-side-left.driver-popover-arrow {
+  border-left-color: var(--color-surface-raised);
+}
+
+.driver-popover.oot-tour .driver-popover-arrow-side-right.driver-popover-arrow {
+  border-right-color: var(--color-surface-raised);
+}
+
+.driver-popover.oot-tour .driver-popover-arrow-side-top.driver-popover-arrow {
+  border-top-color: var(--color-surface-raised);
+}
+
+.driver-popover.oot-tour
+  .driver-popover-arrow-side-bottom.driver-popover-arrow {
+  border-bottom-color: var(--color-surface-raised);
+}
+
+.driver-popover.oot-tour button {
+  background: var(--color-surface-hover);
+  color: var(--color-fg);
+  border: 1px solid var(--color-line-strong);
+  text-shadow: none;
+  border-radius: 0.5rem;
+}
+
+.driver-popover.oot-tour button:hover {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+/* Long form text: Help page and cookie policy. */
+.prose-doc {
+  color: var(--color-fg-muted);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.prose-doc h1 {
+  margin: 3rem 0 1rem;
+  scroll-margin-top: 5rem;
+  color: var(--color-brand);
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.prose-doc h1:first-child {
+  margin-top: 0;
+}
+
+.prose-doc h2 {
+  margin: 2rem 0 0.5rem;
+  scroll-margin-top: 5rem;
+  color: var(--color-fg);
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.prose-doc h3 {
+  margin: 1.5rem 0 0.5rem;
+  scroll-margin-top: 5rem;
+  color: var(--color-teal);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.prose-doc p,
+.prose-doc .p {
+  margin: 0.75rem 0;
+}
+
+.prose-doc ul {
+  margin: 0.5rem 0;
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+
+.prose-doc ul ul {
+  list-style: circle;
+}
+
+.prose-doc a {
+  color: var(--color-teal);
+}
+
+.prose-doc a:hover {
+  text-decoration: underline;
+}
+
+.prose-doc img {
+  display: block;
+  max-width: 100%;
+  margin: 1rem auto;
+  border: 1px solid var(--color-line);
+  border-radius: 0.5rem;
+}
+
+.prose-doc .video {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin: 1rem 0;
+  border: 0;
+  border-radius: 0.5rem;
+}
+
+.prose-doc .code {
+  margin: 0.5rem 0 1.25rem;
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+  border: 1px solid var(--color-line);
+  border-left: 3px solid var(--color-teal);
+  border-radius: 0.5rem;
+  background: var(--color-surface);
+  color: var(--color-fg);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  white-space: pre;
+}

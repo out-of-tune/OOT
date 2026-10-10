@@ -1,106 +1,86 @@
-import DataLoader from 'dataloader'
-import { aql } from 'arangojs'
-import { InvalidInputError } from '../../errors/errors.js'
+import DataLoader from "dataloader";
+import { aql, type Database } from "arangojs";
+import type { AqlValue } from "arangojs/aql";
+import { CollectionType } from "arangojs/collections";
+import { InvalidInputError } from "../../errors/errors.js";
 
+export type Document = { id: string; [key: string]: unknown };
+
+/** Shared queries of the ArangoDB data sources. */
 class BaseAPI {
-  db: any
-  protected _id_loader = new DataLoader<string, unknown>(ids => this.get_ids(ids, this.db))
-  static collection: string = null
-  static edges: string[] = []
+  static collection: string | null = null;
+  static edges: string[] = [];
 
-  constructor(db: any) {
-    this.db = db
+  db: Database;
+  protected _id_loader = new DataLoader<string, unknown>((ids) => this.get_ids(ids));
+
+  constructor(db: Database) {
+    this.db = db;
   }
 
-  async get_ids(ids: string[], db = this.db) {
-    const query = aql`
+  async get_ids(ids: readonly string[], db = this.db) {
+    const cursor = await db.query(aql`
         FOR id IN ${ids}
             RETURN Document(id)
-        `
-    const cursor = await db.query(query)
-    return cursor.all()
+        `);
+    return cursor.all();
   }
 
-  async _search(collection, value, field, limit=undefined) {
-    limit = typeof (limit) !== 'undefined' ? limit : 1
-    const query = aql`
+  async _search(collection: string, value: AqlValue, field: string, limit = 1): Promise<Document[]> {
+    const cursor = await this.db.query(aql`
         FOR n IN ${this.db.collection(collection)}
             FILTER n.${field} == ${value}
             LIMIT ${limit}
             RETURN n
-        `
-    const cursor = await this.db.query(query)
-    const data = await cursor.all()
-    return data.map(this.reducer)
+        `);
+    const data = await cursor.all();
+    return data.map((doc) => this.reducer(doc) as Document);
   }
 
-  async get_id(id) {
-    return this.reducer(await this._id_loader.load(id))
+  async get_id(id: string) {
+    return this.reducer((await this._id_loader.load(id)) as Record<string, unknown> | null);
   }
 
-  reducer(doc) {
-    if (!doc) return doc
-    const {
-      _id,
-      _key,
-      ...obj
-    } = doc
-    return {
-      id: _id,
-      ...obj
-    }
+  /** Renames `_id` to `id` and drops `_key`. */
+  reducer(doc: Record<string, unknown> | null | undefined) {
+    if (!doc) return doc;
+    const { _id, _key, ...obj } = doc;
+    return { id: _id, ...obj };
   }
 
-  async _create(collection, data) {
-    const res = await this.db.collection(collection).save(data)
-
-    return {
-      ...data,
-      id: res._id
-    }
+  async _create(collection: string, data: Record<string, unknown>) {
+    const res = await this.db.collection(collection).save(data);
+    return { ...data, id: res._id };
   }
 
-  async link(from, to, edge_collection, obj = {}) {
-    const edge = {
-      _from: from,
-      _to: to,
-      ...obj
-    }
-    return await this._create(edge_collection, edge)
+  async link(from: string, to: string, edge_collection: string, obj: Record<string, unknown> = {}) {
+    return this._create(edge_collection, { _from: from, _to: to, ...obj });
   }
 
-  async set_fields(collection, id, fields) {
-    if (typeof (fields) !== 'object') throw new InvalidInputError("'fields' must be an object")
-
-    const query = aql`
+  async set_fields(collection: string, id: string, fields: Record<string, unknown>) {
+    if (typeof fields !== "object" || fields === null) throw new InvalidInputError("'fields' must be an object");
+    const cursor = await this.db.query(aql`
         LET d = Document(${id})
-        UPDATE d WITH
-            ${fields}
-        IN ${this.db.collection(collection)}
-        RETURN d`
-
-    const cursor = await this.db.query(query)
-    return this.reducer(await cursor.next())
-
+        UPDATE d WITH ${fields} IN ${this.db.collection(collection)}
+        RETURN NEW`);
+    return this.reducer(await cursor.next());
   }
 
-  static async ensureCollection(db, name, edge = false) {
-    try {
-      const collection = edge ? db.edgeCollection(name) : db.collection(name)
-      if (!await collection.exists()) {
-        console.log(`Creating '${name}' collection...`)
-        await collection.create()
-      }
-    } catch (error) {
-      console.log(error.message)
-    }
+  static async ensureCollection(db: Database, name: string, edge = false) {
+    const collection = db.collection(name);
+    if (await collection.exists()) return;
+    console.log(`Creating '${name}' collection...`);
+    await collection.create({
+      type: edge ? CollectionType.EDGE_COLLECTION : CollectionType.DOCUMENT_COLLECTION,
+    });
   }
-  
-  static async onConnect(db) {
+
+  static async onConnect(db: Database) {
     await Promise.all([
-      this.ensureCollection(db, this.collection),
-      ...this.edges.map(edge => this.ensureCollection(db, edge, true))
-    ])
+      ...(this.collection ? [this.ensureCollection(db, this.collection)] : []),
+      ...this.edges.map((edge) => this.ensureCollection(db, edge, true)),
+    ]);
   }
 }
-export default BaseAPI
+
+export default BaseAPI;

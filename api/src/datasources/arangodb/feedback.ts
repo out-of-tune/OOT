@@ -1,11 +1,11 @@
-import BaseAPI from './base.js'
+import BaseAPI from "./base.js";
 
 class FeedbackAPI extends BaseAPI {
-    static collection = "Feedback"
+  static collection = "Feedback";
 
-    async create(feedback) {
-        return await super._create(FeedbackAPI.collection, feedback)
-    }
+  async create(feedback: Record<string, unknown>) {
+    return this._create(FeedbackAPI.collection, feedback);
+  }
 }
 
-export default FeedbackAPI
+export default FeedbackAPI;

@@ -1,101 +1,84 @@
-import got from 'got'
-import { InvalidInputError } from '../../../errors/errors.js'
-import { API_PORT } from '../../../helpers/settings.js'
+import { maybeCacheControlFromInfo } from "@apollo/cache-control-types";
+import type { GraphQLResolveInfo } from "graphql";
+import { InvalidInputError } from "../../../errors/errors.js";
+import { SpotifyRequestError } from "../../../datasources/spotify/index.js";
 
 type ArtistQuery = {
-    id?: string,
-    sid?: string,
-    mbid?: string,
-    name?: string,
-    limit?: number
+  id?: string;
+  sid?: string;
+  mbid?: string;
+  name?: string;
+  limit?: number;
+};
+
+/**
+ * Loads an artist from Spotify and saves it with its genres.
+ * Returns the same result as the `addArtist` mutation.
+ */
+export async function addArtist(sid: string, dataSources) {
+  if ((await dataSources.arango.artist.search(sid, "sid")).length !== 0) {
+    return { success: false, message: "id already exists in db" };
+  }
+  try {
+    const { genres, ...info } = await dataSources.spotify.artist_info(sid);
+    const artist = await dataSources.arango.artist.create({ sid, mbid: "" });
+    await dataSources.arango.artist.createInfo(info, artist.id);
+    await dataSources.arango.artist.linkGenres(artist.id, genres);
+    return {
+      success: true,
+      message: "added artist successfully",
+      artist: { id: artist.id, sid },
+    };
+  } catch (error) {
+    const invalidId = error instanceof SpotifyRequestError && error.status === 400;
+    return { success: false, message: invalidId ? "invalid id" : (error as Error).message };
+  }
 }
 
 const resolvers = {
-    Query: {
-        artist: async (_, { id, sid, mbid, name, limit }: ArtistQuery, { dataSources, req }) => {
-            const filters = {id, sid, mbid, name}
-            if (Object.values(filters).filter(val => val).length !== 1)
-                throw new InvalidInputError({
-                    data: {
-                        location: 'artist',
-                        input: filters,
-                        unexpected: 'One field is expected to be set. Multiple fields are ambiguous.'
-                    }
-                })
-            if (id) return [{ id }]
-            if (sid) {
-                const res = await dataSources.arango.artist.search(sid, 'sid')
-                if (res.length !== 0) return res
-                try {
-                    const added: any = await got.post(`http://localhost:${API_PORT}/`, {
-                        json: {
-                            query: `
-                                mutation {
-                                    addArtist(sid: "${sid}") {
-                                        artist {
-                                            id
-                                            sid
-                                        }
-                                        success
-                                    }
-                                }
-                            `
-                        }
-                    }).json()
-                    if (added.data.addArtist.success) {
-                        return [ added.data.addArtist.artist ]
-                    }
-                }
-                catch (err) {
-                    console.log(err)
-                }
-                
-                return []
-            }
-            if (mbid) return dataSources.arango.artist.search(mbid, 'mbid')
-            if (name) return dataSources.arango.artist.byName(name, limit)
-            return []
-        }
+  Query: {
+    artist: async (
+      _parent: unknown,
+      { id, sid, mbid, name, limit }: ArtistQuery,
+      { dataSources },
+      info?: GraphQLResolveInfo,
+    ) => {
+      const filters = { id, sid, mbid, name };
+      if (Object.values(filters).filter((value) => value).length !== 1) {
+        throw new InvalidInputError("Set exactly one of id, sid, mbid and name.", {
+          location: "artist",
+          input: filters,
+        });
+      }
+      if (id) return [{ id }];
+      if (sid) {
+        const found = await dataSources.arango.artist.search(sid, "sid");
+        if (found.length !== 0) return found;
+        // Unknown artists are loaded from Spotify on first request.
+        const added = await addArtist(sid, dataSources);
+        if (added.success) return [added.artist];
+        console.log(`Could not add artist ${sid}: ${added.message}`);
+        // The failure may be temporary, so the empty result must not stay in the response cache.
+        if (info) maybeCacheControlFromInfo(info)?.setCacheHint({ maxAge: 0 });
+        return [];
+      }
+      if (mbid) return dataSources.arango.artist.search(mbid, "mbid");
+      if (name) return dataSources.arango.artist.byName(name, limit);
+      return [];
     },
-    Artist: {
-        mbid: async ({ id }, _, { dataSources }) => (await dataSources.arango.artist.get(id)).mbid,
-        sid: async ({ id }, _, { dataSources }) => (await dataSources.arango.artist.get(id)).sid,
-        name: async ({ id }, _, { dataSources }) => (await dataSources.arango.artist.info(id)).name,
-        popularity: async ({ id }, _, { dataSources }) => (await dataSources.arango.artist.info(id)).popularity,
-        images: async ({ id }, _, { dataSources }) => (await dataSources.arango.artist.info(id)).images,
-        genres: async ({ id }, _, { dataSources }) => dataSources.arango.artist.genres(id)
-    },
-    Mutation: {
-        addArtist: async (_, { sid }, { dataSources }) => {
-            if ((await dataSources.arango.artist.search(sid, 'sid')).length !== 0) return {
-                success: false,
-                message: 'id already exists in db'
-            }
+  },
+  Artist: {
+    mbid: async ({ id }, _args: unknown, { dataSources }) => (await dataSources.arango.artist.get(id)).mbid,
+    sid: async ({ id }, _args: unknown, { dataSources }) => (await dataSources.arango.artist.get(id)).sid,
+    name: async ({ id }, _args: unknown, { dataSources }) => (await dataSources.arango.artist.info(id)).name,
+    popularity: async ({ id }, _args: unknown, { dataSources }) =>
+      (await dataSources.arango.artist.info(id)).popularity,
+    images: async ({ id }, _args: unknown, { dataSources }) => (await dataSources.arango.artist.info(id)).images,
+    genres: async ({ id }, _args: unknown, { dataSources }) => dataSources.arango.artist.genres(id),
+  },
+  Mutation: {
+    addArtist: (_parent: unknown, { sid }: { sid: string }, { dataSources }) => addArtist(sid, dataSources),
+  },
+};
 
-            try {
-                const { genres, ...info} = await dataSources.spotify.artist_info(sid)
-                const artist = await dataSources.arango.artist.create({ sid, mbid: '' })
-                const info_ = await dataSources.arango.artist.createInfo(info, artist.id)
-                dataSources.arango.artist.linkGenres(artist.id, genres)
-                
-                return {
-                    success: true,
-                    message: 'added artist successfully',
-                    artist: {
-                        id: artist.id,
-                        sid
-                    }
-                }
-            } catch(err) {
-                return {
-                    success: false,
-                    message: (err.message == "400 - \"{\\n  \\\"error\\\" : {\\n    \\\"status\\\" : 400,\\n    \\\"message\\\" : \\\"invalid id\\\"\\n  }\\n}\"")
-                        ? 'invalid id'
-                        : err.message
-                }
-            }
-        }
-    }
-}
-
-export default resolvers
+export default resolvers;

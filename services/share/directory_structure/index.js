@@ -1,15 +1,8 @@
-const fs = require('fs').promises
+const fs = require('node:fs/promises')
 
-async function ensureDir (dirpath) {
-    try {
-      await fs.mkdir(dirpath, { recursive: true })
-    } catch (err) {
-      if (err.code !== 'EEXIST') throw err
-    }
-}
-
+/** Creates one storage directory per share type. */
 async function ensureTypeDirs(root, types) {
-    types.map(type => ensureDir(`${root}/${type}`))
+    await Promise.all(types.map(type => fs.mkdir(`${root}/${type}`, { recursive: true })))
 }
 
 module.exports = ensureTypeDirs

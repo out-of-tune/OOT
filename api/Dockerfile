@@ -1,11 +1,16 @@
-FROM node:19
-USER "node"
+FROM node:24-alpine AS build
 WORKDIR /usr/src/app
-
 COPY package.json package-lock.json ./
-RUN npm --quiet --no-progress ci && npm cache clean --force
-
-# Bundle app source
+RUN npm ci --include=dev
 COPY . .
+RUN npm run build
 
-CMD [ "npm", "start" ]
+FROM node:24-alpine
+ENV NODE_ENV=production
+WORKDIR /usr/src/app
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev && npm cache clean --force
+COPY --from=build /usr/src/app/dist ./dist
+USER node
+EXPOSE 3003
+CMD ["node", "dist/src/index.js"]

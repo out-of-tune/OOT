@@ -1,4 +1,3 @@
-version: "3"
 services:
   apollo:
     image: ghcr.io/out-of-tune/apollo:latest

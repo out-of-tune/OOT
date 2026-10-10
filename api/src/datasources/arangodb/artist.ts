@@ -45,13 +45,13 @@ class ArtistAPI extends BaseAPI {
         return this.get_id(id)
     }
 
-    async search(value, field, limit) {
+    async search(value, field, limit = 1) {
         const data = await this._search('Artist', value, field, limit)
         data.map(artist => this._id_loader.prime(artist.id, artist))
         return data
     }
 
-    async byName(name, limit) {
+    async byName(name, limit = 10) {
         const query = aql`
         FOR e IN artist_source
             FILTER LOWER(e.name) LIKE LOWER(${'%' + name + '%'})
@@ -78,16 +78,16 @@ class ArtistAPI extends BaseAPI {
     }
 
     async linkGenres(artist_id, genres) {
-        const genre_ids = await Promise.all(genres.map(async g => { 
-            const genres = await super._search('Genre', g, 'name')
-            if (!genres.length) return (await super._create('Genre', { name: g })).id
+        const genre_ids = await Promise.all(genres.map(async g => {
+            const genres = await this._search('Genre', g, 'name')
+            if (!genres.length) return (await this._create('Genre', { name: g })).id
             return genres[0].id
         }))
         return await this._linkGenres(artist_id, genre_ids)
     }
 
     async _linkGenres(artist_id, genre_ids) {
-        genre_ids.map(gid => super.link(artist_id, gid, 'artist_genre'))
+        return Promise.all(genre_ids.map(gid => this.link(artist_id, gid, 'artist_genre')))
     }
 }
 

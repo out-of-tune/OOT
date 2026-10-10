@@ -1,0 +1,53 @@
+import { mutations } from "../mutations";
+const {
+  SET_SELECTED_NODES,
+  SET_SELECTION_MODAL_STATE,
+  SET_TEMPORARY_SELECTED,
+} = mutations;
+
+describe("SET_SELECTED_NODES", () => {
+  let state;
+  beforeEach(() => {
+    state = {
+      selectedNodes: [],
+    };
+  });
+  it("sets the selected nodes", () => {
+    SET_SELECTED_NODES(state, [{ id: "1" }]);
+    expect(state.selectedNodes).toEqual([{ id: "1" }]);
+  });
+});
+
+describe("SET_SELECTION_MODAL_STATE", () => {
+  let state;
+  beforeEach(() => {
+    state = {
+      modalOpen: false,
+    };
+  });
+  it("sets modalOpen", () => {
+    SET_SELECTION_MODAL_STATE(state, true);
+    expect(state.modalOpen).toEqual(true);
+  });
+});
+
+describe("SET_TEMPORARY_SELECTED", () => {
+  let state;
+  beforeEach(() => {
+    state = {
+      temporarySelectedNodes: [],
+    };
+  });
+  it("sets selected index", () => {
+    SET_TEMPORARY_SELECTED(state, [{ id: "1" }]);
+    expect(state.temporarySelectedNodes).toEqual([{ id: "1" }]);
+  });
+});
+
+describe("CLEAR_GRAPH", () => {
+  it("empties the selection together with the graph", () => {
+    const state = { selectedNodes: [{ id: "a" }] };
+    mutations.CLEAR_GRAPH(state);
+    expect(state.selectedNodes).toEqual([]);
+  });
+});

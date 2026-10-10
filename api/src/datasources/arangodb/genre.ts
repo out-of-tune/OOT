@@ -87,13 +87,13 @@ class GenreAPI extends BaseAPI{
         return this.get_id(id)
     }
 
-    async search(value, field, limit) {
+    async search(value, field, limit = 1) {
         const data = await this._search('Genre', value, field, limit)
         data.map(genre => this._id_loader.prime(genre.id, genre))
         return data
     }
 
-    async byName(name, limit) {
+    async byName(name, limit = 10) {
         const cursor = await this.db.query(aql`
             FOR g IN Genre
                 FILTER LOWER(g.name) LIKE LOWER(${'%' + name + '%'})
