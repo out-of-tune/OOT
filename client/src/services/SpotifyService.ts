@@ -4,7 +4,6 @@ import type {
   RepeatState,
   SpotifyDevice,
   SpotifyPlaybackState,
-  SpotifyQueue,
   StartPlaybackOptions,
   SpotifyAlbum,
   SpotifyArtist,
@@ -302,10 +301,6 @@ class SpotifyService {
         )
       )?.devices ?? []
     );
-  }
-
-  getQueue(token: string) {
-    return this.request<SpotifyQueue>("GET", "me/player/queue", token);
   }
 
   addToPlaybackQueue(token: string, uri: string) {

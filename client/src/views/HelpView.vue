@@ -364,9 +364,9 @@ function scrollToSection(id: string) {
         </p>
         <p>
           Under "Relations" you see the neighbors of the node in the graph, by
-          type. Click a neighbor to expand it and to show it in the node info.
-          If the node has no neighbors in the graph yet, "Load relations"
-          expands it.
+          relation. Click a neighbor to move the view to it and to show it in
+          the node info. "Load all" adds every neighbor of a relation to the
+          graph, for example all artists of a genre.
         </p>
 
         <h2 id="nodeinfofocusnode">

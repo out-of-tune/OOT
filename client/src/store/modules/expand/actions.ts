@@ -636,6 +636,24 @@ export const actions = {
     return result;
   },
 
+  /**
+   * Loads every neighbor of the node over one edge type, for example all artists of a genre.
+   * The expand configuration of the user does not apply.
+   */
+  async expandRelation(
+    { dispatch }: Ctx,
+    { node, edge }: { node: NodeInput; edge: string },
+  ): Promise<GraphItems> {
+    const result: GraphItems = await dispatch("expandAction", {
+      nodes: [node],
+      expandConfiguration: [
+        { nodeType: String(node.data.label), edges: [edge] },
+      ],
+    });
+    dispatch("applyAllConfigurations");
+    return result;
+  },
+
   /** Adds the nodes and links that are not in the graph yet and records the change for undo. */
   addToGraph(
     { commit, dispatch, rootState }: Ctx,

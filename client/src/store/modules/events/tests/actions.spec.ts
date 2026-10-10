@@ -714,19 +714,18 @@ describe("queue click mode", () => {
   });
 });
 
-describe("focusAndExpandNode", () => {
-  it("shows the neighbor, moves the view to it and expands it", async () => {
+describe("focusNode", () => {
+  it("shows the neighbor and moves the view to it, without an expand", () => {
     const commit = vi.fn();
     const dispatch = vi.fn();
     const node = { id: "song/1", data: { label: "song", sid: "1" } };
-    await actions.focusAndExpandNode(
-      { commit, dispatch } as never,
-      node as never,
-    );
+    actions.focusNode({ commit, dispatch } as never, node as never);
     expect(commit).toHaveBeenCalledWith("SET_CURRENTNODE", node);
     expect(dispatch).toHaveBeenCalledWith("moveToNode", node);
     expect(dispatch).toHaveBeenCalledWith("loadSongInfo", node);
-    expect(dispatch).toHaveBeenCalledWith("expandAction", { nodes: [node] });
-    expect(dispatch).toHaveBeenLastCalledWith("applyAllConfigurations");
+    expect(dispatch).not.toHaveBeenCalledWith(
+      "expandAction",
+      expect.anything(),
+    );
   });
 });

@@ -6,7 +6,6 @@ import {
   ListX,
   LocateFixed,
   Minus,
-  RefreshCw,
   Save,
   X,
 } from "@lucide/vue";
@@ -25,23 +24,14 @@ const spotify = computed(() => store.state.spotify_player);
 const spotifyReady = computed(() => spotify.value.status === "ready");
 const follow = computed(() => store.state.music_player.followPlayback);
 
-// The Spotify queue changes on every new song, so it reloads with the track.
-watch(
-  [spotifyReady, () => spotify.value.track?.id],
-  ([ready]) => {
-    if (ready) store.dispatch("loadSpotifyQueue");
-  },
-  { immediate: true },
-);
-
 /** A song of either list. Both carry what a row shows. */
 type QueueItem = Pick<Song, "name" | "uri" | "images"> & {
   artists?: { name: string }[];
 };
 
 /**
- * The songs of the list: up next on Spotify when the Spotify player is connected, else
- * the preview queue. A drag sets the new order; on Spotify it goes to Spotify.
+ * The songs of the list: the songs up next on Spotify when the Spotify player is connected,
+ * else the preview queue. A drag sets the new order.
  */
 const items = computed<QueueItem[]>({
   get: () =>
@@ -70,10 +60,12 @@ const uris = computed(() =>
     .filter((uri): uri is string => Boolean(uri)),
 );
 
-const play = (song: QueueItem, index: number) =>
-  spotifyReady.value
-    ? store.dispatch("spotifyPlay", { uris: [song.uri] })
-    : store.dispatch("playAtIndexInQueue", index);
+/** Plays the song now. On Spotify the songs before it leave the list. */
+const play = (index: number) =>
+  store.dispatch(
+    spotifyReady.value ? "playFromSpotifyQueue" : "playAtIndexInQueue",
+    index,
+  );
 const remove = (index: number) =>
   store.dispatch(
     spotifyReady.value ? "removeFromSpotifyQueue" : "removeFromQueue",
@@ -138,16 +130,7 @@ async function saveAsPlaylist() {
           <LocateFixed />
         </IconButton>
         <IconButton
-          v-if="spotifyReady"
-          label="Reload"
-          tooltip="top"
-          size="sm"
-          @click="store.dispatch('loadSpotifyQueue')"
-        >
-          <RefreshCw />
-        </IconButton>
-        <IconButton
-          v-else-if="loggedIn"
+          v-if="loggedIn && !spotifyReady"
           label="Play queue on Spotify"
           tooltip="top"
           size="sm"
@@ -268,7 +251,7 @@ async function saveAsPlaylist() {
           type="button"
           class="flex min-w-0 flex-1 items-center gap-2 text-left"
           title="Play now"
-          @click="play(song, index)"
+          @click="play(index)"
         >
           <img
             v-if="song.images[0]"

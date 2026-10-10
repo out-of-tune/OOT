@@ -128,12 +128,11 @@ export const actions = {
     }
   },
 
-  /** Shows the node in the info panel, moves the view to it and expands it. A song does not play. */
-  async focusAndExpandNode({ commit, dispatch }: Ctx, node: GraphNode) {
-    showClickedNode(commit, dispatch, node, "expand");
+  /** Shows the node in the info panel and moves the view to it. It does not expand, and a song does not play. */
+  focusNode({ commit, dispatch }: Ctx, node: GraphNode) {
+    showClickedNode(commit, dispatch, node, "explore");
     dispatch("moveToNode", node);
     if (node.data.label === "song") dispatch("loadSongInfo", node);
-    await expandNode(dispatch, node);
   },
 
   mouseMoveFunctionality(

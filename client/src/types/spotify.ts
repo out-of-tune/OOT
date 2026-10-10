@@ -35,6 +35,8 @@ export interface SpotifyTrack {
   id: string;
   name: string;
   uri: string;
+  /** The song that was asked for, when Spotify gives another version of it in the market. */
+  linked_from?: { id: string; uri: string };
   preview_url?: string | null;
   duration_ms?: number;
   track_number?: number;
@@ -108,11 +110,6 @@ export interface SpotifyPlaybackState {
   repeat_state: RepeatState;
   item: SpotifyTrack | null;
   timestamp: number;
-}
-
-export interface SpotifyQueue {
-  currently_playing: SpotifyTrack | null;
-  queue: SpotifyTrack[];
 }
 
 export interface StartPlaybackOptions {

@@ -17,6 +17,8 @@ export type SpotifyPlayerStatus =
 export interface NowPlaying {
   id: string | null;
   uri: string;
+  /** The song that was asked for, when Spotify plays another version of it in this market. */
+  linkedFromUri?: string;
   name: string;
   artists: { name: string; id?: string }[];
   albumName: string;

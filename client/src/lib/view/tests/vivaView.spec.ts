@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { fitTransform } from "../vivaView";
+import { centerOffset, fitTransform } from "../vivaView";
 
 // The math of the 2D fit. It moved here from the graph_camera actions with the view contract.
 describe("fitTransform", () => {
@@ -102,6 +102,7 @@ describe("createVivaView lifecycle", () => {
     );
     vi.spyOn(Viva.Graph.View, "webglGraphics").mockReturnValue({
       getNodeUI: (id: string) => ({ position: positions[id] }),
+      graphCenterChanged: vi.fn(),
     } as never);
     vi.spyOn(Viva.Graph.View, "renderer").mockReturnValue(renderer as never);
     vi.spyOn(Viva.Graph.Layout, "forceDirected").mockReturnValue({} as never);
@@ -141,5 +142,71 @@ describe("createVivaView lifecycle", () => {
     view.dispose();
     window.dispatchEvent(new Event("resize"));
     expect(onResize).not.toHaveBeenCalled();
+  });
+});
+
+describe("createVivaView camera", () => {
+  async function view(container: {
+    clientWidth: number;
+    clientHeight: number;
+  }) {
+    const { default: Viva } = await import("vivagraphjs");
+    const graphCenterChanged = vi.fn();
+    const updateSize = vi.fn();
+    vi.spyOn(Viva.Graph.View, "webglGraphics").mockReturnValue({
+      graphCenterChanged,
+      updateSize,
+      getGraphicsRoot: () => ({ width: 800, height: 600 }),
+      // The graph point at the center of the old 800 x 600 canvas.
+      transformClientToGraphCoordinates: (point: { x: number; y: number }) =>
+        point.x === 400 && point.y === 300 ? { x: 5, y: 7 } : point,
+    } as never);
+    vi.spyOn(Viva.Graph.View, "renderer").mockReturnValue({
+      getTransform: () => ({ scale: 2, offsetX: 400, offsetY: 300 }),
+      rerender: vi.fn(),
+    } as never);
+    vi.spyOn(Viva.Graph.Layout, "forceDirected").mockReturnValue({} as never);
+    const { createVivaView } = await import("../vivaView");
+    return {
+      graphCenterChanged,
+      updateSize,
+      view: createVivaView({
+        graph: {} as never,
+        container: container as never,
+        layoutOptions: {} as never,
+      }),
+    };
+  }
+
+  it("centers a point in the container as it is now, also after a resize", async () => {
+    const container = { clientWidth: 800, clientHeight: 600 };
+    const { view: renderer, graphCenterChanged } = await view(container);
+    container.clientWidth = 1200;
+    container.clientHeight = 900;
+    renderer.moveTo(10, 20);
+    expect(graphCenterChanged).toHaveBeenCalledWith(600 - 20, 450 - 40);
+  });
+
+  it("keeps the point at the center of the view in the center when the size changes", async () => {
+    const container = { clientWidth: 800, clientHeight: 600 };
+    const {
+      view: renderer,
+      graphCenterChanged,
+      updateSize,
+    } = await view(container);
+    container.clientWidth = 1200;
+    container.clientHeight = 900;
+    renderer.getGraphics().updateSize(1200, 900);
+    expect(updateSize).toHaveBeenCalled();
+    expect(graphCenterChanged).toHaveBeenCalledWith(600 - 10, 450 - 14);
+  });
+});
+
+describe("centerOffset", () => {
+  it("puts the point in the middle of the viewport at the scale", () => {
+    expect(centerOffset({ x: 100, y: -50 }, 0.5, 1000, 800)).toEqual({
+      x: 450,
+      y: 425,
+    });
   });
 });

@@ -152,7 +152,11 @@ const graphNode = computed(() => {
   return id === 0 ? undefined : store.state.mainGraph.Graph.getNode(id);
 });
 
-/** The neighbors of the node in the graph, by type, in the order of the schema. */
+/**
+ * The relations of the node: one for each edge type of the schema that starts at its type,
+ * with the neighbors of that type that are in the graph. Genres of an artist, artists of a
+ * genre, and so on.
+ */
 const relations = computed(() => {
   // Links change without a change of the node, so this reads the version too.
   void graphVersion.value;
@@ -165,24 +169,52 @@ const relations = computed(() => {
     ),
     "id",
   );
-  return store.state.schema.nodeTypes
-    .map((type) => ({
-      label: type.label,
-      nodes: sortBy(
-        neighbors.filter((neighbor) => neighbor.data.label === type.label),
-        (neighbor) => String(neighbor.data.name ?? neighbor.id).toLowerCase(),
-      ),
-    }))
-    .filter((group) => group.nodes.length > 0);
+  return store.state.schema.edgeTypes.flatMap((edgeType) => {
+    // Expand follows the inbound direction when both start at the type (Genre_to_Genre).
+    const direction =
+      edgeType.inbound.from === label.value
+        ? edgeType.inbound
+        : edgeType.outbound.from === label.value
+          ? edgeType.outbound
+          : undefined;
+    if (!direction) return [];
+    return [
+      {
+        edge: edgeType.label,
+        label: direction.to,
+        connectionName: direction.connectionName,
+        nodes: sortBy(
+          neighbors.filter((neighbor) => neighbor.data.label === direction.to),
+          (neighbor) => String(neighbor.data.name ?? neighbor.id).toLowerCase(),
+        ),
+      },
+    ];
+  });
 });
-/** Types whose neighbors all show. */
+/** Relations whose neighbors all show. */
 const expandedRelations = reactive(new Set<string>());
+/** Relations that load now. */
+const loadingRelations = reactive(new Set<string>());
 watch(
   () => node.value.id,
   () => expandedRelations.clear(),
 );
-const plural = (type: string) =>
-  `${type.charAt(0).toUpperCase()}${type.slice(1)}s`;
+
+/** Loads every neighbor of the relation into the graph, and shows them all. */
+async function loadRelation(edge: string) {
+  const target = graphNode.value;
+  if (!target || loadingRelations.has(edge)) return;
+  loadingRelations.add(edge);
+  try {
+    await store.dispatch("expandRelation", { node: target, edge });
+    if (node.value.id === target.id) expandedRelations.add(edge);
+  } finally {
+    loadingRelations.delete(edge);
+  }
+}
+
+const capitalize = (text: string) =>
+  `${text.charAt(0).toUpperCase()}${text.slice(1)}`;
 
 const focusNode = () => {
   if (node.value.id !== 0)
@@ -356,15 +388,32 @@ const focusNode = () => {
         <Music class="size-3.5" /> No songs loaded
       </p>
 
-      <div class="flex flex-col gap-2">
+      <div v-if="relations.length > 0" class="flex flex-col gap-2">
         <h3 class="label">Relations</h3>
-        <div v-for="group in relations" :key="group.label">
-          <h4 class="mb-1 text-xs text-fg-subtle">
-            {{ plural(group.label) }} ({{ group.nodes.length }})
-          </h4>
-          <ul class="flex flex-wrap gap-1">
+        <div v-for="group in relations" :key="group.edge">
+          <div class="mb-1 flex items-center justify-between gap-2">
+            <h4 class="text-xs text-fg-subtle">
+              {{ capitalize(group.connectionName) }} ({{ group.nodes.length }}
+              in the graph)
+            </h4>
+            <button
+              type="button"
+              class="inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-xs text-accent-strong hover:bg-surface-hover disabled:opacity-50"
+              :disabled="loadingRelations.has(group.edge)"
+              :title="`Add all ${group.connectionName} of ${data.name ?? node.id} to the graph`"
+              @click="loadRelation(group.edge)"
+            >
+              <Network class="size-3" />
+              {{
+                loadingRelations.has(group.edge)
+                  ? "Loading…"
+                  : `Load all ${group.connectionName}`
+              }}
+            </button>
+          </div>
+          <ul v-if="group.nodes.length > 0" class="flex flex-wrap gap-1">
             <li
-              v-for="neighbor in expandedRelations.has(group.label)
+              v-for="neighbor in expandedRelations.has(group.edge)
                 ? group.nodes
                 : group.nodes.slice(0, RELATIONS_SHOWN)"
               :key="neighbor.id"
@@ -373,8 +422,8 @@ const focusNode = () => {
               <button
                 type="button"
                 class="max-w-full truncate rounded-md border border-line px-2 py-0.5 text-left text-xs text-fg-muted hover:border-line-strong hover:bg-surface-hover hover:text-fg"
-                :title="`Expand ${neighbor.data.name ?? neighbor.id} and show it here`"
-                @click="store.dispatch('focusAndExpandNode', neighbor)"
+                :title="`Show ${neighbor.data.name ?? neighbor.id} in the graph`"
+                @click="store.dispatch('focusNode', neighbor)"
               >
                 {{ neighbor.data.name ?? neighbor.id }}
               </button>
@@ -384,32 +433,19 @@ const focusNode = () => {
                 type="button"
                 class="rounded-md px-2 py-0.5 text-xs text-accent-strong hover:underline"
                 @click="
-                  expandedRelations.has(group.label)
-                    ? expandedRelations.delete(group.label)
-                    : expandedRelations.add(group.label)
+                  expandedRelations.has(group.edge)
+                    ? expandedRelations.delete(group.edge)
+                    : expandedRelations.add(group.edge)
                 "
               >
                 {{
-                  expandedRelations.has(group.label)
+                  expandedRelations.has(group.edge)
                     ? "Show less"
                     : `Show all ${group.nodes.length}`
                 }}
               </button>
             </li>
           </ul>
-        </div>
-        <div
-          v-if="relations.length === 0"
-          class="flex items-center justify-between gap-2 text-xs text-fg-subtle"
-        >
-          <span>No relations in the graph yet.</span>
-          <UiButton
-            v-if="graphNode"
-            size="sm"
-            @click="store.dispatch('focusAndExpandNode', graphNode)"
-          >
-            <Network class="size-3.5" /> Load relations
-          </UiButton>
         </div>
       </div>
     </div>

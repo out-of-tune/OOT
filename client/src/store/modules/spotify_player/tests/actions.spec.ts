@@ -428,6 +428,8 @@ describe("queue changes", () => {
     images: [],
     durationMs: 300000,
   });
+  const ids = (queue: { id: string | null }[]) =>
+    queue.map((entry) => entry.id);
 
   /** A context whose dispatch runs the queue actions, so a change goes all the way to Spotify. */
   function queueSetup() {
@@ -437,7 +439,11 @@ describe("queue changes", () => {
       "setSpotifyQueue",
       "syncSpotifyQueue",
       "removeFromSpotifyQueue",
-      "loadSpotifyQueue",
+      "playFromSpotifyQueue",
+      "advanceSpotifyQueue",
+      "spotifyPlay",
+      "spotifyNext",
+      "spotifyTogglePlay",
     ];
     context.dispatch.mockImplementation(((type: string, payload?: unknown) =>
       routed.includes(type)
@@ -450,130 +456,262 @@ describe("queue changes", () => {
         : undefined) as never);
     Object.assign(context.state, {
       track: song("now"),
-      queue: [song("a"), song("b"), song("c")],
+      queue: [],
       paused: false,
       positionMs: 42000,
       positionAt: Date.now(),
       deviceId: "tab",
     });
     vi.mocked(SpotifyService.startPlayback).mockResolvedValue(null);
-    vi.mocked(SpotifyService.getQueue).mockResolvedValue({
-      queue: [],
-    } as never);
+    vi.mocked(SpotifyService.addToPlaybackQueue).mockResolvedValue(null);
     return context;
   }
 
-  beforeEach(() => vi.useFakeTimers());
+  /** Lets the queue reach Spotify: the wait of a change and the wait after a play. */
+  const settle = () => vi.advanceTimersByTimeAsync(2000);
 
-  it("removes a song: the list changes at once, then plays the song that plays again with the new list", async () => {
-    const { ctx, state } = queueSetup();
-    const removing = actions.removeFromSpotifyQueue(ctx, 1);
-    expect(state.queue.map((entry) => entry.id)).toEqual(["a", "c"]);
+  /** Plays the song as the SDK reports it, so the queue moves on. */
+  function playing(context: ReturnType<typeof queueSetup>, id: string) {
+    context.state.track = song(id);
+    return actions.advanceSpotifyQueue(context.ctx);
+  }
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    // The song that waits at Spotify is module state: a disconnect forgets it.
+    actions.disconnectSpotifyPlayer(setup().ctx);
+  });
+
+  it("adds songs without a new play, so the music does not stop", async () => {
+    const context = queueSetup();
+    const adding = actions.addSongsToSpotifyQueue(context.ctx, [
+      { id: "a", uri: "spotify:track:a", name: "a", images: [] },
+      { name: "no uri", images: [] },
+    ]);
+    expect(ids(context.state.queue)).toEqual(["a"]);
+    expect(context.dispatch).toHaveBeenCalledWith("flashQueueBadge");
+    await settle();
+    await expect(adding).resolves.toBe(true);
+    const more = actions.addSongsToSpotifyQueue(context.ctx, [
+      { id: "b", uri: "spotify:track:b", name: "b", images: [] },
+    ]);
+    await settle();
+    await more;
+    expect(ids(context.state.queue)).toEqual(["a", "b"]);
     expect(SpotifyService.startPlayback).not.toHaveBeenCalled();
-    await vi.advanceTimersByTimeAsync(300);
+    // Spotify only holds the next song.
+    expect(SpotifyService.addToPlaybackQueue).toHaveBeenCalledTimes(1);
+    expect(SpotifyService.addToPlaybackQueue).toHaveBeenCalledWith(
+      "token",
+      "spotify:track:a",
+    );
+  });
+
+  it("moves on when the next song plays, and gives Spotify the song after it", async () => {
+    const context = queueSetup();
+    const adding = actions.setSpotifyQueue(context.ctx, [song("a"), song("b")]);
+    await settle();
+    await adding;
+    const advancing = playing(context, "a");
+    await settle();
+    await advancing;
+    expect(ids(context.state.queue)).toEqual(["b"]);
+    expect(SpotifyService.addToPlaybackQueue).toHaveBeenLastCalledWith(
+      "token",
+      "spotify:track:b",
+    );
+    const last = playing(context, "b");
+    await settle();
+    await last;
+    expect(context.state.queue).toEqual([]);
+    expect(SpotifyService.addToPlaybackQueue).toHaveBeenCalledTimes(2);
+  });
+
+  it("knows a song that Spotify plays in another version", async () => {
+    const context = queueSetup();
+    const adding = actions.setSpotifyQueue(context.ctx, [song("a"), song("b")]);
+    await settle();
+    await adding;
+    context.state.track = {
+      ...song("other-a"),
+      linkedFromUri: "spotify:track:a",
+    };
+    const advancing = actions.advanceSpotifyQueue(context.ctx);
+    await settle();
+    await advancing;
+    expect(ids(context.state.queue)).toEqual(["b"]);
+  });
+
+  it("keeps the queue when another song plays", async () => {
+    const context = queueSetup();
+    const adding = actions.setSpotifyQueue(context.ctx, [song("a"), song("b")]);
+    await settle();
+    await adding;
+    const advancing = playing(context, "previous");
+    await settle();
+    await advancing;
+    expect(ids(context.state.queue)).toEqual(["a", "b"]);
+    expect(SpotifyService.addToPlaybackQueue).toHaveBeenCalledTimes(1);
+  });
+
+  it("removes or moves a later song without a request", async () => {
+    const context = queueSetup();
+    const adding = actions.setSpotifyQueue(context.ctx, [
+      song("a"),
+      song("b"),
+      song("c"),
+    ]);
+    await settle();
+    await adding;
+    const removing = actions.removeFromSpotifyQueue(context.ctx, 1);
+    expect(ids(context.state.queue)).toEqual(["a", "c"]);
+    await settle();
+    await expect(removing).resolves.toBe(true);
+    const moving = actions.setSpotifyQueue(context.ctx, [song("a"), song("d")]);
+    await settle();
+    await moving;
+    expect(SpotifyService.startPlayback).not.toHaveBeenCalled();
+    expect(SpotifyService.addToPlaybackQueue).toHaveBeenCalledTimes(1);
+  });
+
+  it("clears the queue: only the song that plays is at Spotify, and the list stays empty", async () => {
+    const context = queueSetup();
+    const adding = actions.setSpotifyQueue(context.ctx, [song("a"), song("b")]);
+    await settle();
+    await adding;
+    const clearing = actions.setSpotifyQueue(context.ctx, []);
+    expect(context.state.queue).toEqual([]);
+    await settle();
+    await expect(clearing).resolves.toBe(true);
+    expect(SpotifyService.startPlayback).toHaveBeenCalledTimes(1);
+    expect(SpotifyService.startPlayback).toHaveBeenCalledWith("token", {
+      deviceId: "tab",
+      uris: ["spotify:track:now"],
+      positionMs: expect.any(Number),
+    });
+    expect(SpotifyService.addToPlaybackQueue).toHaveBeenCalledTimes(1);
+    expect(context.state.queue).toEqual([]);
+  });
+
+  it("replaces a removed next song at Spotify and keeps a paused song paused", async () => {
+    const context = queueSetup();
+    const adding = actions.setSpotifyQueue(context.ctx, [song("a"), song("b")]);
+    await settle();
+    await adding;
+    context.state.paused = true;
+    const removing = actions.removeFromSpotifyQueue(context.ctx, 0);
+    await settle();
     await expect(removing).resolves.toBe(true);
     expect(SpotifyService.startPlayback).toHaveBeenCalledWith("token", {
       deviceId: "tab",
-      uris: ["spotify:track:now", "spotify:track:a", "spotify:track:c"],
-      positionMs: 42300,
+      uris: ["spotify:track:now"],
+      positionMs: 42000,
     });
-    expect(SpotifyService.pausePlayback).not.toHaveBeenCalled();
+    expect(SpotifyService.pausePlayback).toHaveBeenCalled();
+    expect(SpotifyService.addToPlaybackQueue).toHaveBeenLastCalledWith(
+      "token",
+      "spotify:track:b",
+    );
+    expect(ids(context.state.queue)).toEqual(["b"]);
   });
 
   it("sends quick changes in one request", async () => {
-    const { ctx } = queueSetup();
-    actions.removeFromSpotifyQueue(ctx, 0);
-    actions.removeFromSpotifyQueue(ctx, 0);
-    const last = actions.setSpotifyQueue(ctx, []);
-    await vi.advanceTimersByTimeAsync(300);
+    const context = queueSetup();
+    const adding = actions.setSpotifyQueue(context.ctx, [
+      song("a"),
+      song("b"),
+      song("c"),
+    ]);
+    await settle();
+    await adding;
+    actions.removeFromSpotifyQueue(context.ctx, 0);
+    actions.removeFromSpotifyQueue(context.ctx, 0);
+    const last = actions.removeFromSpotifyQueue(context.ctx, 0);
+    await settle();
     await last;
     expect(SpotifyService.startPlayback).toHaveBeenCalledTimes(1);
-    expect(SpotifyService.startPlayback).toHaveBeenCalledWith(
-      "token",
-      expect.objectContaining({ uris: ["spotify:track:now"] }),
-    );
+    expect(context.state.queue).toEqual([]);
   });
 
-  it("keeps a paused song paused and turns shuffle off", async () => {
-    const { ctx, state, dispatch } = queueSetup();
-    state.paused = true;
-    state.shuffle = true;
-    const moving = actions.setSpotifyQueue(ctx, [song("c"), song("a")]);
-    await vi.advanceTimersByTimeAsync(300);
-    await moving;
-    expect(SpotifyService.setShuffle).toHaveBeenCalledWith("token", false);
-    expect(state.shuffle).toBe(false);
-    expect(dispatch).toHaveBeenCalledWith(
-      "setInfo",
-      "Shuffle is off, so the queue keeps your order",
-    );
-    expect(SpotifyService.startPlayback).toHaveBeenCalledWith(
-      "token",
-      expect.objectContaining({
-        uris: ["spotify:track:now", "spotify:track:c", "spotify:track:a"],
-        positionMs: 42000,
-      }),
-    );
-    expect(SpotifyService.pausePlayback).toHaveBeenCalled();
-  });
-
-  it("adds songs to the end, then reloads the queue from Spotify", async () => {
-    const { ctx, state, dispatch } = queueSetup();
-    const adding = actions.addSongsToSpotifyQueue(ctx, [
-      { id: "d", uri: "spotify:track:d", name: "d", images: [] },
-      { name: "no uri", images: [] },
+  it("skips ahead: plays the clicked song and keeps the songs after it", async () => {
+    const context = queueSetup();
+    const adding = actions.setSpotifyQueue(context.ctx, [
+      song("a"),
+      song("b"),
+      song("c"),
     ]);
-    expect(state.queue.map((entry) => entry.id)).toEqual(["a", "b", "c", "d"]);
-    expect(dispatch).not.toHaveBeenCalledWith("flashQueueBadge");
-    await vi.advanceTimersByTimeAsync(300);
-    await expect(adding).resolves.toBe(true);
-    expect(dispatch).toHaveBeenCalledWith("flashQueueBadge");
-    expect(SpotifyService.addToPlaybackQueue).not.toHaveBeenCalled();
-    await vi.advanceTimersByTimeAsync(800);
-    expect(SpotifyService.getQueue).toHaveBeenCalled();
-  });
-
-  it("uses the queue of Spotify when no song is loaded", async () => {
-    const { ctx, state } = queueSetup();
-    state.track = null;
-    state.queue = [];
-    vi.mocked(SpotifyService.addToPlaybackQueue).mockResolvedValue(null);
-    await expect(
-      actions.addSongsToSpotifyQueue(ctx, [
-        { uri: "spotify:track:d", name: "d", images: [] },
-      ]),
-    ).resolves.toBe(true);
-    expect(SpotifyService.addToPlaybackQueue).toHaveBeenCalledWith(
+    await settle();
+    await adding;
+    const skipping = actions.playFromSpotifyQueue(context.ctx, 1);
+    expect(ids(context.state.queue)).toEqual(["c"]);
+    await settle();
+    await skipping;
+    expect(SpotifyService.startPlayback).toHaveBeenCalledWith("token", {
+      deviceId: "tab",
+      uris: ["spotify:track:b"],
+    });
+    const advancing = playing(context, "b");
+    await settle();
+    await advancing;
+    expect(ids(context.state.queue)).toEqual(["c"]);
+    expect(SpotifyService.addToPlaybackQueue).toHaveBeenLastCalledWith(
       "token",
-      "spotify:track:d",
+      "spotify:track:c",
     );
-    expect(SpotifyService.startPlayback).not.toHaveBeenCalled();
-    expect(state.queue.map((entry) => entry.uri)).toEqual(["spotify:track:d"]);
   });
 
-  it("reports a refused change and loads the real queue again", async () => {
-    const { ctx, dispatch } = queueSetup();
-    vi.mocked(SpotifyService.startPlayback).mockRejectedValue({
+  it("keeps the songs in the list when nothing is loaded, and play starts them", async () => {
+    const context = queueSetup();
+    context.state.track = null;
+    const adding = actions.addSongsToSpotifyQueue(context.ctx, [
+      { id: "a", uri: "spotify:track:a", name: "a", images: [] },
+      { id: "b", uri: "spotify:track:b", name: "b", images: [] },
+    ]);
+    await settle();
+    await expect(adding).resolves.toBe(true);
+    expect(SpotifyService.addToPlaybackQueue).not.toHaveBeenCalled();
+    const starting = actions.spotifyTogglePlay(context.ctx);
+    await settle();
+    await starting;
+    expect(SpotifyService.startPlayback).toHaveBeenCalledWith("token", {
+      deviceId: "tab",
+      uris: ["spotify:track:a"],
+    });
+    expect(ids(context.state.queue)).toEqual(["b"]);
+  });
+
+  it("plays the next song of the list on next when Spotify does not hold it", async () => {
+    const context = queueSetup();
+    vi.mocked(SpotifyService.addToPlaybackQueue).mockRejectedValue({
       response: { status: 403, data: { error: { message: "Restricted" } } },
     });
-    const removing = actions.removeFromSpotifyQueue(ctx, 0);
-    await vi.advanceTimersByTimeAsync(300);
-    await expect(removing).resolves.toBe(false);
-    expect(dispatch).toHaveBeenCalledWith("setError", new Error("Restricted"));
-    await vi.advanceTimersByTimeAsync(800);
-    expect(SpotifyService.getQueue).toHaveBeenCalled();
+    const adding = actions.setSpotifyQueue(context.ctx, [song("a")]);
+    await settle();
+    await expect(adding).resolves.toBe(false);
+    expect(context.dispatch).toHaveBeenCalledWith(
+      "setError",
+      new Error("Restricted"),
+    );
+    vi.mocked(SpotifyService.addToPlaybackQueue).mockResolvedValue(null);
+    const next = actions.spotifyNext(context.ctx);
+    await settle();
+    await next;
+    expect(SpotifyService.startPlayback).toHaveBeenCalledWith("token", {
+      deviceId: "tab",
+      uris: ["spotify:track:a"],
+    });
+    expect(SpotifyService.skipToNext).not.toHaveBeenCalled();
   });
 
-  it("does not replace a change that is not at Spotify yet with the old queue", async () => {
-    const { ctx, state } = queueSetup();
-    vi.mocked(SpotifyService.getQueue).mockResolvedValue({
-      queue: [{ id: "old", uri: "spotify:track:old", name: "old" }],
-    } as never);
-    const removing = actions.removeFromSpotifyQueue(ctx, 0);
-    await actions.loadSpotifyQueue(ctx);
-    expect(state.queue.map((entry) => entry.id)).toEqual(["b", "c"]);
-    await vi.advanceTimersByTimeAsync(300);
-    await removing;
+  it("gives Spotify the next song again after another play empties its queue", async () => {
+    const context = queueSetup();
+    const adding = actions.setSpotifyQueue(context.ctx, [song("a")]);
+    await settle();
+    await adding;
+    await actions.spotifyPlay(context.ctx, { contextUri: "spotify:album:x" });
+    await settle();
+    expect(SpotifyService.addToPlaybackQueue).toHaveBeenCalledTimes(2);
+    expect(ids(context.state.queue)).toEqual(["a"]);
   });
 });
 

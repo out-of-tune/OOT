@@ -56,6 +56,19 @@ export function fitTransform(
 }
 
 /**
+ * The translation (in client pixels) that shows the graph point at the center of a viewport
+ * of the given size, at the given zoom scale.
+ */
+export function centerOffset(
+  point: { x: number; y: number },
+  scale: number,
+  width: number,
+  height: number,
+) {
+  return { x: width / 2 - point.x * scale, y: height / 2 - point.y * scale };
+}
+
+/**
  * Runs the function and returns the window "resize" listeners that it adds. Viva input events
  * add one that its dispose does not remove.
  */
@@ -96,10 +109,37 @@ export const createVivaView: ViewFactory = ({
     graphics: webglGraphics,
   });
 
+  /**
+   * Centers the view on a point in graph coordinates. Viva's own moveTo centers on the middle
+   * of the container at the time the renderer started, and its resize handler moves that
+   * point, so after a resize the view went to the wrong place.
+   */
+  function centerOn(point: { x: number; y: number }) {
+    const offset = centerOffset(
+      point,
+      renderer.getTransform().scale,
+      container.clientWidth,
+      container.clientHeight,
+    );
+    webglGraphics.graphCenterChanged(offset.x, offset.y);
+    renderer.rerender();
+  }
+
+  /** Keeps the graph point at the center of the view in the center when the size changes. */
+  function updateSize() {
+    const canvas = webglGraphics.getGraphicsRoot();
+    const center = webglGraphics.transformClientToGraphCoordinates({
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+    });
+    webglGraphics.updateSize();
+    centerOn(center);
+  }
+
   const graphics: GraphGraphics = {
     getNodeUI: (nodeId) => webglGraphics.getNodeUI(nodeId),
     getLinkUI: (linkId) => webglGraphics.getLinkUI(linkId),
-    updateSize: (width, height) => webglGraphics.updateSize(width, height),
+    updateSize: () => updateSize(),
     toScreen: (position) => ({
       ...webglGraphics.transformGraphToClientCoordinates({
         x: position.x,
@@ -150,7 +190,12 @@ export const createVivaView: ViewFactory = ({
 
   const view: GraphRenderer = {
     mode: "2d",
-    run: () => trackResizeListeners(() => void renderer.run()),
+    // The resize handler of the renderer centers the whole graph with a wrong offset.
+    // updateSize keeps the view in place instead.
+    run: () =>
+      collectResizeListeners(() => void renderer.run()).forEach((listener) =>
+        window.removeEventListener("resize", listener),
+      ),
     rerender: () => renderer.rerender(),
     dispose: () => {
       clearTimeout(zoomTimer);
@@ -189,14 +234,10 @@ export const createVivaView: ViewFactory = ({
         container.clientWidth,
         container.clientHeight,
       );
-      renderer.moveTo(center.x, center.y);
-      renderer.rerender();
+      centerOn(center);
       zoomToScale(scale);
     },
-    moveTo: (x, y) => {
-      renderer.moveTo(x, y);
-      renderer.rerender();
-    },
+    moveTo: (x, y) => centerOn({ x, y }),
     getTransform: () => renderer.getTransform(),
     zoomIn: () => renderer.zoomIn(),
     zoomOut: () => renderer.zoomOut(),

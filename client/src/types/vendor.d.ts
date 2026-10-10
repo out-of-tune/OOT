@@ -76,6 +76,9 @@ declare module "vivagraphjs" {
     updateSize(width?: number, height?: number): void;
     transformClientToGraphCoordinates(point: Position): Position;
     transformGraphToClientCoordinates(point: Position): Position;
+    /** Sets the translation of the view, in client pixels. */
+    graphCenterChanged(x: number, y: number): void;
+    getGraphicsRoot(): HTMLCanvasElement;
     placeNode(
       callback: (ui: NodeUI, position: Position) => void,
     ): WebglGraphics;
@@ -187,6 +190,8 @@ declare module "vivagraphjs" {
 interface SpotifySdkTrack {
   id: string | null;
   uri: string;
+  /** The song that was asked for, when Spotify plays another version of it. */
+  linked_from?: { uri: string | null; id: string | null };
   name: string;
   duration_ms: number;
   artists: { name: string; uri: string }[];
